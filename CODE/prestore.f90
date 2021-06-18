@@ -2988,6 +2988,80 @@ SUBROUTINE INVERT(RFF,INVRFF,IVGT)
  End subroutine INVERT
  
  
+ SUBROUTINE DG_1
+ IMPLICIT NONE
+ INTEGER::COUNTERDG,K,INC,QQP,i,kmaxe
+ kmaxe=xmpielrank(n)
+ 
+ 
+ IF (DG.EQ.1)THEN
+
+!$OMP DO
+DO I=1,KMAXE
+ COUNTERDG=0
+SELECT CASE(ielem(n,i)%ishape)
+
+      CASE(5)
+
+
+
+ do K=1,ELEM_DEC
+	VEXT(1:3,1:2)=ELEM_LISTD(k,1:3,1:2)
+      CALL QUADRATUREtriangle(N,IGQRULES)
+	  VOLTEMP=TRIANGLEVOLUME(N)/IELEM(N,I)%totvolume
+	   QQP=QP_Triangle
+	  DO INC=1,QQP
+	  POX(1)=QPOINTS(1,INC)
+	  POY(1)=QPOINTS(2,INC) 
+			COUNTERDG=COUNTERDG+1
+
+        
+			x1=pox(1)
+			y1=poy(1)
+			compwrt=-1
+			
+	MASS_MATRIX(I,:,COUNTERDG)=	basis_rec2d(N,x1,y1,ielem(n,i)%iorder,1,ielem(n,i)%idegfree)
+		write(300+n,*)"element",i,counterdg
+		write(300+n,*) mass_matrix(i,1:IELEM(N,I)%IDEGFREE,counterdg)
+		
+		END DO 
+    end do
+
+    
+    CASE(6)
+      CALL QUADRATUREtriangle(N,IGQRULES)
+	  VOLTEMP=1.0d0
+	   QQP=QP_Triangle
+	  DO INC=1,QQP
+	  POX(1)=QPOINTS(1,INC)
+	  POY(1)=QPOINTS(2,INC) 
+	  
+	  
+	  COUNTERDG=COUNTERDG+1
+
+        
+					x1=pox(1)-ielem(n,i)%xxc
+			y1=poy(1)-ielem(n,i)%yyc
+			compwrt=-1
+			
+	MASS_MATRIX(I,:,COUNTERDG)=	basis_rec2d(N,x1,y1,ielem(n,i)%iorder,1,ielem(n,i)%idegfree)
+		write(300+n,*)"element",i,counterdg
+		write(300+n,*) mass_matrix(i,1:IELEM(N,I)%IDEGFREE,counterdg)
+	  
+	  end do
+	  
+	  end  select
+    
+end do
+!$OMP END DO
+
+END IF
+ 
+ 
+ END SUBROUTINE
+ 
+ 
+ 
  
  
  END MODULE PRESTORE

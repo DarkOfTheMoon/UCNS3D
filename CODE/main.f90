@@ -660,6 +660,7 @@ end if
    
    else
    CALL INITIALISE2d(N)
+   CALL DG_1
    end if
  
 IF (RESTART.GT.0)THEN

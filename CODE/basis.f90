@@ -1537,6 +1537,9 @@ OOV=1.0D0/(ILOCAL_RECON3(ICONSIDERED)%VOLUME(1,1))
     SB(3)=X1*X1
     SB(4) = X1*Y1
     SB(5)= Y1*Y1
+    
+    
+    
     case(3)
     !THIRD ORDER
      SB(1)=X1
@@ -1620,9 +1623,14 @@ OOV=1.0D0/(ILOCAL_RECON3(ICONSIDERED)%VOLUME(1,1))
    
     if (compwrt.eq.0)then
     basis_rec2d(1:NUMBER_OF_DOG)=SB(1:NUMBER_OF_DOG)-((INTEG_BASIS(ICONSIDERED)%value(1:NUMBER_OF_DOG))*OOV)
-    else
+    end if
+    if (compwrt.eq.1)then
     basis_rec2d(1:NUMBER_OF_DOG)=SB(1:NUMBER_OF_DOG)-((INTEG_BASIS(ICONSIDERED)%valuec(1:NUMBER_OF_DOG))*OOV)
     end if
+    if (compwrt.eq.-1)then
+    basis_rec2d(1:NUMBER_OF_DOG)=SB(1:NUMBER_OF_DOG)!-((INTEG_BASIS(ICONSIDERED)%valuec(1:NUMBER_OF_DOG))*OOV)
+    end if
+    
     
 
 END FUNCTION BASIS_REC2d

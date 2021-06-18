@@ -788,8 +788,9 @@ SUBROUTINE INITIALISE2d(N)
 IMPLICIT NONE
 integer,INTENT(IN)::N
 REAL,allocatable,DIMENSION(:)::RG,ARG
+REAL::DGX1,DGY1,DGZ1
 CHARACTER(LEN=20)::PROC,RESTFILE,PROC3
-INTEGER:: prev_turbequation,INITIAL,III,i,k,jx,QQP,INC,kmaxe,jkn,ki,iterr,JX2
+INTEGER:: prev_turbequation,INITIAL,III,i,k,jx,QQP,INC,kmaxe,jkn,ki,iterr,JX2,COUNTERDG
 
 IF (LAMPS.EQ.1)THEN
 III=1
@@ -874,6 +875,9 @@ IF (RESTART.EQ.0)THEN
 	ELSE
 !$OMP DO SCHEDULE (STATIC) 
 	DO I=1,KMAXE
+	COUNTERDG=0
+	
+	
 		iconsidered=i
 		 VEXT=ZERO
 !     NODES_LIST=ZERO
@@ -933,6 +937,11 @@ IF (RESTART.EQ.0)THEN
 	  END DO
       
       ELSE
+      
+      
+      !1 this is where the initialisation will be performed for every decomposed element.
+      !INITIALISE COUNTER OF GAUSSIAN QUADRATURE POINT
+      
        do K=1,ELEM_DEC
 	VEXT(1:3,1:2)=ELEM_LISTD(k,1:3,1:2)
 	  
@@ -948,8 +957,23 @@ IF (RESTART.EQ.0)THEN
 	 
 	  
 			IF (ITESTCASE.LE.2)THEN
-			U_C(I)%VAL(1,1)=U_C(I)%VAL(1,1)+LINEAR_INIT2D(N)*WEQUA3D(INC)*(VOLTEMP)
-			U_E(I)%VAL(1,1)=U_C(I)%VAL(1,1)
+			U_C(I)%VAL(1,1)=U_C(I)%VAL(1,1)+LINEAR_INIT2D(N)*WEQUA3D(INC)*(VOLTEMP)  !numerical
+			U_E(I)%VAL(1,1)=U_C(I)%VAL(1,1)  !exact
+			
+			IF (DG.EQ.1)THEN
+			COUNTERDG=COUNTERDG+1
+			
+			
+			
+			U_C(I)%VALDG(1,COUNTERDG,1)=LINEAR_INIT2D(N)   !THIS IS JUST THE INITIAL SOLUTION
+			
+			
+            WRITE(200+N,*)"ELEMENT", I,"DG INITIAL", COUNTERDG
+            WRITE(200+N,*)"SOLUTION", U_C(I)%VALDG(1,COUNTERDG,1)
+			END IF
+			
+			
+			
 			ELSE
 			CALL INITIALISE_EULER2D(N)
 			if ((turbulence .eq. 1).or.(passivescalar.gt.0)) then
@@ -987,6 +1011,22 @@ IF (RESTART.EQ.0)THEN
 			IF (ITESTCASE.LE.2)THEN
 			U_C(I)%VAL(1,1)=U_C(I)%VAL(1,1)+LINEAR_INIT2D(N)*WEQUA3D(INC)*(VOLTEMP)
 			U_E(I)%VAL(1,1)=U_C(I)%VAL(1,1)
+			
+			IF (DG.EQ.1)THEN
+			COUNTERDG=COUNTERDG+1
+			
+			
+			
+			U_C(I)%VALDG(1,COUNTERDG,1)=LINEAR_INIT2D(N)   !THIS IS JUST THE INITIAL SOLUTION
+			
+			
+            WRITE(200+N,*)"ELEMENT", I,"DG INITIAL", COUNTERDG
+            WRITE(200+N,*)"SOLUTION", U_C(I)%VALDG(1,COUNTERDG,1)
+			END IF
+			
+			
+			
+			
 			ELSE
 			CALL INITIALISE_EULER2D(N)
 			if ((turbulence .eq. 1).or.(passivescalar.gt.0)) then
@@ -1018,6 +1058,13 @@ IF (RESTART.EQ.0)THEN
 !$OMP END PARALLEL 
 	RES_TIME=ZERO
 END IF
+
+
+
+
+
+
+
 
 
 ! IF (RESTART.GT.0)THEN     !IF_RESTART

@@ -1241,7 +1241,7 @@ end if
 	TYPE(U_EXACT),ALLOCATABLE,DIMENSION(:),INTENT(INOUT)::U_E
 	INTEGER,ALLOCATABLE,DIMENSION(:),INTENT(IN)::XMPIELRANK
 	INTEGER,INTENT(IN)::ITESTCASE,N
-	INTEGER::I,KMAXE,ISTAGE
+	INTEGER::I,KMAXE,ISTAGE,TOTALPOINTS
 	KMAXE=XMPIELRANK(N)
 	ALLOCATE (U_C(KMAXE))
 	
@@ -1307,8 +1307,32 @@ end if
 	
 	END SELECT
 	
+	
+	if (DG.EQ.1)THEN
+	allocate (mass_matrix(kmaxe,1:idegfree,QP_TRIANGLE*2));mass_matrix=zero
+	END IF
+	
 	DO I=1,KMAXE
         ALLOCATE (U_C(I)%VAL(ISTAGE,NOF_VARIABLES));U_C(I)%VAL=ZERO
+        
+        select case (ielem(n,i)%ishape)
+        
+        case(5) !quadrilateral
+        ielem(n,i)%iTOTALPOINTS=QP_TRIANGLE*2
+        
+        
+        case(6)!triangle
+         ielem(n,i)%iTOTALPOINTS=QP_TRIANGLE
+         
+         
+         end select
+        
+        IF (DG.EQ.1)THEN
+        ALLOCATE (U_C(I)%VALDG(ISTAGE,TOTALPOINTS,NOF_VARIABLES));U_C(I)%VALDG=ZERO
+        
+        END IF
+        
+        
                     if (( turbulence .eq. 1).or.(PASSIVESCALAR.GT.0))THEN
                         Allocate(U_CT(I)%VAL(ISTAGE,turbulenceequations+PASSIVESCALAR));U_CT(I)%VAL=ZERO   
                     Endif
