@@ -53,11 +53,11 @@ KMAXE=XMPIELRANK(N)
 		LEFTV(1:NOF_vARIABLES)=U_C(I)%VAL(1,1:NOF_vARIABLES)
 		
 		CALL CONS2PRIM(N)
-		if (multispecies.eq.1)then
+		IF (multispecies.eq.1)THEN
 		AGRT=SQRT((LEFTV(5)+MP_PINFL)*GAMMAl/LEFTV(1))
-		else
+		ELSE
 		AGRT=SQRT(LEFTV(5)*GAMMA/LEFTV(1))
-		end if
+		END IF
 		
 		VELN=MAX(ABS(LEFTV(2)),ABS(LEFTV(3)),ABS(LEFTV(4)))+AGRT
 		DT=MIN(DT,CCFL*((IELEM(N,I)%MINEDGE)/(ABS(VELN))))
@@ -81,7 +81,7 @@ KMAXE=XMPIELRANK(N)
 		IF (TURBULENCEMODEL.EQ.1)THEN
 		TURBMV(1)=U_CT(I)%VAL(1,1);  TURBMV(2)=U_CT(I)%VAL(1,1);
 		eddyfl(2)=turbmv(1); eddyfr(2)=turbmv(2)
-		Call EDDYVISCO(N,VISCL,LAML,TURBMV,ETVM,EDDYFL,EDDYFR)
+		CALL EDDYVISCO(N,VISCL,LAML,TURBMV,ETVM,EDDYFL,EDDYFR)
 		LAML(1)=LAML(1)+LAML(3)
 		VISCL(1)=VISCL(1)+VISCL(3)
 		END IF
@@ -152,7 +152,7 @@ KMAXE=XMPIELRANK(N)
 		IF (TURBULENCEMODEL.EQ.1)THEN
 		TURBMV(1)=U_CT(I)%VAL(1,1);  TURBMV(2)=U_CT(I)%VAL(1,1);
 		eddyfl(2)=turbmv(1); eddyfr(2)=turbmv(2)
-		Call EDDYVISCO(N,VISCL,LAML,TURBMV,ETVM,EDDYFL,EDDYFR)
+		CALL EDDYVISCO(N,VISCL,LAML,TURBMV,ETVM,EDDYFL,EDDYFR)
 		LAML(1)=LAML(1)+LAML(3)
 		VISCL(1)=VISCL(1)+VISCL(3)
 		END IF
@@ -195,10 +195,10 @@ KMAXE=XMPIELRANK(N)
 	!$OMP DO REDUCTION (MIN:DT)
         DO I=1,KMAXE
         
-				if (initcond.eq.3)then
+				IF (initcond.eq.3)THEN
 				  lamx=-ielem(n,i)%yyc+0.5d0
 				  lamy=ielem(n,i)%xxc-0.5
-				  end if
+				  END IF
         
         
 		VELN=MAX(ABS(LAMx),ABS(LAMy))
@@ -213,11 +213,11 @@ KMAXE=XMPIELRANK(N)
         DO I=1,KMAXE
 		LEFTV(1:NOF_vARIABLES)=U_C(I)%VAL(1,1:NOF_vARIABLES)
 		CALL CONS2PRIM2D(N)
-		if (multispecies.eq.1)then
+		IF (multispecies.eq.1)THEN
 		AGRT=SQRT((LEFTV(4)+MP_PINFL)*GAMMAl/LEFTV(1))
-		else
+		ELSE
 		AGRT=SQRT(LEFTV(4)*GAMMA/LEFTV(1))
-		end if
+		END IF
 		VELN=MAX(ABS(LEFTV(2)),ABS(LEFTV(3)))+AGRT
 		DT=MIN(DT,CCFL*((IELEM(N,I)%MINEDGE)/(ABS(VELN))))
 		
@@ -240,7 +240,7 @@ KMAXE=XMPIELRANK(N)
 		IF (TURBULENCEMODEL.EQ.1)THEN
 		TURBMV(1)=U_CT(I)%VAL(1,1);  TURBMV(2)=U_CT(I)%VAL(1,1);
 		eddyfl(2)=turbmv(1); eddyfr(2)=turbmv(2)
-		Call EDDYVISCO2D(N,VISCL,LAML,TURBMV,ETVM,EDDYFL,EDDYFR)
+		CALL EDDYVISCO2D(N,VISCL,LAML,TURBMV,ETVM,EDDYFL,EDDYFR)
 		LAML(1)=LAML(1)+LAML(3)
 		VISCL(1)=VISCL(1)+VISCL(3)
 		END IF
@@ -307,7 +307,7 @@ KMAXE=XMPIELRANK(N)
 		IF (TURBULENCEMODEL.EQ.1)THEN
 		TURBMV(1)=U_CT(I)%VAL(1,1);  TURBMV(2)=U_CT(I)%VAL(1,1);
 		eddyfl(2)=turbmv(1); eddyfr(2)=turbmv(2)
-		Call EDDYVISCO2D(N,VISCL,LAML,TURBMV,ETVM,EDDYFL,EDDYFR)
+		CALL EDDYVISCO2D(N,VISCL,LAML,TURBMV,ETVM,EDDYFL,EDDYFR)
 		LAML(1)=LAML(1)+LAML(3)
 		VISCL(1)=VISCL(1)+VISCL(3)
 		END IF
@@ -364,9 +364,9 @@ IF (FASTEST.EQ.1)THEN
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION(N)
-    end if
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION(N)
+    END IF
     
     END SELECT
 ELSE
@@ -381,9 +381,9 @@ ELSE
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION(N)
-    end if
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION(N)
+    END IF
     
     END SELECT
 END IF
@@ -400,7 +400,7 @@ DO I=1,KMAXE
 END DO
 !$OMP END DO
 
-if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
 !$OMP DO
 DO I=1,KMAXE
   OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
@@ -408,7 +408,7 @@ DO I=1,KMAXE
   U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar)=U_Ct(I)%VAL(2,1:turbulenceequations+passivescalar)-(DT*(RHSt(I)%VAL(1:turbulenceequations+passivescalar)*OOVOLUME))
 END DO
 !$OMP END DO
- end if
+ END IF
  
  IF (MOOD.EQ.1)THEN
  
@@ -452,9 +452,9 @@ IF (FASTEST.EQ.1)THEN
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION(N)
-    end if
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION(N)
+    END IF
     END SELECT
 ELSE
     CALL EXCHANGE_HIGHER(N)
@@ -468,9 +468,9 @@ ELSE
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION(N)
-    end if
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION(N)
+    END IF
     END SELECT
 END IF
 
@@ -488,7 +488,7 @@ END DO
 
 
 
-if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
 !$OMP DO
 DO I=1,KMAXE
   OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
@@ -497,7 +497,7 @@ DO I=1,KMAXE
 ((RHSt(I)%VAL(1:turbulenceequations+passivescalar))*(OOVOLUME))))
 END DO
 !$OMP END DO
- end if
+ END IF
 
  IF (MOOD.EQ.1)THEN
  
@@ -543,9 +543,9 @@ IF (FASTEST.EQ.1)THEN
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION(N)
-    end if
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION(N)
+    END IF
     END SELECT
 ELSE
     CALL EXCHANGE_HIGHER(N)
@@ -559,10 +559,10 @@ ELSE
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION(N)
-    end if
-    call VORTEXCALC(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION(N)
+    END IF
+    CALL VORTEXCALC(N)
     END SELECT
 END IF
 !$OMP DO
@@ -609,7 +609,7 @@ END DO
 END IF
 
 
-if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
 !$OMP DO
 DO I=1,KMAXE
   OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
@@ -617,7 +617,7 @@ U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar)=((OO3)*U_Ct(I)%VAL(2,1:turbul
 ((DT)*((RHSt(I)%VAL(1:turbulenceequations+passivescalar))*(OOVOLUME))))
 END DO
 !$OMP END DO
- end if
+ END IF
 
 
 
@@ -660,9 +660,9 @@ IF (FASTEST.EQ.1)THEN
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION(N)
-    end if
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION(N)
+    END IF
     
     END SELECT
 ELSE
@@ -677,9 +677,9 @@ ELSE
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION(N)
-    end if
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION(N)
+    END IF
     
     END SELECT
 END IF
@@ -693,7 +693,7 @@ DO I=1,KMAXE
 END DO
 !$OMP END DO
 
-if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
 !$OMP DO
 DO I=1,KMAXE
   OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
@@ -701,7 +701,7 @@ DO I=1,KMAXE
   U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar)=U_Ct(I)%VAL(2,1:turbulenceequations+passivescalar)-(DT*(RHSt(I)%VAL(1:turbulenceequations+passivescalar)*OOVOLUME))
 END DO
 !$OMP END DO
- end if
+ END IF
  
 IF (FASTEST.EQ.1)THEN
     CALL EXCHANGE_LOWER(N)
@@ -715,9 +715,9 @@ IF (FASTEST.EQ.1)THEN
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION(N)
-    end if
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION(N)
+    END IF
     END SELECT
 ELSE
     CALL EXCHANGE_HIGHER(N)
@@ -731,9 +731,9 @@ ELSE
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION(N)
-    end if
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION(N)
+    END IF
     END SELECT
 END IF
 
@@ -746,7 +746,7 @@ DO I=1,KMAXE
 END DO
 !$OMP END DO
 
-if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
 !$OMP DO
 DO I=1,KMAXE
   OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
@@ -755,7 +755,7 @@ DO I=1,KMAXE
 ((RHSt(I)%VAL(1:turbulenceequations+passivescalar))*(OOVOLUME))))
 END DO
 !$OMP END DO
- end if
+ END IF
 
 
 
@@ -771,9 +771,9 @@ IF (FASTEST.EQ.1)THEN
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION(N)
-    end if
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION(N)
+    END IF
     END SELECT
 ELSE
     CALL EXCHANGE_HIGHER(N)
@@ -787,10 +787,10 @@ ELSE
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION(N)
-    end if
-    call VORTEXCALC(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION(N)
+    END IF
+    CALL VORTEXCALC(N)
     END SELECT
 END IF
 !$OMP DO
@@ -801,7 +801,7 @@ DO I=1,KMAXE
 END DO
 !$OMP END DO
 
-if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
 !$OMP DO
 DO I=1,KMAXE
   OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
@@ -809,7 +809,7 @@ U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar)=((OO3)*U_Ct(I)%VAL(2,1:turbul
 ((DT)*((RHSt(I)%VAL(1:turbulenceequations+passivescalar))*(OOVOLUME))))
 END DO
 !$OMP END DO
- end if
+ END IF
 
 
 
@@ -854,9 +854,9 @@ IF (FASTEST.EQ.1)THEN
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION(N)
-    end if
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION(N)
+    END IF
     END SELECT
 ELSE
    
@@ -875,10 +875,10 @@ ELSE
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION(N)
-    end if
-    call VORTEXCALC(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION(N)
+    END IF
+    CALL VORTEXCALC(N)
     END SELECT
 END IF
 
@@ -893,14 +893,14 @@ DO I=1,KMAXE
 END DO
 !$OMP END DO
 
-if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
 !$OMP DO
 DO I=1,KMAXE
   OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
   U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar)=U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar)-(DT*(RHSt(I)%VAL(1:turbulenceequations+passivescalar)*OOVOLUME))
 END DO
 !$OMP END DO
- end if
+ END IF
 
 
 
@@ -945,9 +945,9 @@ IF (FASTEST.EQ.1)THEN
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION(N)
-    end if
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION(N)
+    END IF
     END SELECT
 ELSE
     CALL EXCHANGE_HIGHER(N)
@@ -961,9 +961,9 @@ ELSE
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION(N)
-    end if
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION(N)
+    END IF
     END SELECT
 END IF
 
@@ -976,7 +976,7 @@ DO I=1,KMAXE
   
 END DO
 !$OMP END DO
-if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
 !$OMP DO
 DO I=1,KMAXE
   OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
@@ -984,7 +984,7 @@ DO I=1,KMAXE
   U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar)=U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar)-(DT*(RHSt(I)%VAL(1:turbulenceequations+passivescalar)*OOVOLUME))
 END DO
 !$OMP END DO
- end if
+ END IF
 
 
 
@@ -1000,9 +1000,9 @@ IF (FASTEST.EQ.1)THEN
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION(N)
-    end if
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION(N)
+    END IF
     END SELECT
 ELSE
     CALL EXCHANGE_HIGHER(N)
@@ -1016,10 +1016,10 @@ ELSE
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION(N)
-    end if
-    call VORTEXCALC(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION(N)
+    END IF
+    CALL VORTEXCALC(N)
     END SELECT
 END IF
 
@@ -1030,14 +1030,14 @@ DO I=1,KMAXE
 END DO
 !$OMP END DO
 
-if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
 !$OMP DO
 DO I=1,KMAXE
   OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
   U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar)=(oo2*U_Ct(I)%VAL(2,1:turbulenceequations+passivescalar))+(oo2*U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar))-(dt*oo2*(RHSt(I)%VAL(1:turbulenceequations+passivescalar)*OOVOLUME))
   END DO
 !$OMP END DO
- end if
+ END IF
 
 
 
@@ -1081,9 +1081,9 @@ IF (FASTEST.EQ.1)THEN
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION(N)
-    end if
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION(N)
+    END IF
     END SELECT
 ELSE
     CALL EXCHANGE_HIGHER(N)
@@ -1097,9 +1097,9 @@ ELSE
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION(N)
-    end if
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION(N)
+    END IF
     END SELECT
 END IF
 
@@ -1113,7 +1113,7 @@ DO I=1,KMAXE
 END DO
 !$OMP END DO
 
-if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
 !$OMP DO
 DO I=1,KMAXE
   OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
@@ -1121,7 +1121,7 @@ DO I=1,KMAXE
   U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar)=U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar)-(ielem(n,i)%dtl*(RHSt(I)%VAL(1:turbulenceequations+passivescalar)*OOVOLUME))
   END DO
 !$OMP END DO
- end if
+ END IF
 
 
 IF (FASTEST.EQ.1)THEN
@@ -1136,9 +1136,9 @@ IF (FASTEST.EQ.1)THEN
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION(N)
-    end if
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION(N)
+    END IF
     END SELECT
 ELSE
     CALL EXCHANGE_HIGHER(N)
@@ -1152,10 +1152,10 @@ ELSE
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION(N)
-    end if
-    call VORTEXCALC(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION(N)
+    END IF
+    CALL VORTEXCALC(N)
     END SELECT
 END IF
 
@@ -1167,14 +1167,14 @@ DO I=1,KMAXE
 END DO
 !$OMP END DO
 
-if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
 !$OMP DO
 DO I=1,KMAXE
   OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
   U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar)=(oo2*U_Ct(I)%VAL(2,1:turbulenceequations+passivescalar))+(oo2*U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar))-(ielem(n,i)%dtl*oo2*(RHSt(I)%VAL(1:turbulenceequations+passivescalar)*OOVOLUME))
   END DO
 !$OMP END DO
- end if
+ END IF
 
 
 IF (AVERAGING.EQ.1)THEN
@@ -1212,9 +1212,9 @@ IF (FASTEST.EQ.1)THEN
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE2D(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE2D(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION2d(N)
-    end if
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION2d(N)
+    END IF
     END SELECT
 ELSE
     CALL EXCHANGE_HIGHER(N)
@@ -1228,9 +1228,9 @@ ELSE
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE2D(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE2D(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION2d(N)
-    end if
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION2d(N)
+    END IF
     END SELECT
 END IF
 
@@ -1244,7 +1244,7 @@ DO I=1,KMAXE
 END DO
 !$OMP END DO
 
-if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
 !$OMP DO
 DO I=1,KMAXE
   OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
@@ -1252,7 +1252,7 @@ DO I=1,KMAXE
   U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar)=U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar)-(ielem(n,i)%dtl*(RHSt(I)%VAL(1:turbulenceequations+passivescalar)*OOVOLUME))
   END DO
 !$OMP END DO
- end if
+ END IF
 
 
 
@@ -1268,10 +1268,10 @@ IF (FASTEST.EQ.1)THEN
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE2D(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE2D(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION2d(N)
-    end if
-    call VORTEXCALC2D(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION2d(N)
+    END IF
+    CALL VORTEXCALC2D(N)
     END SELECT
 ELSE
     CALL EXCHANGE_HIGHER(N)
@@ -1285,10 +1285,10 @@ ELSE
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE2D(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE2D(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION2d(N)
-    end if
-    call VORTEXCALC2D(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION2d(N)
+    END IF
+    CALL VORTEXCALC2D(N)
     END SELECT
 END IF
 
@@ -1299,14 +1299,14 @@ DO I=1,KMAXE
 END DO
 !$OMP END DO
 
-if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
 !$OMP DO
 DO I=1,KMAXE
   OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
   U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar)=(oo2*U_Ct(I)%VAL(2,1:turbulenceequations+passivescalar))+(oo2*U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar))-(ielem(n,i)%dtl*oo2*(RHSt(I)%VAL(1:turbulenceequations+passivescalar)*OOVOLUME))
   END DO
 !$OMP END DO
- end if
+ END IF
 
 
 
@@ -1346,9 +1346,9 @@ IF (FASTEST.EQ.1)THEN
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE2D(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE2D(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION2d(N)
-    end if
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION2d(N)
+    END IF
     END SELECT
 ELSE
     CALL EXCHANGE_HIGHER(N)
@@ -1362,9 +1362,9 @@ ELSE
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE2D(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE2D(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION2d(N)
-    end if
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION2d(N)
+    END IF
     END SELECT
 END IF
 
@@ -1379,7 +1379,7 @@ END DO
 !$OMP END DO
 
 
-if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
 !$OMP DO
 DO I=1,KMAXE
   OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
@@ -1387,7 +1387,7 @@ DO I=1,KMAXE
   U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar)=U_Ct(I)%VAL(2,1:turbulenceequations+passivescalar)-(dt*(RHSt(I)%VAL(1:turbulenceequations+passivescalar)*OOVOLUME))
   END DO
 !$OMP END DO
- end if
+ END IF
 
 
 IF (FASTEST.EQ.1)THEN
@@ -1402,9 +1402,9 @@ IF (FASTEST.EQ.1)THEN
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE2D(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE2D(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION2d(N)
-    end if
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION2d(N)
+    END IF
     END SELECT
 ELSE
     CALL EXCHANGE_HIGHER(N)
@@ -1418,10 +1418,10 @@ ELSE
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE2D(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE2D(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION2d(N)
-    end if
-    call VORTEXCALC2D(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION2d(N)
+    END IF
+    CALL VORTEXCALC2D(N)
     END SELECT
 END IF
 
@@ -1432,14 +1432,14 @@ DO I=1,KMAXE
 END DO
 !$OMP END DO
 
-if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
 !$OMP DO
 DO I=1,KMAXE
   OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
   U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar)=(U_Ct(I)%VAL(2,1:turbulenceequations+passivescalar))-(dt*(RHSt(I)%VAL(1:turbulenceequations+passivescalar)*OOVOLUME))
   END DO
 !$OMP END DO
- end if
+ END IF
 
 
 
@@ -1480,9 +1480,9 @@ IF (FASTEST.EQ.1)THEN
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE2D(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE2D(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION2d(N)
-    end if
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION2d(N)
+    END IF
     END SELECT
 ELSE
     CALL EXCHANGE_HIGHER(N)
@@ -1496,10 +1496,10 @@ ELSE
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE2D(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE2D(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION2d(N)
-    end if
-    call VORTEXCALC2D(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION2d(N)
+    END IF
+    CALL VORTEXCALC2D(N)
     END SELECT
 END IF
 
@@ -1513,14 +1513,14 @@ DO I=1,KMAXE
 END DO
 !$OMP END DO
 
-if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
 !$OMP DO
 DO I=1,KMAXE
   OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
   U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar)=U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar)-(dt*(RHSt(I)%VAL(1:turbulenceequations+passivescalar)*OOVOLUME))
   END DO
 !$OMP END DO
- end if
+ END IF
 
 
 
@@ -1563,10 +1563,10 @@ IF (FASTEST.EQ.1)THEN
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-    CALL CALCULATE_FLUXESHI_diffusive2d(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION2d(N)
-    end if
+    CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION2d(N)
+    END IF
     END SELECT
     
 ELSE
@@ -1580,10 +1580,10 @@ ELSE
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-    CALL CALCULATE_FLUXESHI_diffusive2d(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION2d(N)
-    end if
+    CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION2d(N)
+    END IF
     END SELECT
 END IF
 
@@ -1597,7 +1597,7 @@ DO I=1,KMAXE
 END DO
 !$OMP END DO
 
-if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
 !$OMP DO
 DO I=1,KMAXE
   OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
@@ -1605,7 +1605,7 @@ DO I=1,KMAXE
   U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar)=U_Ct(I)%VAL(2,1:turbulenceequations+passivescalar)-(DT*(RHSt(I)%VAL(1:turbulenceequations+passivescalar)*OOVOLUME))
   END DO
 !$OMP END DO
- end if
+ END IF
 
 
 IF (FASTEST.EQ.1)THEN
@@ -1619,10 +1619,10 @@ IF (FASTEST.EQ.1)THEN
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-    CALL CALCULATE_FLUXESHI_diffusive2d(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION2d(N)
-    end if
+    CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION2d(N)
+    END IF
     END SELECT
 ELSE
     CALL EXCHANGE_HIGHER(N)
@@ -1635,10 +1635,10 @@ ELSE
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-    CALL CALCULATE_FLUXESHI_diffusive2d(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION2d(N)
-    end if
+    CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION2d(N)
+    END IF
     END SELECT
 END IF
 
@@ -1651,7 +1651,7 @@ DO I=1,KMAXE
 END DO
 !$OMP END DO
 
-if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
 !$OMP DO
 DO I=1,KMAXE
   OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
@@ -1660,7 +1660,7 @@ DO I=1,KMAXE
 ((RHSt(I)%VAL(1:turbulenceequations+passivescalar))*(OOVOLUME))))
   END DO
 !$OMP END DO
- end if
+ END IF
 
 
 
@@ -1675,10 +1675,10 @@ IF (FASTEST.EQ.1)THEN
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-    CALL CALCULATE_FLUXESHI_diffusive2d(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION2d(N)
-    end if
+    CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION2d(N)
+    END IF
     END SELECT
 ELSE
     CALL EXCHANGE_HIGHER(N)
@@ -1691,11 +1691,11 @@ ELSE
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-    CALL CALCULATE_FLUXESHI_diffusive2d(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION2d(N)
-    end if
-    call VORTEXCALC2D(N)
+    CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION2d(N)
+    END IF
+    CALL VORTEXCALC2D(N)
     END SELECT
 END IF
 !$OMP DO
@@ -1707,7 +1707,7 @@ END DO
 !$OMP END DO
 
 
-if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
 !$OMP DO
 DO I=1,KMAXE
   OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
@@ -1715,7 +1715,7 @@ DO I=1,KMAXE
 ((DT)*((RHSt(I)%VAL(1:turbulenceequations+passivescalar))*(OOVOLUME))))
   END DO
 !$OMP END DO
- end if
+ END IF
 
 
 
@@ -1761,10 +1761,10 @@ IF (FASTEST.EQ.1)THEN
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-    CALL CALCULATE_FLUXESHI_diffusive2d(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION2d(N)
-    end if
+    CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION2d(N)
+    END IF
     END SELECT
     
 ELSE
@@ -1778,10 +1778,10 @@ ELSE
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-    CALL CALCULATE_FLUXESHI_diffusive2d(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION2d(N)
-    end if
+    CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION2d(N)
+    END IF
     END SELECT
 END IF
 
@@ -1797,7 +1797,7 @@ DO I=1,KMAXE
 END DO
 !$OMP END DO
 
-if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
 !$OMP DO
 DO I=1,KMAXE
   OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
@@ -1805,7 +1805,7 @@ DO I=1,KMAXE
   U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar)=U_Ct(I)%VAL(2,1:turbulenceequations+passivescalar)-(DT*(RHSt(I)%VAL(1:turbulenceequations+passivescalar)*OOVOLUME))
 END DO
 !$OMP END DO
- end if
+ END IF
  
  IF (MOOD.EQ.1)THEN
  
@@ -1849,10 +1849,10 @@ IF (FASTEST.EQ.1)THEN
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-    CALL CALCULATE_FLUXESHI_diffusive2d(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION2d(N)
-    end if
+    CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION2d(N)
+    END IF
     END SELECT
 ELSE
     CALL EXCHANGE_HIGHER(N)
@@ -1865,10 +1865,10 @@ ELSE
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-    CALL CALCULATE_FLUXESHI_diffusive2d(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION2d(N)
-    end if
+    CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION2d(N)
+    END IF
     END SELECT
 END IF
 
@@ -1886,7 +1886,7 @@ END DO
 
 
 
-if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
 !$OMP DO
 DO I=1,KMAXE
   OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
@@ -1895,7 +1895,7 @@ DO I=1,KMAXE
 ((RHSt(I)%VAL(1:turbulenceequations+passivescalar))*(OOVOLUME))))
 END DO
 !$OMP END DO
- end if
+ END IF
 
  IF (MOOD.EQ.1)THEN
  
@@ -1940,10 +1940,10 @@ IF (FASTEST.EQ.1)THEN
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-    CALL CALCULATE_FLUXESHI_diffusive2d(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION2d(N)
-    end if
+    CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION2d(N)
+    END IF
     END SELECT
 ELSE
     CALL EXCHANGE_HIGHER(N)
@@ -1956,11 +1956,11 @@ ELSE
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-    CALL CALCULATE_FLUXESHI_diffusive2d(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION2d(N)
-    end if
-    call VORTEXCALC2D(N)
+    CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION2d(N)
+    END IF
+    CALL VORTEXCALC2D(N)
     END SELECT
 END IF
 !$OMP DO
@@ -2007,7 +2007,7 @@ END DO
 END IF
 
 
-if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
 !$OMP DO
 DO I=1,KMAXE
   OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
@@ -2015,7 +2015,7 @@ U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar)=((OO3)*U_Ct(I)%VAL(2,1:turbul
 ((DT)*((RHSt(I)%VAL(1:turbulenceequations+passivescalar))*(OOVOLUME))))
 END DO
 !$OMP END DO
- end if
+ END IF
 
 
 
@@ -2060,51 +2060,51 @@ IF (FASTEST.EQ.1)THEN
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION(N)
-    end if
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION(N)
+    END IF
     END SELECT
 ELSE
-    if (statistics.eq.1)then
+    IF (statistics.eq.1)THEN
     !$OMP BARRIER 
     !$OMP MASTER
     pr_T1=MPI_Wtime()
      !$OMP END MASTER
      !$OMP BARRIER
-    end if
+    END IF
     
      
     CALL EXCHANGE_HIGHER(N)
-    if (statistics.eq.1)then
+    IF (statistics.eq.1)THEN
     !$OMP BARRIER 
     !$OMP MASTER
     pr_t2=MPI_Wtime()
     prace_t1=pr_t2-pr_t1
     !$OMP END MASTER
      !$OMP BARRIER
-    end if
+    END IF
     
     CALL ARBITRARY_ORDER3(N)
-    if (statistics.eq.1)then
+    IF (statistics.eq.1)THEN
     !$OMP BARRIER 
     !$OMP MASTER
     pr_t3=MPI_Wtime()
     prace_t2=pr_t3-pr_t2
     !$OMP END MASTER
      !$OMP BARRIER
-    end if
+    END IF
     
     
     
     CALL EXHBOUNDHIGHER(N)
-    if (statistics.eq.1)then
+    IF (statistics.eq.1)THEN
     !$OMP BARRIER 
     !$OMP MASTER
     pr_t4=MPI_Wtime()
     prace_t3=pr_t4-pr_t3
     !$OMP END MASTER
      !$OMP BARRIER
-    end if
+    END IF
     
     
     SELECT CASE(ITESTCASE)
@@ -2115,20 +2115,20 @@ ELSE
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE(N)
-     if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION(N)
-    end if
+     IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION(N)
+    END IF
     END SELECT
     
     
-    if (statistics.eq.1)then
+    IF (statistics.eq.1)THEN
     !$OMP BARRIER 
     !$OMP MASTER
     pr_t5=MPI_Wtime()
     prace_t4=pr_t5-pr_t4
     !$OMP END MASTER
      !$OMP BARRIER
-    end if
+    END IF
     
     
     
@@ -2148,7 +2148,7 @@ DO I=1,KMAXE
 END DO
 !$OMP END DO
 
-if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
 !$OMP DO
 DO I=1,KMAXE
   OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
@@ -2156,10 +2156,10 @@ DO I=1,KMAXE
   U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar)=U_Ct(I)%VAL(2,1:turbulenceequations+passivescalar)-(DT*0.391752226571890*(RHSt(I)%VAL(1:turbulenceequations+passivescalar)*OOVOLUME))
   END DO
 !$OMP END DO
- end if
+ END IF
  
  
-    if (statistics.eq.1)then
+    IF (statistics.eq.1)THEN
     !$OMP BARRIER 
     !$OMP MASTER
     pr_t6=MPI_Wtime()
@@ -2220,7 +2220,7 @@ DO I=1,KMAXE
     !$OMP END MASTER
      !$OMP BARRIER
     
-    end if
+    END IF
 
 
 IF (FASTEST.EQ.1)THEN
@@ -2235,9 +2235,9 @@ IF (FASTEST.EQ.1)THEN
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE(N)
-     if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION(N)
-    end if
+     IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION(N)
+    END IF
     END SELECT
 ELSE
     CALL EXCHANGE_HIGHER(N)
@@ -2251,9 +2251,9 @@ ELSE
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE(N)
-     if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION(N)
-    end if
+     IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION(N)
+    END IF
     END SELECT
 END IF
 
@@ -2266,7 +2266,7 @@ DO I=1,KMAXE
 END DO
 !$OMP END DO
 
-if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
 !$OMP DO
 DO I=1,KMAXE
   OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
@@ -2275,7 +2275,7 @@ DO I=1,KMAXE
 ((RHSt(I)%VAL(1:turbulenceequations+passivescalar))*(OOVOLUME))))
 END DO
 !$OMP END DO
- end if
+ END IF
 
 
 
@@ -2292,9 +2292,9 @@ IF (FASTEST.EQ.1)THEN
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE(N)
-     if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION(N)
-    end if
+     IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION(N)
+    END IF
     END SELECT
 ELSE
     CALL EXCHANGE_HIGHER(N)
@@ -2308,9 +2308,9 @@ ELSE
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE(N)
-     if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION(N)
-    end if
+     IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION(N)
+    END IF
     END SELECT
 END IF
 !$OMP DO
@@ -2323,7 +2323,7 @@ END DO
 !$OMP END DO
 
 
-if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
 !$OMP DO
 DO I=1,KMAXE
   OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
@@ -2332,7 +2332,7 @@ DO I=1,KMAXE
 ((RHSt(I)%VAL(1:turbulenceequations+passivescalar))*(OOVOLUME))))
 END DO
 !$OMP END DO
- end if
+ END IF
 
 
 IF (FASTEST.EQ.1)THEN
@@ -2347,9 +2347,9 @@ IF (FASTEST.EQ.1)THEN
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE(N)
-     if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION(N)
-    end if
+     IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION(N)
+    END IF
     END SELECT
 ELSE
     CALL EXCHANGE_HIGHER(N)
@@ -2363,9 +2363,9 @@ ELSE
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE(N)
-     if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION(N)
-    end if
+     IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION(N)
+    END IF
     END SELECT
 END IF
 !$OMP DO
@@ -2378,7 +2378,7 @@ DO I=1,KMAXE
 END DO
 !$OMP END DO
 
-if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
 !$OMP DO
 DO I=1,KMAXE
   OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
@@ -2388,7 +2388,7 @@ DO I=1,KMAXE
 ((RHSt(I)%VAL(1:turbulenceequations+passivescalar))*(OOVOLUME))))
 END DO
 !$OMP END DO
- end if
+ END IF
 
 
 
@@ -2404,9 +2404,9 @@ IF (FASTEST.EQ.1)THEN
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE(N)
-     if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION(N)
-    end if
+     IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION(N)
+    END IF
     END SELECT
 ELSE
     CALL EXCHANGE_HIGHER(N)
@@ -2420,10 +2420,10 @@ ELSE
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
     CALL CALCULATE_FLUXESHI_DIFFUSIVE(N)
-     if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION(N)
-    end if
-    call VORTEXCALC(N)
+     IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION(N)
+    END IF
+    CALL VORTEXCALC(N)
     END SELECT
 END IF
 !$OMP DO
@@ -2436,7 +2436,7 @@ END DO
 !$OMP END DO
 
 
-if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
 !$OMP DO
 DO I=1,KMAXE
   OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
@@ -2445,7 +2445,7 @@ DO I=1,KMAXE
 				(0.08460416338212*U_Ct(I)%VAL(6,1:turbulenceequations+passivescalar))-(0.22600748319395*(DT)*((RHSt(I)%VAL(1:turbulenceequations+passivescalar))*(OOVOLUME)))
 END DO
 !$OMP END DO
- end if
+ END IF
 
 
 IF (AVERAGING.EQ.1)THEN
@@ -2484,10 +2484,10 @@ IF (FASTEST.EQ.1)THEN
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-    CALL CALCULATE_FLUXESHI_diffusive2d(N)
-     if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION2d(N)
-    end if
+    CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
+     IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION2d(N)
+    END IF
     END SELECT
     
 ELSE
@@ -2501,10 +2501,10 @@ ELSE
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-    CALL CALCULATE_FLUXESHI_diffusive2d(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION2d(N)
-    end if
+    CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION2d(N)
+    END IF
     END SELECT
 END IF
 
@@ -2517,7 +2517,7 @@ DO I=1,KMAXE
 END DO
 !$OMP END DO
 
-if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
 !$OMP DO
 DO I=1,KMAXE
   OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
@@ -2525,7 +2525,7 @@ DO I=1,KMAXE
   U_Ct(I)%VAL(1,1:turbulenceequations+passivescalar)=U_Ct(I)%VAL(2,1:turbulenceequations+passivescalar)-(DT*0.391752226571890*(RHSt(I)%VAL(1:turbulenceequations+passivescalar)*OOVOLUME))
   END DO
 !$OMP END DO
- end if
+ END IF
 
 
 IF (FASTEST.EQ.1)THEN
@@ -2540,10 +2540,10 @@ IF (FASTEST.EQ.1)THEN
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-    CALL CALCULATE_FLUXESHI_diffusive2d(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION2d(N)
-    end if
+    CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION2d(N)
+    END IF
     END SELECT
     
 ELSE
@@ -2557,10 +2557,10 @@ ELSE
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-    CALL CALCULATE_FLUXESHI_diffusive2d(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION2d(N)
-    end if
+    CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION2d(N)
+    END IF
     END SELECT
 END IF
 
@@ -2573,7 +2573,7 @@ DO I=1,KMAXE
 END DO
 !$OMP END DO
 
-if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
 !$OMP DO
 DO I=1,KMAXE
   OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
@@ -2582,7 +2582,7 @@ DO I=1,KMAXE
 ((RHSt(I)%VAL(1:turbulenceequations+passivescalar))*(OOVOLUME))))
 END DO
 !$OMP END DO
- end if
+ END IF
 
 
 IF (FASTEST.EQ.1)THEN
@@ -2597,10 +2597,10 @@ IF (FASTEST.EQ.1)THEN
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-    CALL CALCULATE_FLUXESHI_diffusive2d(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION2d(N)
-    end if
+    CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION2d(N)
+    END IF
     END SELECT
     
 ELSE
@@ -2614,10 +2614,10 @@ ELSE
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-    CALL CALCULATE_FLUXESHI_diffusive2d(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION2d(N)
-    end if
+    CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION2d(N)
+    END IF
     END SELECT
 END IF
 !$OMP DO
@@ -2629,7 +2629,7 @@ DO I=1,KMAXE
 END DO
 !$OMP END DO
 
-if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
 !$OMP DO
 DO I=1,KMAXE
   OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
@@ -2638,7 +2638,7 @@ DO I=1,KMAXE
 ((RHSt(I)%VAL(1:turbulenceequations+passivescalar))*(OOVOLUME))))
 END DO
 !$OMP END DO
- end if
+ END IF
  
 IF (FASTEST.EQ.1)THEN
     CALL EXCHANGE_LOWER(N)
@@ -2652,10 +2652,10 @@ IF (FASTEST.EQ.1)THEN
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-    CALL CALCULATE_FLUXESHI_diffusive2d(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION2d(N)
-    end if
+    CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION2d(N)
+    END IF
     END SELECT
     
 ELSE
@@ -2669,10 +2669,10 @@ ELSE
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-    CALL CALCULATE_FLUXESHI_diffusive2d(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION2d(N)
-    end if
+    CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION2d(N)
+    END IF
     END SELECT
 END IF
 !$OMP DO
@@ -2685,7 +2685,7 @@ DO I=1,KMAXE
 END DO
 !$OMP END DO
 
-if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
 !$OMP DO
 DO I=1,KMAXE
   OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
@@ -2695,7 +2695,7 @@ DO I=1,KMAXE
 ((RHSt(I)%VAL(1:turbulenceequations+passivescalar))*(OOVOLUME))))
 END DO
 !$OMP END DO
- end if
+ END IF
  
 IF (FASTEST.EQ.1)THEN
     CALL EXCHANGE_LOWER(N)
@@ -2709,10 +2709,10 @@ IF (FASTEST.EQ.1)THEN
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-    CALL CALCULATE_FLUXESHI_diffusive2d(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION2d(N)
-    end if
+    CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION2d(N)
+    END IF
     END SELECT
     
 ELSE
@@ -2726,12 +2726,12 @@ ELSE
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-    CALL CALCULATE_FLUXESHI_diffusive2d(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION2d(N)
-    end if
+    CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION2d(N)
+    END IF
     IF (ITESTCASE.EQ.4)THEN
-    call VORTEXCALC2D(N)
+    CALL VORTEXCALC2D(N)
     END IF
     END SELECT
 END IF
@@ -2744,7 +2744,7 @@ DO I=1,KMAXE
 END DO
 !$OMP END DO
 
-if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
 !$OMP DO
 DO I=1,KMAXE
   OOVOLUME=1.0D0/IELEM(N,I)%TOTVOLUME
@@ -2753,7 +2753,7 @@ DO I=1,KMAXE
 				(0.08460416338212*U_Ct(I)%VAL(6,1:turbulenceequations+passivescalar))-(0.22600748319395*(DT)*((RHSt(I)%VAL(1:turbulenceequations+passivescalar))*(OOVOLUME)))
 END DO
 !$OMP END DO
- end if
+ END IF
 
 IF (AVERAGING.EQ.1)THEN
 
@@ -2791,11 +2791,11 @@ IF (FASTEST.EQ.1)THEN
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
-    CALL CALCULATE_FLUXESHI_diffusive(N)
-    call VORTEXCALC(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION(N)
-    end if
+    CALL CALCULATE_FLUXESHI_dIFfusive(N)
+    CALL VORTEXCALC(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION(N)
+    END IF
     END SELECT
     
 ELSE
@@ -2809,29 +2809,29 @@ ELSE
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
-    CALL CALCULATE_FLUXESHI_diffusive(N)
-    call VORTEXCALC(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION(N)
-    end if
+    CALL CALCULATE_FLUXESHI_dIFfusive(N)
+    CALL VORTEXCALC(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION(N)
+    END IF
     END SELECT
 END IF
 
 IF (RELAX.EQ.3)THEN
  
- call RELAXATION_LUMFREE(N)
+ CALL RELAXATION_LUMFREE(N)
  
  ELSE
   
-if (lowmemory.eq.0)then
+IF (lowmemory.eq.0)THEN
    
- call RELAXATION(N)
+ CALL RELAXATION(N)
    
- else
+ ELSE
  
- call RELAXATION_lm(N)
+ CALL RELAXATION_lm(N)
  
- end if
+ END IF
    
   END IF
 
@@ -2839,26 +2839,26 @@ if (lowmemory.eq.0)then
  
 !$OMP DO
 DO I=1,KMAXE
-    If ((impdu(i,1).ne.impdu(i,1)).or.(impdu(i,2).ne.impdu(i,2)).or.(impdu(i,3).ne.impdu(i,3)).or.(impdu(i,4).ne.impdu(i,4)).or.(impdu(i,5).ne.impdu(i,5)))then
+    IF ((impdu(i,1).ne.impdu(i,1)).or.(impdu(i,2).ne.impdu(i,2)).or.(impdu(i,3).ne.impdu(i,3)).or.(impdu(i,4).ne.impdu(i,4)).or.(impdu(i,5).ne.impdu(i,5)))THEN
         write(600+n,*)"nan present",ielem(n,i)%ihexgl,ielem(n,i)%ishape,ielem(n,i)%xxc, ielem(n,i)%yyc,ielem(n,i)%zzc
         write(600+n,*)ielem(n,i)%dih(:)
         kill_nan=1
-    end if
+    END IF
   U_C(I)%VAL(1,1:nof_Variables)=U_C(I)%VAL(1,1:nof_Variables)+IMPDU(I,1:nof_Variables)
 END DO
 !$OMP END DO
-    if (kill_nan.eq.1)then
+    IF (kill_nan.eq.1)THEN
         stop
-    end if
+    END IF
 
 IF ((PASSIVESCALAR.GT.0).OR.(TURBULENCE.GT.0))THEN
 !$OMP DO
   DO I=1,KMAXE
   do k=1,turbulenceequations+passivescalar
-  if (U_CT(I)%VAL(1,k)+IMPDU(I,5+k).ge.zero)then
+  IF (U_CT(I)%VAL(1,k)+IMPDU(I,5+k).ge.zero)THEN
   U_CT(I)%VAL(1,k)=U_CT(I)%VAL(1,k)+0.4*IMPDU(i,5+k)
-  end if
-  end do
+  END IF
+  END do
 END DO
 !$OMP END DO
 END IF
@@ -2898,11 +2898,11 @@ IF (FASTEST.EQ.1)THEN
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-    CALL CALCULATE_FLUXESHI_diffusive2d(N)
-   ! call VORTEXCALC2D(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION2d(N)
-    end if
+    CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
+   ! CALL VORTEXCALC2D(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION2d(N)
+    END IF
     END SELECT
     
 ELSE
@@ -2916,11 +2916,11 @@ ELSE
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-    CALL CALCULATE_FLUXESHI_diffusive2d(N)
-    !call VORTEXCALC2D(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION2d(N)
-    end if
+    CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
+    !CALL VORTEXCALC2D(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION2d(N)
+    END IF
     END SELECT
 END IF
 
@@ -2928,29 +2928,29 @@ END IF
 
  IF (RELAX.EQ.3)THEN
  
- call RELAXATION_LUMFREE(N)
+ CALL RELAXATION_LUMFREE(N)
  
  ELSE
- if (lowmemory.eq.0)then
+ IF (lowmemory.eq.0)THEN
    
- call RELAXATION2d(N)
+ CALL RELAXATION2d(N)
    
- else
+ ELSE
  
- call RELAXATION_lm2d(N)
+ CALL RELAXATION_lm2d(N)
  
- end if
+ END IF
   END IF
 
  kill_nan=0
 !$OMP DO
 DO I=1,KMAXE
 
-    If ((impdu(i,1).ne.impdu(i,1)).or.(impdu(i,2).ne.impdu(i,2)).or.(impdu(i,3).ne.impdu(i,3)).or.(impdu(i,4).ne.impdu(i,4)))then
+    IF ((impdu(i,1).ne.impdu(i,1)).or.(impdu(i,2).ne.impdu(i,2)).or.(impdu(i,3).ne.impdu(i,3)).or.(impdu(i,4).ne.impdu(i,4)))THEN
         write(600+n,*)"nan present",ielem(n,i)%ihexgl,ielem(n,i)%ishape,ielem(n,i)%xxc, ielem(n,i)%yyc
         write(600+n,*)ielem(n,i)%dih(:)
         kill_nan=1
-    end if
+    END IF
 
     
     
@@ -2960,9 +2960,9 @@ DO I=1,KMAXE
 END DO
 !$OMP END DO
 
-    if (kill_nan.eq.1)then
+    IF (kill_nan.eq.1)THEN
         stop
-    end if
+    END IF
 
 
 
@@ -2970,21 +2970,21 @@ IF ((PASSIVESCALAR.GT.0).OR.(TURBULENCE.GT.0))THEN
 !$OMP DO
   DO I=1,KMAXE
   do k=1,turbulenceequations+passivescalar
-  if (ispal.eq.1)then
-  if (U_CT(I)%VAL(1,k)+IMPDU(I,4+k).ge.zero)then
+  IF (ispal.eq.1)THEN
+  IF (U_CT(I)%VAL(1,k)+IMPDU(I,4+k).ge.zero)THEN
   U_CT(I)%VAL(1,k)=U_CT(I)%VAL(1,k)+0.4*IMPDU(i,4+k)
-   end if
-   else
+   END IF
+   ELSE
    U_CT(I)%VAL(1,k)=U_CT(I)%VAL(1,k)+0.4*IMPDU(i,4+k)
    
-   end if
-  end do
+   END IF
+  END do
 END DO
 !$OMP END DO
 
-!   if (kill_nan.eq.2)then
+!   IF (kill_nan.eq.2)THEN
 !         stop
-!     end if
+!     END IF
 
 
 
@@ -3022,10 +3022,10 @@ IF (IT.EQ.RESTART)THEN
 DO I=1,KMAXE 
   U_C(I)%VAL(3,1:NOF_VARIABLES)=U_C(I)%VAL(1,1:NOF_VARIABLES)
   U_C(I)%VAL(2,1:nof_variables)=U_C(I)%VAL(1,1:nof_variables)
-  if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+  IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
   U_CT(I)%VAL(3,:)=U_CT(I)%VAL(1,:)
   U_CT(I)%VAL(2,:)=U_CT(I)%VAL(1,:)
-  end if
+  END IF
 END DO
 !$OMP END DO
 END IF
@@ -3054,11 +3054,11 @@ IF (FASTEST.EQ.1)THEN
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
-    CALL CALCULATE_FLUXESHI_diffusive(N)
-    call VORTEXCALC(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION(N)
-    end if
+    CALL CALCULATE_FLUXESHI_dIFfusive(N)
+    CALL VORTEXCALC(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION(N)
+    END IF
     END SELECT
     
 ELSE
@@ -3072,34 +3072,34 @@ ELSE
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
-    CALL CALCULATE_FLUXESHI_diffusive(N)
-    call VORTEXCALC(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION(N)
-    end if
+    CALL CALCULATE_FLUXESHI_dIFfusive(N)
+    CALL VORTEXCALC(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION(N)
+    END IF
     END SELECT
 END IF
 
 
-if (relax.eq.3)Then
+IF (relax.eq.3)THEN
 
 
 
-call RELAXATION_LUMFREE(N)
+CALL RELAXATION_LUMFREE(N)
 
 
-else
+ELSE
 
 
-if (lowmemory.eq.0)then
+IF (lowmemory.eq.0)THEN
    
- call RELAXATION(N)
+ CALL RELAXATION(N)
    
- else
+ ELSE
  
- call RELAXATION_lm(N)
+ CALL RELAXATION_lm(N)
  
- end if
+ END IF
  END IF
 
  
@@ -3111,18 +3111,18 @@ DO I=1,KMAXE
       rsumfacei=sqrt(((IMPDU(I,1))**2)+((IMPDU(I,2))**2)+((IMPDU(I,3))**2)+((IMPDU(I,4))**2)+((IMPDU(I,5))**2))
       allresdt=allresdt+(rsumfacei*ielem(n,i)%totvolume)
       
-      If ((impdu(i,1).ne.impdu(i,1)).or.(impdu(i,2).ne.impdu(i,2)).or.(impdu(i,3).ne.impdu(i,3)).or.(impdu(i,4).ne.impdu(i,4)).or.(impdu(i,5).ne.impdu(i,5)))then
+      IF ((impdu(i,1).ne.impdu(i,1)).or.(impdu(i,2).ne.impdu(i,2)).or.(impdu(i,3).ne.impdu(i,3)).or.(impdu(i,4).ne.impdu(i,4)).or.(impdu(i,5).ne.impdu(i,5)))THEN
       kill_nan=1
-      end if
-end do
+      END IF
+END do
 !$OMP END DO
 
 
 !$OMP BARRIER 
 
-     if (kill_nan.eq.1)then
+     IF (kill_nan.eq.1)THEN
         stop
-    end if
+    END IF
 
 
 
@@ -3138,55 +3138,55 @@ DUMMY3I=zero
 CALL MPI_ALLREDUCE(allresdt,DUMMY3i,1,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERROR)
 allresdt=dummy3i/TOTALVOLUME
 
-if (allresdt.gt.firsti)then
+IF (allresdt.gt.firsti)THEN
 firsti=allresdt
-end if
+END IF
 
 allresdt=allresdt/firsti
 
 
-if (n.eq.0)then
+IF (n.eq.0)THEN
 				  OPEN(77,FILE='res1.txt',FORM='FORMATTED',ACTION='WRITE',POSITION='APPEND')
 				  WRITE(77,*)allresdt,jj,it
 				  CLOSE(77)
 
-end if
+END IF
 
 !$OMP END MASTER
 !$OMP BARRIER 
 
 
 
-  if ((allresdt.le.inner_tol).or.(jj.eq.upperlimit))then
+  IF ((allresdt.le.inner_tol).or.(jj.eq.upperlimit))THEN
  !$OMP DO SCHEDULE (STATIC)
   DO I=1,KMAXE
  U_C(I)%VAL(1,1:nof_Variables)=U_C(I)%VAL(1,1:nof_Variables)+IMPDU(I,1:nof_Variables)
-    if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+    IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
     do k=1,turbulenceequations+passivescalar
-	if (U_CT(I)%VAL(1,k)+IMPDU(I,nof_Variables+k).ge.zero)then
+	IF (U_CT(I)%VAL(1,k)+IMPDU(I,nof_Variables+k).ge.zero)THEN
   U_CT(I)%VAL(1,k)=U_CT(I)%VAL(1,k)+IMPDU(i,nof_Variables+k)
-	end if
-    end do
-    end if
-  end DO
+	END IF
+    END do
+    END IF
+  END DO
 !$OMP END DO
   exit
 
-else
+ELSE
  !$OMP DO SCHEDULE (STATIC)
  DO I=1,KMAXE
  U_C(I)%VAL(1,1:nof_Variables)=U_C(I)%VAL(1,1:nof_Variables)+IMPDU(I,1:nof_Variables)
-    if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+    IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
     do k=1,turbulenceequations+passivescalar
-	if (U_CT(I)%VAL(1,k)+IMPDU(I,nof_Variables+k).ge.zero)then
+	IF (U_CT(I)%VAL(1,k)+IMPDU(I,nof_Variables+k).ge.zero)THEN
   U_CT(I)%VAL(1,k)=U_CT(I)%VAL(1,k)+IMPDU(i,nof_Variables+k)
-	end if
-    end do
-    end if
-  end DO
+	END IF
+    END do
+    END IF
+  END DO
 !$OMP END DO
 
-end if
+END IF
 
 
 END DO
@@ -3198,11 +3198,11 @@ DO I=1,KMAXE
   U_C(I)%VAL(1,1:nof_variables)=2.0*U_C(I)%VAL(2,1:nof_variables)-U_C(I)%VAL(3,1:nof_variables)
   
   
-  if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+  IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
   U_CT(I)%VAL(3,:)=U_CT(I)%VAL(2,:)
   U_CT(I)%VAL(2,:)=U_CT(I)%VAL(1,:)
   U_CT(I)%VAL(1,:)=2.0*U_CT(I)%VAL(2,:)-U_CT(I)%VAL(3,:)
-  end if
+  END IF
 END DO
 !$OMP END DO
 
@@ -3263,10 +3263,10 @@ IF (IT.EQ.RESTART)THEN
 DO I=1,KMAXE 
   U_C(I)%VAL(3,1:NOF_VARIABLES)=U_C(I)%VAL(1,1:NOF_VARIABLES)
   U_C(I)%VAL(2,1:nof_variables)=U_C(I)%VAL(1,1:nof_variables)
-  if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+  IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
   U_CT(I)%VAL(3,:)=U_CT(I)%VAL(1,:)
   U_CT(I)%VAL(2,:)=U_CT(I)%VAL(1,:)
-  end if
+  END IF
 END DO
 !$OMP END DO
 END IF
@@ -3296,11 +3296,11 @@ IF (FASTEST.EQ.1)THEN
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
-    CALL CALCULATE_FLUXESHI_diffusive(N)
-    call VORTEXCALC(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION(N)
-    end if
+    CALL CALCULATE_FLUXESHI_dIFfusive(N)
+    CALL VORTEXCALC(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION(N)
+    END IF
     END SELECT
     
 ELSE
@@ -3314,16 +3314,16 @@ ELSE
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE(N)
-    CALL CALCULATE_FLUXESHI_diffusive(N)
-    call VORTEXCALC(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION(N)
-    end if
+    CALL CALCULATE_FLUXESHI_dIFfusive(N)
+    CALL VORTEXCALC(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION(N)
+    END IF
     END SELECT
 END IF
 
 
-call RELAXATION_EX(N)
+CALL RELAXATION_EX(N)
 
 
 
@@ -3334,7 +3334,7 @@ call RELAXATION_EX(N)
 DO I=1,KMAXE
       rsumfacei=sqrt(((IMPDU(I,1))**2)+((IMPDU(I,2))**2)+((IMPDU(I,3))**2)+((IMPDU(I,4))**2)+((IMPDU(I,5))**2))
       allresdt=allresdt+(rsumfacei*ielem(n,i)%totvolume)
-end do
+END do
 !$OMP END DO
 
 !$OMP BARRIER 
@@ -3346,48 +3346,48 @@ allresdt=dummy3i/TOTALVOLUME
 
 
 
-if (allresdt.gt.firsti)then
+IF (allresdt.gt.firsti)THEN
 firsti=allresdt
-end if
+END IF
 
 allresdt=allresdt/firsti
 
 
-    if (n.eq.0)then
+    IF (n.eq.0)THEN
     write(777,*)allresdt,jj,it
-    end if
+    END IF
 
 
 !$OMP END MASTER
 !$OMP BARRIER 
 
     
-  if ((allresdt.le.inner_tol).or.(jj.eq.upperlimit))then
+  IF ((allresdt.le.inner_tol).or.(jj.eq.upperlimit))THEN
  !$OMP DO SCHEDULE (STATIC)
   DO I=1,KMAXE
  U_C(I)%VAL(1,1:nof_Variables)=U_C(I)%VAL(1,1:nof_Variables)+IMPDU(I,1:nof_Variables)
-    if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+    IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
     do k=1,turbulenceequations+passivescalar
   U_CT(I)%VAL(1,k)=U_CT(I)%VAL(1,k)+IMPDU(i,nof_Variables+k)
-    end do
-    end if
-  end DO
+    END do
+    END IF
+  END DO
 !$OMP END DO
   exit
 
-else
+ELSE
  !$OMP DO SCHEDULE (STATIC)
  DO I=1,KMAXE
  U_C(I)%VAL(1,1:nof_Variables)=U_C(I)%VAL(1,1:nof_Variables)+IMPDU(I,1:nof_Variables)
-  if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+  IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
     do k=1,turbulenceequations+passivescalar
   U_CT(I)%VAL(1,k)=U_CT(I)%VAL(1,k)+IMPDU(i,nof_Variables+k)
-    end do
-    end if
-  end DO
+    END do
+    END IF
+  END DO
 !$OMP END DO
 
-end if
+END IF
 
 
 
@@ -3408,11 +3408,11 @@ DO I=1,KMAXE
   U_C(I)%VAL(1,1:nof_variables)=2.0*U_C(I)%VAL(2,1:nof_variables)-U_C(I)%VAL(3,1:nof_variables)
   
   
-  if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+  IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
   U_CT(I)%VAL(3,:)=U_CT(I)%VAL(2,:)
   U_CT(I)%VAL(2,:)=U_CT(I)%VAL(1,:)
   U_CT(I)%VAL(1,:)=2.0*U_CT(I)%VAL(2,:)-U_CT(I)%VAL(3,:)
-  end if
+  END IF
 END DO
 !$OMP END DO
 
@@ -3460,10 +3460,10 @@ IF (IT.EQ.RESTART)THEN
 DO I=1,KMAXE 
   U_C(I)%VAL(3,1:NOF_VARIABLES)=U_C(I)%VAL(1,1:NOF_VARIABLES)
   U_C(I)%VAL(2,1:nof_variables)=U_C(I)%VAL(1,1:nof_variables)
-  if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+  IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
   U_CT(I)%VAL(3,:)=U_CT(I)%VAL(1,:)
   U_CT(I)%VAL(2,:)=U_CT(I)%VAL(1,:)
-  end if
+  END IF
 END DO
 !$OMP END DO
 END IF
@@ -3493,11 +3493,11 @@ IF (FASTEST.EQ.1)THEN
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-    CALL CALCULATE_FLUXESHI_diffusive2d(N)
-    call VORTEXCALC2d(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION2d(N)
-    end if
+    CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
+    CALL VORTEXCALC2d(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION2d(N)
+    END IF
     END SELECT
     
 ELSE
@@ -3511,16 +3511,16 @@ ELSE
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-    CALL CALCULATE_FLUXESHI_diffusive2d(N)
-    call VORTEXCALC2d(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION2d(N)
-    end if
+    CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
+    CALL VORTEXCALC2d(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION2d(N)
+    END IF
     END SELECT
 END IF
 
 
-call RELAXATION_EX(N)
+CALL RELAXATION_EX(N)
 
 
 
@@ -3531,7 +3531,7 @@ call RELAXATION_EX(N)
 DO I=1,KMAXE
       rsumfacei=sqrt(((IMPDU(I,1))**2)+((IMPDU(I,2))**2)+((IMPDU(I,3))**2)+((IMPDU(I,4))**2))
       allresdt=allresdt+(rsumfacei*ielem(n,i)%totvolume)
-end do
+END do
 !$OMP END DO
 
 !$OMP BARRIER 
@@ -3543,48 +3543,48 @@ allresdt=dummy3i/TOTALVOLUME
 
 
 
-if (allresdt.gt.firsti)then
+IF (allresdt.gt.firsti)THEN
 firsti=allresdt
-end if
+END IF
 
 allresdt=allresdt/firsti
 
 
-    if (n.eq.0)then
+    IF (n.eq.0)THEN
     write(777,*)allresdt,jj,it
-    end if
+    END IF
 
 
 !$OMP END MASTER
 !$OMP BARRIER 
 
     
-  if ((allresdt.le.inner_tol).or.(jj.eq.upperlimit))then
+  IF ((allresdt.le.inner_tol).or.(jj.eq.upperlimit))THEN
  !$OMP DO SCHEDULE (STATIC)
   DO I=1,KMAXE
  U_C(I)%VAL(1,1:nof_Variables)=U_C(I)%VAL(1,1:nof_Variables)+IMPDU(I,1:nof_Variables)
-    if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+    IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
     do k=1,turbulenceequations+passivescalar
   U_CT(I)%VAL(1,k)=U_CT(I)%VAL(1,k)+IMPDU(i,nof_Variables+k)
-    end do
-    end if
-  end DO
+    END do
+    END IF
+  END DO
 !$OMP END DO
   exit
 
-else
+ELSE
  !$OMP DO SCHEDULE (STATIC)
  DO I=1,KMAXE
  U_C(I)%VAL(1,1:nof_Variables)=U_C(I)%VAL(1,1:nof_Variables)+IMPDU(I,1:nof_Variables)
-  if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+  IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
     do k=1,turbulenceequations+passivescalar
   U_CT(I)%VAL(1,k)=U_CT(I)%VAL(1,k)+IMPDU(i,nof_Variables+k)
-    end do
-    end if
-  end DO
+    END do
+    END IF
+  END DO
 !$OMP END DO
 
-end if
+END IF
 
 
 
@@ -3605,11 +3605,11 @@ DO I=1,KMAXE
   U_C(I)%VAL(1,1:nof_variables)=2.0*U_C(I)%VAL(2,1:nof_variables)-U_C(I)%VAL(3,1:nof_variables)
   
   
-  if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+  IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
   U_CT(I)%VAL(3,:)=U_CT(I)%VAL(2,:)
   U_CT(I)%VAL(2,:)=U_CT(I)%VAL(1,:)
   U_CT(I)%VAL(1,:)=2.0*U_CT(I)%VAL(2,:)-U_CT(I)%VAL(3,:)
-  end if
+  END IF
 END DO
 !$OMP END DO
 
@@ -3674,10 +3674,10 @@ IF (IT.EQ.RESTART)THEN
 DO I=1,KMAXE 
   U_C(I)%VAL(3,1:NOF_VARIABLES)=U_C(I)%VAL(1,1:NOF_VARIABLES)
   U_C(I)%VAL(2,1:nof_variables)=U_C(I)%VAL(1,1:nof_variables)
-  if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+  IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
   U_CT(I)%VAL(3,:)=U_CT(I)%VAL(1,:)
   U_CT(I)%VAL(2,:)=U_CT(I)%VAL(1,:)
-  end if
+  END IF
 END DO
 !$OMP END DO
 END IF
@@ -3702,11 +3702,11 @@ IF (FASTEST.EQ.1)THEN
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-    CALL CALCULATE_FLUXESHI_diffusive2d(N)
-    call VORTEXCALC2D(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION2d(N)
-    end if
+    CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
+    CALL VORTEXCALC2D(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION2d(N)
+    END IF
     END SELECT
     
 ELSE
@@ -3720,44 +3720,44 @@ ELSE
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
     CASE(4)
     CALL CALCULATE_FLUXESHI_CONVECTIVE2d(N)
-    CALL CALCULATE_FLUXESHI_diffusive2d(N)
-    call VORTEXCALC2D(N)
-    if (turbulence.eq.1)then
-    call SOURCES_COMPUTATION2d(N)
-    end if
+    CALL CALCULATE_FLUXESHI_dIFfusive2d(N)
+    CALL VORTEXCALC2D(N)
+    IF (turbulence.eq.1)THEN
+    CALL SOURCES_COMPUTATION2d(N)
+    END IF
     END SELECT
 END IF
 
 
-if (relax.eq.3)Then
+IF (relax.eq.3)THEN
 
 
 
-call RELAXATION_LUMFREE(N)
+CALL RELAXATION_LUMFREE(N)
 
 
-else
+ELSE
 
 
 
-if (lowmemory.eq.0)then
+IF (lowmemory.eq.0)THEN
    
- call RELAXATION2d(N)
+ CALL RELAXATION2d(N)
    
- else
+ ELSE
  
- call RELAXATION_lm2d(N)
+ CALL RELAXATION_lm2d(N)
  
- end if
+ END IF
  
-end if
+END IF
 
 !$OMP BARRIER 
 !$OMP DO SCHEDULE(STATIC) REDUCTION(+:allresdt)
 DO I=1,KMAXE
       rsumfacei=sqrt(((IMPDU(I,1))**2)+((IMPDU(I,2))**2)+((IMPDU(I,3))**2)+((IMPDU(I,4))**2))
       allresdt=allresdt+(rsumfacei*ielem(n,i)%totvolume)
-end do
+END do
 !$OMP END DO
 
 !$OMP BARRIER 
@@ -3769,17 +3769,17 @@ allresdt=dummy3i/TOTALVOLUME
 
 
 
-if (allresdt.gt.firsti)then
+IF (allresdt.gt.firsti)THEN
 firsti=allresdt
-end if
+END IF
 
 allresdt=allresdt/firsti
 
 
-if (n.eq.0)then
+IF (n.eq.0)THEN
 write(777,*)allresdt,jj,it
 
-end if
+END IF
 
 
 !$OMP END MASTER
@@ -3788,36 +3788,36 @@ end if
 
 
 
-  if ((allresdt.le.inner_tol).or.(jj.eq.upperlimit))then
+  IF ((allresdt.le.inner_tol).or.(jj.eq.upperlimit))THEN
  !$OMP DO SCHEDULE (STATIC)
   DO I=1,KMAXE
  U_C(I)%VAL(1,1:nof_Variables)=U_C(I)%VAL(1,1:nof_Variables)+IMPDU(I,1:nof_Variables)
-    if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+    IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
     do k=1,turbulenceequations+passivescalar
-	if (U_CT(I)%VAL(1,k)+IMPDU(I,nof_Variables+k).ge.zero)then
+	IF (U_CT(I)%VAL(1,k)+IMPDU(I,nof_Variables+k).ge.zero)THEN
   U_CT(I)%VAL(1,k)=U_CT(I)%VAL(1,k)+IMPDU(i,nof_Variables+k)
-	end if
-    end do
-    end if
-  end DO
+	END IF
+    END do
+    END IF
+  END DO
 !$OMP END DO
   exit
 
-else
+ELSE
  !$OMP DO SCHEDULE (STATIC)
  DO I=1,KMAXE
  U_C(I)%VAL(1,1:nof_Variables)=U_C(I)%VAL(1,1:nof_Variables)+IMPDU(I,1:nof_Variables)
-    if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+    IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
     do k=1,turbulenceequations+passivescalar
-	if (U_CT(I)%VAL(1,k)+IMPDU(I,nof_Variables+k).ge.zero)then
+	IF (U_CT(I)%VAL(1,k)+IMPDU(I,nof_Variables+k).ge.zero)THEN
   U_CT(I)%VAL(1,k)=U_CT(I)%VAL(1,k)+IMPDU(i,nof_Variables+k)
-	end if
-    end do
-    end if
-  end DO
+	END IF
+    END do
+    END IF
+  END DO
 !$OMP END DO
 
-end if
+END IF
 
 
 END DO
@@ -3833,11 +3833,11 @@ DO I=1,KMAXE
   U_C(I)%VAL(1,1:nof_variables)=2.0*U_C(I)%VAL(2,1:nof_variables)-U_C(I)%VAL(3,1:nof_variables)
   
   
-  if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+  IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
   U_CT(I)%VAL(3,:)=U_CT(I)%VAL(2,:)
   U_CT(I)%VAL(2,:)=U_CT(I)%VAL(1,:)
   U_CT(I)%VAL(1,:)=2.0*U_CT(I)%VAL(2,:)-U_CT(I)%VAL(3,:)
-  end if
+  END IF
 END DO
 !$OMP END DO
 
@@ -3893,10 +3893,10 @@ IMPDU(I,1:nof_variables)=DT1*(1.5D0*U_C(I)%VAL(1,1:nof_Variables)-2.0D0*U_C(I)%V
 
 IF ((TURBULENCE.GT.0).OR.(PASSIVESCALAR.GT.0))THEN
 impdu(I,INDT1:INDT2)=DT1*(1.5D0*U_CT(I)%VAL(1,1:INDT3)-2.0D0*U_CT(I)%VAL(2,1:INDT3)+0.5D0*U_CT(I)%VAL(3,1:INDT3))+RHST(I)%VAL(1:INDT3)
-end if
+END IF
 
 END DO
-!$OMP end DO 
+!$OMP END DO 
 
 
 !$OMP DO SCHEDULE (STATIC)
@@ -3905,7 +3905,7 @@ dtau=(ielem(n,i)%dtl/IELEM(N,I)%TOTVOLUME)*(1.0d0/(1.0D0+1.5D0*(ielem(n,i)%dtl/D
 IMPDU(I,1:nof_variables)=-IMPDU(I,1:nof_variables)*dtau
 IF ((TURBULENCE.GT.0).OR.(PASSIVESCALAR.GT.0))THEN
 impdu(I,INDT1:INDT2)=-impdu(I,INDT1:INDT2)*dtau
-end if
+END IF
 END DO
 !$OMP END DO 
 
@@ -3928,13 +3928,13 @@ KMAXE=XMPIELRANK(N)
 
 
 IF (DIMENSIONA.EQ.3)THEN
-if (rungekutta.eq.4)then
+IF (rungekutta.eq.4)THEN
 ind1=7
-else
+ELSE
 ind1=5
-end if
+END IF
 
-  if (tz1.gt.zero)then
+  IF (tz1.gt.zero)THEN
  !$OMP DO
   DO I=1,KMAXE
     U_C(I)%val(ind1,:)=(((Tz1-dt)/(Tz1))*U_C(I)%val(ind1,:))+((dt*U_C(I)%VAL(1,:))/Tz1)
@@ -3963,14 +3963,14 @@ end if
     IF ((PASSIVESCALAR.GT.0))THEN
     U_C(I)%RMS(7)=SQRT(abs(((U_C(I)%RMS(7)**2)*((Tz1-DT)/(Tz1)))+(((U_CT(I)%VAL(1,TURBULENCEEQUATIONS+1)&
 -U_CT(I)%val(ind1,TURBULENCEEQUATIONS+1))**2)*DT/Tz1)))
-    end if
+    END IF
    
    
    
     
   END DO
   !$OMP END DO
-  else
+  ELSE
   !$OMP DO
   DO I=1,KMAXE
     U_C(I)%val(ind1,:)=ZERO;U_C(I)%RMS=zero
@@ -3984,10 +3984,10 @@ end if
   
   END DO
   !$OMP END DO
-  end if
+  END IF
 
 ELSE
-if (t.gt.0.0)then
+IF (t.gt.0.0)THEN
   !$OMP DO
   DO I=1,KMAXE
     U_C(I)%val(ind1,:)=(((Tz1-dt)/(Tz1))*U_C(I)%val(ind1,:))+((dt*U_C(I)%VAL(1,:))/Tz1)
@@ -4009,11 +4009,11 @@ if (t.gt.0.0)then
     IF ((PASSIVESCALAR.GT.0))THEN
     U_C(I)%RMS(4)=SQRT(abs(((U_C(I)%RMS(4)**2)*((Tz1-dt)/(Tz1)))+(((U_CT(I)%VAL(1,TURBULENCEEQUATIONS+1)&
 -U_CT(I)%val(ind1,TURBULENCEEQUATIONS+1))**2)*dt/Tz1)))/U_C(I)%val(ind1,1)
-    end if
+    END IF
     
   END DO
   !$OMP END DO
-  else
+  ELSE
   !$OMP DO
   DO I=1,KMAXE
     U_C(I)%val(ind1,:)=ZERO
@@ -4027,7 +4027,7 @@ if (t.gt.0.0)then
   
   END DO
   !$OMP END DO
-  end if
+  END IF
  END IF
 
 
@@ -4037,10 +4037,6 @@ if (t.gt.0.0)then
    CALL AVERAGE_STRESSES(N)
    END IF
    
-   
-
-
-
 END SUBROUTINE AVERAGING_T
 
 
@@ -4079,11 +4075,11 @@ REAL::CPUT1,CPUT2,CPUT3,CPUT4,CPUT5,CPUT6,CPUT8,timec3,TIMEC1,TIMEC4,TIMEC8,TOTV
 !$OMP BARRIER
 !$OMP MASTER 
       CALL GRID_WRITE
-      if ((Average_restart.eq.0).and.(averaging.eq.1)) then
+      IF ((Average_restart.eq.0).and.(averaging.eq.1)) THEN
 				Tz1=0.0
-				else
+				ELSE
 				tz1=t
-		end if
+		END IF
       
       
 !$OMP END MASTER 
@@ -4099,10 +4095,6 @@ REAL::CPUT1,CPUT2,CPUT3,CPUT4,CPUT5,CPUT6,CPUT8,timec3,TIMEC1,TIMEC4,TIMEC8,TOTV
 	END IF
 !$OMP END MASTER
 !$OMP BARRIER
-      		
-             
-      
-      
       
       
      DO 
@@ -4152,9 +4144,9 @@ REAL::CPUT1,CPUT2,CPUT3,CPUT4,CPUT5,CPUT6,CPUT8,timec3,TIMEC1,TIMEC4,TIMEC8,TOTV
  				TOTK=DUMEtg2
  				IF (N.EQ.0)THEN
  				TOTV1=TOTK/((2.0*PI)**3)
-					if (it.eq.0)then
+					IF (it.eq.0)THEN
 					TAYLOR=TOTK
-					end if
+					END IF
 					
 				
 				
@@ -4164,25 +4156,16 @@ REAL::CPUT1,CPUT2,CPUT3,CPUT4,CPUT5,CPUT6,CPUT8,timec3,TIMEC1,TIMEC4,TIMEC8,TOTV
 !  				CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
  				
 
-! 				end if
-			    end if
-					
-					
-					
-					
-					
-					
-					
-					
-				
+! 				END IF
+			    END IF
 			
 			
-			if (rungekutta.GE.11)then
+			IF (rungekutta.GE.11)THEN
 			dt=timestep
 			DT=MIN(DT,OUT_TIME-T)
-			else
+			ELSE
 			DT=MIN(DT,OUT_TIME-T)
-			end if
+			END IF
 			
 			!$OMP END MASTER 
 			!$OMP BARRIER	
@@ -4199,7 +4182,7 @@ REAL::CPUT1,CPUT2,CPUT3,CPUT4,CPUT5,CPUT6,CPUT8,timec3,TIMEC1,TIMEC4,TIMEC8,TOTV
 			
 			IF (MOOD.EQ.1)THEN
 			CALL RUNGE_KUTTA3_MOOD(N)
-			else
+			ELSE
 			CALL RUNGE_KUTTA3(N)
 			END IF
 			
@@ -4210,15 +4193,15 @@ REAL::CPUT1,CPUT2,CPUT3,CPUT4,CPUT5,CPUT6,CPUT8,timec3,TIMEC1,TIMEC4,TIMEC8,TOTV
 			CALL RUNGE_KUTTA5(N)
 			
 			case(10)
-			call IMPLICIT_TIMEs(N)
+			CALL IMPLICIT_TIMEs(N)
 			
 			
 			case(11)
-			call dual_TIME(N)
+			CALL dual_TIME(N)
 			
 			
 			case(12)
-			call dual_TIME_EX(N)
+			CALL dual_TIME_EX(N)
 			
 			
 			END SELECT
@@ -4226,30 +4209,24 @@ REAL::CPUT1,CPUT2,CPUT3,CPUT4,CPUT5,CPUT6,CPUT8,timec3,TIMEC1,TIMEC4,TIMEC8,TOTV
 			!$OMP BARRIER
 			!$OMP MASTER
 			
-			if (rungekutta.GE.11)then
+			IF (rungekutta.GE.11)THEN
  			 T=T+(DT)
  			  Tz1=Tz1+(DT)
 
-			else
+			ELSE
                        T=T+DT
 			tz1=tz1+DT
-			  end if
+			  END IF
 			  
 			
 			
 ! 			IF (N.EQ.0)THEN
 ! 				  OPEN(63,FILE='history.txt',FORM='FORMATTED',STATUS='old',ACTION='WRITE',POSITION='APPEND')
-! 				  if (rungekutta.eq.11)then
+! 				  IF (rungekutta.eq.11)THEN
 ! 				  WRITE(63,*)DT,it,"TIME STEP SIZE",T
-! 				  end if
+! 				  END IF
 ! 				  CLOSE(63)
 ! 				  END IF
-			
-			
-			
-			
-			
-			
 			
 			
 			IF (INITCOND.eq.95)THEN                    
@@ -4266,15 +4243,15 @@ REAL::CPUT1,CPUT2,CPUT3,CPUT4,CPUT5,CPUT6,CPUT8,timec3,TIMEC1,TIMEC4,TIMEC8,TOTV
  				TOTK=DUMEtg2
  				IF (N.EQ.0)THEN
  				TOTV2=TOTK/((2.0*PI)**3)
-					if (it.eq.0)then
+					IF (it.eq.0)THEN
 					TAYLOR=TOTK
-					end if
+					END IF
 					
 				IF (IT.EQ.0)THEN
 				OPEN(73,FILE='ENERGY.dat',FORM='FORMATTED',STATUS='NEW',ACTION='WRITE',POSITION='APPEND')
 				ELSE
 				OPEN(73,FILE='ENERGY.dat',FORM='FORMATTED',STATUS='old',ACTION='WRITE',POSITION='APPEND')
-				end if
+				END IF
 				WRITE(73,*)T,TOTK/TAYLOR,-(TOTV2-TOTV1)/DT
 				CLOSE(73)
 				END IF
@@ -4283,13 +4260,13 @@ REAL::CPUT1,CPUT2,CPUT3,CPUT4,CPUT5,CPUT6,CPUT8,timec3,TIMEC1,TIMEC4,TIMEC8,TOTV
  				CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
  				
 
-! 				end if
-			    end if
+! 				END IF
+			    END IF
            
-			    if((initcond.eq.408).or.(initcond.eq.422))THEN
-			    if ( mod(it, 40) .eq. 0)then
-                    call TRAJECTORIES
-			    end if
+			    IF((initcond.eq.408).or.(initcond.eq.422))THEN
+			    IF ( mod(it, 40) .eq. 0)THEN
+                    CALL TRAJECTORIES
+			    END IF
 			    END IF
 			
 			
@@ -4297,27 +4274,27 @@ REAL::CPUT1,CPUT2,CPUT3,CPUT4,CPUT5,CPUT6,CPUT8,timec3,TIMEC1,TIMEC4,TIMEC8,TOTV
 			!$OMP END MASTER 
 			!$OMP BARRIER
 			
-			if ( mod(it, iforce) .eq. 0) then
+			IF ( mod(it, IForce) .eq. 0) THEN
 			IF (OUTSURF.EQ.1) THEN   
 				  CALL forces
-			end if
-			end if
+			END IF
+			END IF
 			
-			if ((rungekutta.ge.5).and.(rungekutta.lt.11))then
-			if ( mod(it, residualfreq) .eq. 0) then
-                               Call RESIDUAL_COMPUTE
-			end if
-			end if
+			IF ((rungekutta.ge.5).and.(rungekutta.lt.11))THEN
+			IF ( mod(it, residualfreq) .eq. 0) THEN
+                               CALL RESIDUAL_COMPUTE
+			END IF
+			END IF
 			
 			!$OMP MASTER
-			IF (NPROBES.GT.0) call PROBING
+			IF (NPROBES.GT.0) CALL PROBING
 					
 			
 			IF (TIMEC1.GE.IEVERY)THEN
 			    CALL VOLUME_SOLUTION_WRITE
-			     if (outsurf.eq.1)then
-			    call surface_SOLUTION_WRITE
-			    end if
+			     IF (outsurf.eq.1)THEN
+			    CALL surface_SOLUTION_WRITE
+			    END IF
 			CPUT1=MPI_WTIME()
 			END IF
 			
@@ -4325,21 +4302,21 @@ REAL::CPUT1,CPUT2,CPUT3,CPUT4,CPUT5,CPUT6,CPUT8,timec3,TIMEC1,TIMEC4,TIMEC8,TOTV
 			
 			IF (TIMEC8.GE.IEVERYAV)THEN
 			IF (AVERAGING.EQ.1)THEN
-			call VOLUME_SOLUTION_WRITE_av
-			   if (outsurf.eq.1)then
-			  call surface_SOLUTION_WRITE_av
-			  end if
-			end if
+			CALL VOLUME_SOLUTION_WRITE_av
+			   IF (outsurf.eq.1)THEN
+			  CALL surface_SOLUTION_WRITE_av
+			  END IF
+			END IF
 			CPUT8=MPI_WTIME()
-			end if
+			END IF
 			
 			
 			
 			IF (TIMEC4.GE.IEVERY2)THEN
-			    call CHECKPOINTING
+			    CALL CHECKPOINTING
 			      IF (AVERAGING.EQ.1)THEN
-				call CHECKPOINTING_av
-			      end if
+				CALL CHECKPOINTING_av
+			      END IF
 	
 			  CPUT5=MPI_WTIME()
 			  
@@ -4358,7 +4335,7 @@ REAL::CPUT1,CPUT2,CPUT3,CPUT4,CPUT5,CPUT6,CPUT8,timec3,TIMEC1,TIMEC4,TIMEC8,TOTV
 			 KILL=1
 			END IF
 			
-			if ((rungekutta.lt.5).or.(rungekutta.GE.11))then
+			IF ((rungekutta.lt.5).or.(rungekutta.GE.11))THEN
 			IF (T.GE.OUT_TIME)THEN
 			KILL=1
 			END IF
@@ -4368,52 +4345,34 @@ REAL::CPUT1,CPUT2,CPUT3,CPUT4,CPUT5,CPUT6,CPUT8,timec3,TIMEC1,TIMEC4,TIMEC8,TOTV
 
 			  
 			!$OMP MASTER
-			if (kill.eq.1)then
+			IF (kill.eq.1)THEN
 			    CALL VOLUME_SOLUTION_WRITE
-			      if (outsurf.eq.1)then
-			      call surface_SOLUTION_WRITE
-			      end if
-			    call CHECKPOINTING
+			      IF (outsurf.eq.1)THEN
+			      CALL surface_SOLUTION_WRITE
+			      END IF
+			    CALL CHECKPOINTING
 			      IF (AVERAGING.EQ.1)THEN
-			      call VOLUME_SOLUTION_WRITE_av
-				if (outsurf.eq.1)then
-				  call surface_SOLUTION_WRITE_av
-				end if	    
-				call CHECKPOINTING_av
-			      end if
-			end if
-			
-			
-			
+			      CALL VOLUME_SOLUTION_WRITE_av
+				IF (outsurf.eq.1)THEN
+				  CALL surface_SOLUTION_WRITE_av
+				END IF	    
+				CALL CHECKPOINTING_av
+			      END IF
+			END IF
 			
 			!$OMP END MASTER
 			!$OMP BARRIER
 			
-			if (kill.eq.1)then
-			if (itestcase.le.3)then   
-			call CALCULATE_ERROR(n)
-			end if
-			  
-			  
-			  
-			  
-			  
-			  
-			  
-			  
-			  
+			IF (kill.eq.1)THEN
+			IF (itestcase.le.3)THEN   
+			CALL CALCULATE_ERROR(n)
+			END IF			  
 			  
 			return
-			end if
-
-			
-			
-			
-end do
+			END IF
+END do
 		      
 END SUBROUTINE TIME_MARCHING
-
-
 
 
 
@@ -4425,313 +4384,277 @@ INTEGER,INTENT(IN)::N
 real,dimension(1:5)::DUMMYOUT,DUMMYIN
 INTEGER::I,KMAXE
 REAL::CPUT1,CPUT2,CPUT3,CPUT4,CPUT5,CPUT6,CPUT8,timec3,TIMEC1,TIMEC4,TIMEC8,TOTV1,TOTV2,DUMEtg1,DUMEtg2,TOTK
+
 kmaxe=XMPIELRANK(n)
-      kill=0
-      T=res_time
-      iscoun=1
-	!$OMP MASTER 
-	CPUT1=CPUX1(1)
-	CPUT4=CPUX1(1)
-	CPUT5=CPUX1(1)
-	CPUT8=CPUX1(1)
-	!$OMP END MASTER 
-         !$OMP BARRIER
+kill=0
+T=res_time
+iscoun=1
+!$OMP MASTER 
+CPUT1=CPUX1(1)
+CPUT4=CPUX1(1)
+CPUT5=CPUX1(1)
+CPUT8=CPUX1(1)
+!$OMP END MASTER 
+!$OMP BARRIER
+
+IT=RESTART
+
+!$OMP MASTER 
+CALL GRID_WRITE
+CALL VOLUME_SOLUTION_WRITE
+IF (outsurf.eq.1)THEN
+    CALL SURF_WRITE
+END IF
+
+IF ((Average_restart.eq.0).and.(averaging.eq.1)) THEN
+    Tz1=0.0
+ELSE
+    tz1=t
+END IF
+!$OMP END MASTER 
+!$OMP BARRIER
       
-	      			
-	IT=RESTART
-      
-      !$OMP MASTER 
-      CALL GRID_WRITE
-      CALL VOLUME_SOLUTION_WRITE
-       if (outsurf.eq.1)then
-      call SURF_WRITE
-      end if
-      
-      if ((Average_restart.eq.0).and.(averaging.eq.1)) then
-				Tz1=0.0
-				else
-				tz1=t
-		end if
-      !$OMP END MASTER 
-      !$OMP BARRIER
-      
-     DO 
-		    CALL CALCULATE_CFL2D(N)
-		    IF (RUNGEKUTTA.GE.5)CALL CALCULATE_CFLL2d(N)
-		    
-			!$OMP MASTER
-			DUMMYOUT(1)=DT
-			CPUT2=MPI_WTIME()
-			TIMEC8=CPUT2-CPUT8
-			TIMEC1=CPUT2-CPUT1
-		        dummyout(2)=TIMEC1
-			DUMMYIN=0.0d0
-			timec3=cput2-cput4
-			dummyout(3)=TIMEC3
-			TIMEC4=CPUT2-CPUT5
-			dummyout(4)=TIMEC4
-			DUMMYOUT(5)=TIMEC8
-			
-			CALL MPI_ALLREDUCE(DUMMYOUT,DUMMYIN,5,MPI_DOUBLE_PRECISION,MPI_MIN,MPI_COMM_WORLD,IERROR)
-			
-			DT=DUMMYIN(1)
-			TIMEC1=DUMMYIN(2)
-			TIMEC3=DUMMYIN(3)
-			TIMEC4=DUMMYIN(4)
-			TIMEC8=DUMMYIN(5)
-				  IF (N.EQ.0)THEN
-				  OPEN(63,FILE='history.txt',FORM='FORMATTED',STATUS='old',ACTION='WRITE',POSITION='APPEND')
-				  WRITE(63,*)DT,it,"TIME STEP SIZE",T
-				  CLOSE(63)
-				  END IF
-				  
-			IF (INITCOND.eq.95)THEN                    
- 				TOTK=0
- 				DO I=1,KMAXE
-					TOTK=TOTK+IELEM(N,I)%TOTVOLUME*(1.0/2.0)*&
-(((U_C(I)%VAL(1,2)/U_C(I)%VAL(1,1))**2)+((U_C(I)%VAL(1,3)/U_C(I)%VAL(1,1))**2))
-				END DO
+DO
+    CALL CALCULATE_CFL2D(N)
+    IF (RUNGEKUTTA.GE.5) CALL CALCULATE_CFLL2d(N)
+        
+    !$OMP MASTER
+    DUMMYOUT(1)=DT
+    CPUT2=MPI_WTIME()
+    TIMEC8=CPUT2-CPUT8
+    TIMEC1=CPUT2-CPUT1
+    DUMMYOUT(2)=TIMEC1
+    DUMMYIN=0.0d0
+    TIMEC3=CPUT2-CPUT45
+    DUMMYOUT(3)=TIMEC3
+    TIMEC4=CPUT2-CPUT5
+    DUMMYOUT(4)=TIMEC4
+    DUMMYOUT(5)=TIMEC8
+    
+    CALL MPI_ALLREDUCE(DUMMYOUT,DUMMYIN,5,MPI_DOUBLE_PRECISION,MPI_MIN,MPI_COMM_WORLD,IERROR)
+    
+    DT=DUMMYIN(1)
+    TIMEC1=DUMMYIN(2)
+    TIMEC3=DUMMYIN(3)
+    TIMEC4=DUMMYIN(4)
+    TIMEC8=DUMMYIN(5)
+    IF (N.EQ.0)THEN
+        OPEN(63,FILE='history.txt',FORM='FORMATTED',STATUS='old',ACTION='WRITE',POSITION='APPEND')
+        WRITE(63,*)DT,it,"TIME STEP SIZE",T
+        CLOSE(63)
+    END IF
+            
+    IF (INITCOND.eq.95)THEN                    
+        TOTK=0
+        DO I=1,KMAXE
+            TOTK=TOTK+IELEM(N,I)%TOTVOLUME*(1.0/2.0)*&
+                (((U_C(I)%VAL(1,2)/U_C(I)%VAL(1,1))**2)+((U_C(I)%VAL(1,3)/U_C(I)%VAL(1,1))**2))
+        END DO
 ! 				
- 				DUMEtg1=TOTK
- 				DUMEtg2=0.0
- 				CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
- 				CALL MPI_ALLREDUCE(DUMEtg1,DUMEtg2,1,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERROR)
- 				TOTK=DUMEtg2
- 				IF (N.EQ.0)THEN
+        DUMEtg1=TOTK
+        DUMEtg2=0.0
+        CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
+        CALL MPI_ALLREDUCE(DUMEtg1,DUMEtg2,1,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERROR)
+        TOTK=DUMEtg2
+        IF (N.EQ.0)THEN
 !  				TOTV2=TOTK/((2.0*PI)**3)
-! 					if (it.eq.0)then
+! 					IF (it.eq.0)THEN
 ! 					TAYLOR=TOTK
-! 					end if
-					
-				IF (IT.EQ.0)THEN
-				OPEN(73,FILE='ENERGY.dat',FORM='FORMATTED',STATUS='NEW',ACTION='WRITE',POSITION='APPEND')
-				ELSE
-				OPEN(73,FILE='ENERGY.dat',FORM='FORMATTED',STATUS='old',ACTION='WRITE',POSITION='APPEND')
-				end if
-				WRITE(73,*)T,TOTK
-				CLOSE(73)
-				END IF
- 				
- 				
- 				CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
- 				
+! 					END IF
+            IF (IT.EQ.0)THEN
+                OPEN(73,FILE='ENERGY.dat',FORM='FORMATTED',STATUS='NEW',ACTION='WRITE',POSITION='APPEND')
+            ELSE
+                OPEN(73,FILE='ENERGY.dat',FORM='FORMATTED',STATUS='old',ACTION='WRITE',POSITION='APPEND')
+            END IF
+            WRITE(73,*)T,TOTK
+            CLOSE(73)
+        END IF
+            
+        CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
+    END IF
+    
+    IF ((MULTISPECIES.EQ.1))THEN
+        IF((initcond.eq.405).or.(initcond.eq.411))THEN
+            IF ( mod(it, 20) .eq. 0)THEN
+                CALL TRAJECTORIES
+            END IF
+        END IF
+    END IF
+        
+    IF (rungekutta.GE.11)THEN
+        dt=timestep
+        DT=MIN(DT,OUT_TIME-T)
+    ELSE
+        DT=MIN(DT,OUT_TIME-T)
+    END IF
+            
+    !$OMP END MASTER 
+    !$OMP BARRIER
 
-! 				end if
-			    end if
-			    IF ((MULTISPECIES.EQ.1))then
-			    if((initcond.eq.405).or.(initcond.eq.411))THEN
-			    if ( mod(it, 20) .eq. 0)then
-                    call TRAJECTORIES
-			    end if
-			    END IF
-			    end if
-			
-			
-			
-			
-			
-			if (rungekutta.GE.11)then
-			dt=timestep
-                      DT=MIN(DT,OUT_TIME-T)
-		      else
-		      DT=MIN(DT,OUT_TIME-T)
-		      end if
-		      
-		      !$OMP END MASTER 
-			!$OMP BARRIER
-		      
-			
-			SELECT CASE(RUNGEKUTTA)
-			
-			CASE(1)
-			CALL RUNGE_KUTTA1_2d(N)
-			
-			CASE(2)
-			CALL RUNGE_KUTTA2_2d(N)
-			
-			CASE(3)
-			
-			IF (MOOD.EQ.1)THEN
-			CALL RUNGE_KUTTA3_2D_MOOD(N)
-			else
-			CALL RUNGE_KUTTA3_2D(N)
-			END IF
-			
-			
-			
-			CASE(4)
-			CALL RUNGE_KUTTA4_2D(N)
-			
-			CASE(5)
-			CALL RUNGE_KUTTA5_2D(N)
-			
-			
-			case(10)
-			call IMPLICIT_TIMEs_2d(N)
-			
-			
-			case(11)
-			call dual_TIME_2d(N)
-			
-			case(12)
-			call dual_TIME_EX_2D(N)
-			
-			
-			
-			
-			END SELECT
-			
-			!$OMP MASTER
-			if (rungekutta.GE.11)then
- 			 T=T+(DT)
- 			  Tz1=Tz1+(DT)
+    SELECT CASE(RUNGEKUTTA)
+    
+        CASE(1)
+            CALL RUNGE_KUTTA1_2d(N)
+        
+        CASE(2)
+            CALL RUNGE_KUTTA2_2d(N)
+        
+        CASE(3)
+            IF (MOOD.EQ.1)THEN
+                CALL RUNGE_KUTTA3_2D_MOOD(N)
+            ELSE
+                CALL RUNGE_KUTTA3_2D(N)
+            END IF
+        
+        CASE(4)
+            CALL RUNGE_KUTTA4_2D(N)
+        
+        CASE(5)
+            CALL RUNGE_KUTTA5_2D(N)
+        
+        CASE(10)
+            CALL IMPLICIT_TIMEs_2d(N)
+        
+        CASE(11)
+            CALL dual_TIME_2d(N)
+        
+        CASE(12)
+            CALL dual_TIME_EX_2D(N)
 
-			else
-                       T=T+DT
-			tz1=tz1+DT
-			  end if
-			  
-			  
-			  
-			  
-			  
-			  
-			  
-			  
-			!$OMP END MASTER 
-			!$OMP BARRIER
-			if ( mod(it, iforce) .eq. 0) then
-			IF (OUTSURF.EQ.1) THEN   
-				  CALL forces
-			end if
-			end if
-			
-			if ((rungekutta.ge.5).and.(rungekutta.lt.11))then
-			if ( mod(it, residualfreq) .eq. 0) then
-                               Call RESIDUAL_COMPUTE
-			end if
-			end if
-			
-			!$OMP MASTER
-			IF (NPROBES.GT.0) call PROBING2D
-					
-			
-			IF (TIMEC1.GE.IEVERY)THEN
-			    CALL VOLUME_SOLUTION_WRITE
-			     if (outsurf.eq.1)then
-			    call surface_SOLUTION_WRITE
-			    end if
-			CPUT1=MPI_WTIME()
-			END IF
-			
-			
-			
-			IF (TIMEC8.GE.IEVERYAV)THEN
-			IF (AVERAGING.EQ.1)THEN
-			call VOLUME_SOLUTION_WRITE_av
-			   if (outsurf.eq.1)then
-			  call surface_SOLUTION_WRITE_av
-			  end if
-			end if
-			CPUT8=MPI_WTIME()
-			end if
-			
-			
-			
-			IF ((TIMEC4.GE.IEVERY2).OR.(TIMEC3.GE.WALLC)) THEN
-			  CPUT5=MPI_WTIME()
-				IF (TIMEC3.GE.WALLC) THEN
-				  KILL=1
-				END IF
-				
-			  if (kill.eq.1)then
-			  CALL VOLUME_SOLUTION_WRITE
-			   if (outsurf.eq.1)then
-			    call surface_SOLUTION_WRITE
-			    
-			    end if
-			  
-			  call CHECKPOINTING
-			  
-			
-			IF (AVERAGING.EQ.1)THEN
-			  call CHECKPOINTING_av
-			end if
-			else
-			
-			  CALL VOLUME_SOLUTION_WRITE
-			    if (outsurf.eq.1)then
-			      call surface_SOLUTION_WRITE
-			      
-			      end if
-			  IF (AVERAGING.EQ.1)THEN
-			    call CHECKPOINTING_av
-			  end if
+    END SELECT
+        
+    !$OMP MASTER
+    IF (rungekutta.GE.11)THEN
+        T=T+(DT)
+        Tz1=Tz1+(DT)
+    ELSE
+        T=T+DT
+        tz1=tz1+DT
+    END IF
 
-			end if
-			end if
-			if ((rungekutta.lt.5).or.(rungekutta.GE.11))then
-			IF (T.GE.OUT_TIME)THEN
- 			  KILL=1
-			  
-			  CALL VOLUME_SOLUTION_WRITE
-			   if (outsurf.eq.1)then
-			    call surface_SOLUTION_WRITE
-			    end if
-			  
-			  call CHECKPOINTING
-			 
-			  if (averaging .eq.1) then
-			  call VOLUME_SOLUTION_WRITE_av
-			   if (outsurf.eq.1)then
-			  call surface_SOLUTION_WRITE_av
-			  end if
-			  call CHECKPOINTING_av
-			  end if			
-			END IF
-			end if
-			!$OMP END MASTER 
-			!$OMP BARRIER
-			
-			
-			
-			!$OMP MASTER
-			IT=IT+1
-			IF (IT.EQ.NTMAX)THEN
-			 KILL=1
-			END IF
-			!$OMP END MASTER 
-			!$OMP BARRIER
-		    
-			if (kill.eq.1)then
-			IF (OUTSURF.EQ.1) THEN   
-				  CALL forces
-			  end if
-			
-			!$OMP MASTER
-			if ((rungekutta.eq.5).or.(rungekutta.eq.10))then
-			  CALL VOLUME_SOLUTION_WRITE
-			   if (outsurf.eq.1)then
-			    call surface_SOLUTION_WRITE
-			    
-			    end if
-			  
-			  call CHECKPOINTING
-			end if
-			!$OMP END MASTER
-			!$OMP BARRIER
-			
-			if (itestcase.le.3)then   
-			call CALCULATE_ERROR(n)
-			end if
-			
-			
-			return
-			end if
-			
-			
-			
-end do
+
+    !$OMP END MASTER 
+    !$OMP BARRIER
+    IF ( mod(it, IForce) .eq. 0) THEN
+        IF (OUTSURF.EQ.1) THEN   
+            CALL forces
+        END IF
+    END IF
+    
+    IF ((rungekutta.ge.5).and.(rungekutta.lt.11))THEN
+        IF ( mod(it, residualfreq) .eq. 0) THEN
+            CALL RESIDUAL_COMPUTE
+        END IF
+    END IF
+    
+    !$OMP MASTER
+    IF (NPROBES.GT.0) CALL PROBING2D
+            
+    
+    IF (TIMEC1.GE.IEVERY)THEN
+        CALL VOLUME_SOLUTION_WRITE
+        IF (outsurf.eq.1)THEN
+            CALL surface_SOLUTION_WRITE
+        END IF
+    CPUT1=MPI_WTIME()
+    END IF
+
+    
+    IF (TIMEC8.GE.IEVERYAV)THEN
+        IF (AVERAGING.EQ.1)THEN
+            CALL VOLUME_SOLUTION_WRITE_av
+            IF (outsurf.eq.1)THEN
+                CALL surface_SOLUTION_WRITE_av
+            END IF
+        END IF
+        CPUT8=MPI_WTIME()
+    END IF
+
+
+    IF ((TIMEC4.GE.IEVERY2).OR.(TIMEC3.GE.WALLC)) THEN
+        CPUT5=MPI_WTIME()
+        IF (TIMEC3.GE.WALLC) THEN
+            KILL=1
+        END IF
+        
+        IF (kill.eq.1)THEN
+            CALL VOLUME_SOLUTION_WRITE
+            IF (outsurf.eq.1)THEN
+                CALL surface_SOLUTION_WRITE
+            END IF 
+            CALL CHECKPOINTING
+        
+            IF (AVERAGING.EQ.1)THEN
+                CALL CHECKPOINTING_av
+            END IF
+        ELSE
+            CALL VOLUME_SOLUTION_WRITE
+            IF (outsurf.eq.1)THEN
+                CALL surface_SOLUTION_WRITE
+            END IF
+            IF (AVERAGING.EQ.1)THEN
+                CALL CHECKPOINTING_av
+            END IF
+        END IF
+        
+    END IF
+    IF ((rungekutta.lt.5).or.(rungekutta.GE.11))THEN
+        IF (T.GE.OUT_TIME)THEN
+            KILL=1
+            
+            CALL VOLUME_SOLUTION_WRITE
+            IF (outsurf.eq.1)THEN
+                CALL surface_SOLUTION_WRITE
+            END IF
+            
+            CALL CHECKPOINTING
+            
+            IF (averaging .eq.1) THEN
+                CALL VOLUME_SOLUTION_WRITE_av
+                IF (outsurf.eq.1)THEN
+                    CALL surface_SOLUTION_WRITE_av
+                END IF
+                CALL CHECKPOINTING_av
+            END IF			
+        END IF
+    END IF
+    !$OMP END MASTER 
+    !$OMP BARRIER
+    
+    
+    
+    !$OMP MASTER
+    IT=IT+1
+    IF (IT.EQ.NTMAX)THEN
+        KILL=1
+    END IF
+    !$OMP END MASTER 
+    !$OMP BARRIER
+    
+    IF (kill.eq.1)THEN ! END DO LOOP
+        IF (OUTSURF.EQ.1) THEN   
+            CALL forces
+        END IF
+    
+        !$OMP MASTER
+        IF ((rungekutta.eq.5).or.(rungekutta.eq.10))THEN
+            CALL VOLUME_SOLUTION_WRITE
+            IF (outsurf.eq.1)THEN
+                CALL surface_SOLUTION_WRITE
+            END IF
+            
+            CALL CHECKPOINTING
+        END IF
+        !$OMP END MASTER
+        !$OMP BARRIER
+        
+        IF (itestcase.le.3)THEN   
+            CALL CALCULATE_ERROR(n)
+        END IF
+    
+    return
+    END IF
+END DO
 		      
 END SUBROUTINE TIME_MARCHING2
 

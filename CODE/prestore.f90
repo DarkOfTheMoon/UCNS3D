@@ -2541,25 +2541,6 @@ WEFF=zero
 END SUBROUTINE P2DH6
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 FUNCTION CALINTBASIS(N,IXX,JXX,KXX,LXX1)
 !> @brief
 !> This subroutine computes basis functions for each element
@@ -2574,11 +2555,8 @@ REAL,DIMENSION(1:number_of_dog)::CALINTBASIS
 	CALINTBASIS = ZERO
      	
 	CALINTBASIS(1:number_of_dog)=COMPBASEL(N,eltype,number_of_dog)
-      	
-
 	
    END FUNCTION
-
 
 
 FUNCTION COMPBASEL(N,ELTYPE,number_of_dog)
@@ -2590,14 +2568,6 @@ INTEGER,INTENT(INout)::ELTYPE,number_of_dog
 INTEGER::JX,K
 real,dimension(1:number_of_dog)::compbasel,s1
 S1=ZERO
-
-
-
-
-
-
-
-
 
  SELECT CASE(ELTYPE)
       CASE(1)
@@ -2785,18 +2755,9 @@ S1=ZERO
 		    S1(1:number_of_dog)=S1(1:number_of_dog)+COMPBASTRi(N,number_of_dog)
 		    
 		  end do
-		    COMPBASEL=S1
-		
-		
-		
-		
+		    COMPBASEL=S1	
 		
 		end if
-		  
-		  
-		  
-		  
-		  
 
 	      CASE(6)
 
@@ -2811,20 +2772,6 @@ S1=ZERO
 		    END DO
 		    
 		  COMPBASEL=COMPBAStri(N,number_of_dog)
-
-	      
-
-
-
-
-
-
-
-
-
-
-
-
 
      END SELECT
 
@@ -2996,7 +2943,7 @@ SUBROUTINE INVERT(RFF,INVRFF,IVGT)
     IF (DG.EQ.1)THEN
         !$OMP DO
         DO I=1,KMAXE
-            COUNTERDG=0
+            COUNTERDG=0 !number of quadrature point per element?
         
             SELECT CASE(ielem(n,i)%ishape)
             CASE(5)
@@ -3014,7 +2961,7 @@ SUBROUTINE INVERT(RFF,INVRFF,IVGT)
                         y1=poy(1)
                         compwrt=-1
                                 
-                        MASS_MATRIX(I,:,COUNTERDG)=	basis_rec2d(N,x1,y1,ielem(n,i)%iorder,1,ielem(n,i)%idegfree)
+                        MASS_MATRIX(I,:,COUNTERDG) = basis_rec2d(N,x1,y1,ielem(n,i)%iorder,1,ielem(n,i)%idegfree)
                         write(300+n,*)"element",i,counterdg
                         write(300+n,*) mass_matrix(i,1:IELEM(N,I)%IDEGFREE,counterdg)
                     END DO 
@@ -3034,7 +2981,7 @@ SUBROUTINE INVERT(RFF,INVRFF,IVGT)
                     y1=poy(1)-ielem(n,i)%yyc
                     compwrt=-1
                             
-                    MASS_MATRIX(I,:,COUNTERDG)=	basis_rec2d(N,x1,y1,ielem(n,i)%iorder,1,ielem(n,i)%idegfree)
+                    MASS_MATRIX(I,:,COUNTERDG) = basis_rec2d(N,x1,y1,ielem(n,i)%iorder,1,ielem(n,i)%idegfree)
                     write(300+n,*)"element",i,counterdg
                     write(300+n,*) mass_matrix(i,1:IELEM(N,I)%IDEGFREE,counterdg)
                 
