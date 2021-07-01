@@ -291,7 +291,8 @@ REAL,DIMENSION(7)::ALLRES,INITIALRES
 !--------------------------------------------------------------------------------------------------------------------------!
 INTEGER,ALLOCATABLE,DIMENSION(:,:)::ILOCALALLELG3
 REAL,ALLOCATABLE,DIMENSION(:,:)::ILOCALALLELGD,b_char,x_Char
-REAL,ALLOCATABLE,DIMENSION(:,:,:)::ba_char,a_char,MASS_MATRIX
+REAL,ALLOCATABLE,DIMENSION(:,:,:)::ba_char,a_char
+REAL,ALLOCATABLE,DIMENSION(:,:,:,:)::MASS_MATRIX
 real::a_rot,c_rot,b_rot,root_rot,sheartemp
 REAL,ALLOCATABLE,DIMENSION(:)::WEIGHT_T2
 

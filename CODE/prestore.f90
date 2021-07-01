@@ -2988,71 +2988,82 @@ SUBROUTINE INVERT(RFF,INVRFF,IVGT)
  End subroutine INVERT
  
  
- SUBROUTINE DG_1
- IMPLICIT NONE
- INTEGER::COUNTERDG,K,INC,QQP,i,kmaxe
- kmaxe=xmpielrank(n)
+SUBROUTINE DG_1
+IMPLICIT NONE
+INTEGER::COUNTERDG,K,INC,QQP,I,kmaxe, Idex, Jdex
+REAL,DIMENSION(number_of_dog)::Basis_vector
+
+kmaxe=xmpielrank(n)
  
  
- IF (DG.EQ.1)THEN
+IF (DG.EQ.1)THEN
 
 !$OMP DO
 DO I=1,KMAXE
- COUNTERDG=0
-SELECT CASE(ielem(n,i)%ishape)
 
-      CASE(5)
+    COUNTERDG=0
+    
+    SELECT CASE(ielem(n,i)%ishape)
 
-
-
- do K=1,ELEM_DEC
-	VEXT(1:3,1:2)=ELEM_LISTD(k,1:3,1:2)
-      CALL QUADRATUREtriangle(N,IGQRULES)
-	  VOLTEMP=TRIANGLEVOLUME(N)/IELEM(N,I)%totvolume
-	   QQP=QP_Triangle
-	  DO INC=1,QQP
-	  POX(1)=QPOINTS(1,INC)
-	  POY(1)=QPOINTS(2,INC) 
-			COUNTERDG=COUNTERDG+1
-
+        CASE(5)
+            DO K=1,ELEM_DEC
+                VEXT(1:3,1:2)=ELEM_LISTD(k,1:3,1:2)
+                CALL QUADRATUREtriangle(N,IGQRULES)
+                VOLTEMP=TRIANGLEVOLUME(N)/IELEM(N,I)%totvolume
+                QQP=QP_Triangle
+                    DO INC=1,QQP
+                        POX(1)=QPOINTS(1,INC)
+                        POY(1)=QPOINTS(2,INC) 
+                        COUNTERDG=COUNTERDG+1
         
-			x1=pox(1)
-			y1=poy(1)
-			compwrt=-1
+                        x1=pox(1)
+                        y1=poy(1)
+                        compwrt=-1
 			
-	MASS_MATRIX(I,:,COUNTERDG)=	basis_rec2d(N,x1,y1,ielem(n,i)%iorder,1,ielem(n,i)%idegfree)
-		write(300+n,*)"element",i,counterdg
-		write(300+n,*) mass_matrix(i,1:IELEM(N,I)%IDEGFREE,counterdg)
+                        Basis_vector(:) = basis_rec2d(N,x1,y1,ielem(n,i)%iorder,I,ielem(n,i)%idegfree)
+			
+                        write(300+n,*)"element",i,"QuadraturePoint",counterdg
+			
+                        DO Idex=1,ielem(n,i)%idegfree
+                            DO Jdex=1,ielem(n,i)%idegfree
+                                MASS_MATRIX(I,Idex,Jdex,COUNTERDG)=	basis_vector(Idex)*basis_vector(Jdex)*WEQUA3D(INC)
+                                write(300+n,*)"MassMatrix at Index",Idex,Jdex,":",mass_matrix(i,Idex,Jdex,counterdg)
+                            END DO    
+                        END DO
 		
-		END DO 
-    end do
+                    END DO 
+                END DO
 
-    
-    CASE(6)
-      CALL QUADRATUREtriangle(N,IGQRULES)
-	  VOLTEMP=1.0d0
-	   QQP=QP_Triangle
-	  DO INC=1,QQP
-	  POX(1)=QPOINTS(1,INC)
-	  POY(1)=QPOINTS(2,INC) 
+        CASE(6)
+            CALL QUADRATUREtriangle(N,IGQRULES)
+            VOLTEMP=1.0d0
+            QQP=QP_Triangle
+            DO INC=1,QQP
+                POX(1)=QPOINTS(1,INC)
+                POY(1)=QPOINTS(2,INC) 
 	  
-	  
-	  COUNTERDG=COUNTERDG+1
+                COUNTERDG=COUNTERDG+1
 
-        
-					x1=pox(1)-ielem(n,i)%xxc
-			y1=poy(1)-ielem(n,i)%yyc
-			compwrt=-1
+                x1=pox(1)-ielem(n,i)%xxc
+                y1=poy(1)-ielem(n,i)%yyc
+                compwrt=-1
 			
-	MASS_MATRIX(I,:,COUNTERDG)=	basis_rec2d(N,x1,y1,ielem(n,i)%iorder,1,ielem(n,i)%idegfree)
-		write(300+n,*)"element",i,counterdg
-		write(300+n,*) mass_matrix(i,1:IELEM(N,I)%IDEGFREE,counterdg)
+                Basis_vector(:) = basis_rec2d(N,x1,y1,ielem(n,i)%iorder,I,ielem(n,i)%idegfree)
+			
+                write(300+n,*)"element",i,"QuadraturePoint",counterdg
+            
+                DO Idex=1,ielem(n,i)%idegfree
+                    DO Jdex=1,ielem(n,i)%idegfree
+                        MASS_MATRIX(I,Idex,Jdex,COUNTERDG)=	basis_vector(Idex)*basis_vector(Jdex)*WEQUA3D(INC)
+                        write(300+n,*)"MassMatrix at Index",Idex,Jdex,":",mass_matrix(i,Idex,Jdex,counterdg)
+                    END DO    
+                END DO
+                    
+            END DO
 	  
-	  end do
-	  
-	  end  select
+        END SELECT
     
-end do
+END DO
 !$OMP END DO
 
 END IF
