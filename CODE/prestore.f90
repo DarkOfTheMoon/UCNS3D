@@ -3045,6 +3045,7 @@ DO I=1,KMAXE
                 COUNTERDG=COUNTERDG+1
 
                 x1=pox(1)-ielem(n,i)%xxc
+		!another idea is x1=(pox(1)-ielem(n,i)%xxc)/(abs(xmax-xmin)) !!Takis
                 y1=poy(1)-ielem(n,i)%yyc
                 compwrt=-1
 			
