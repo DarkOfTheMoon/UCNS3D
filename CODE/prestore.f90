@@ -3001,6 +3001,13 @@ IF (DG.EQ.1)THEN
 !$OMP DO
 DO I=1,KMAXE
 
+	!first we need to set the values of the vertices like that!
+	!do K=1,IELEM(N,I)%NONODES
+	 !   NODES_LIST(k,1:2)=inoder(IELEM(N,I)%NODES(K))%CORD(1:2)
+	 !   vext(k,1:2)=NODES_LIST(k,1:2)
+	 ! END DO
+	  !end takis
+
     COUNTERDG=0
     
     SELECT CASE(ielem(n,i)%ishape)
