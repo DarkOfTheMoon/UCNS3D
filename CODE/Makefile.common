@@ -27,6 +27,10 @@ translate.mod translate.o : translate.f90
 
 basis.mod basis.o : basis.f90 declaration.mod library.mod
 	$(F90) $(FFLAGS)  -c    basis.f90
+	
+unit.mod unit.o : unit_test.f90 declaration.mod library.mod basis.mod
+	$(F90) $(FFLAGS)  -c    unti_test.f90	
+	
 
 boundary.mod bc_p.o : bc_p.f90 library.mod transform.mod
 	$(F90) $(FFLAGS)  -c    bc_p.f90
@@ -97,7 +101,7 @@ source.mod source.o : source.f90 library.mod transform.mod local.mod riemann.mod
 svd.mod svd.o : svd.f90 mpiinfo.mod
 	$(F90) $(FFLAGS)  -c    svd.f90
 
-moodr.mod mood.o : mood.f90 mpiinfo.mod declaration.mod translate.mod  memory.mod communications.mod io.mod partition.mod library.mod transform.mod fluxes.mod initialisation.mod boundary.mod recon.mod local.mod fluxes_v.mod profile.mod flow_operations.mod gradients.mod basis.mod prestore.mod riemann.mod source.mod implicit_time.mod implicit_fluxes.mod
+moodr.mod mood.o : mood.f90 mpiinfo.mod declaration.mod translate.mod memory.mod communications.mod io.mod partition.mod library.mod transform.mod fluxes.mod initialisation.mod boundary.mod recon.mod local.mod fluxes_v.mod profile.mod flow_operations.mod gradients.mod basis.mod prestore.mod riemann.mod source.mod implicit_time.mod implicit_fluxes.mod
 	$(F90) $(FFLAGS)  -c    mood.f90
 
 advance.mod time_p.o : time_p.f90 library.mod transform.mod fluxes.mod source.mod initialisation.mod boundary.mod recon.mod local.mod flow_operations.mod communications.mod implicit_time.mod implicit_fluxes.mod io.mod
