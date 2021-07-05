@@ -3037,8 +3037,12 @@ END IF
 firsti=0.0d0
 DO JJ=1,upperlimit
       rsumfacei=zero;allresdt=zero;dummy3i=zero; 
-      
-        iscoun=2
+   if (jj.eq.1)then
+    iscoun=1
+      else
+      iscoun=2
+      end if    
+    
       
 
       
@@ -3195,14 +3199,14 @@ END DO
 DO I=1,KMAXE 
   U_C(I)%VAL(3,1:NOF_VARIABLES)=U_C(I)%VAL(2,1:NOF_VARIABLES)
   U_C(I)%VAL(2,1:nof_variables)=U_C(I)%VAL(1,1:nof_variables)
-  U_C(I)%VAL(1,1:nof_variables)=2.0*U_C(I)%VAL(2,1:nof_variables)-U_C(I)%VAL(3,1:nof_variables)
+  !U_C(I)%VAL(1,1:nof_variables)=2.0*U_C(I)%VAL(2,1:nof_variables)-U_C(I)%VAL(3,1:nof_variables)
   
   
   IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
   U_CT(I)%VAL(3,:)=U_CT(I)%VAL(2,:)
   U_CT(I)%VAL(2,:)=U_CT(I)%VAL(1,:)
-  U_CT(I)%VAL(1,:)=2.0*U_CT(I)%VAL(2,:)-U_CT(I)%VAL(3,:)
-  END IF
+  !U_CT(I)%VAL(1,:)=2.0*U_CT(I)%VAL(2,:)-U_CT(I)%VAL(3,:)
+  end if
 END DO
 !$OMP END DO
 
@@ -3674,10 +3678,19 @@ IF (IT.EQ.RESTART)THEN
 DO I=1,KMAXE 
   U_C(I)%VAL(3,1:NOF_VARIABLES)=U_C(I)%VAL(1,1:NOF_VARIABLES)
   U_C(I)%VAL(2,1:nof_variables)=U_C(I)%VAL(1,1:nof_variables)
+<<<<<<< HEAD
   IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
   U_CT(I)%VAL(3,:)=U_CT(I)%VAL(1,:)
   U_CT(I)%VAL(2,:)=U_CT(I)%VAL(1,:)
   END IF
+=======
+  
+  if ((turbulence.gt.0).or.(passivescalar.gt.0))then
+  U_CT(I)%VAL(3,:)=U_CT(I)%VAL(1,:)
+  U_CT(I)%VAL(2,:)=U_CT(I)%VAL(1,:)
+  
+  end if
+>>>>>>> 70fa61f8ced36446e240316abd5dcdf095b0d263
 END DO
 !$OMP END DO
 END IF
@@ -3687,7 +3700,12 @@ END IF
 firsti=0.0d0
 DO JJ=1,upperlimit
       rsumfacei=zero;allresdt=zero;dummy3i=zero; 
-    iscoun=2
+      if (jj.eq.1)then
+    iscoun=1
+      else
+      iscoun=2
+      end if
+      
 
       
 IF (FASTEST.EQ.1)THEN
@@ -3830,14 +3848,19 @@ END DO
 DO I=1,KMAXE 
   U_C(I)%VAL(3,1:NOF_VARIABLES)=U_C(I)%VAL(2,1:NOF_VARIABLES)
   U_C(I)%VAL(2,1:nof_variables)=U_C(I)%VAL(1,1:nof_variables)
-  U_C(I)%VAL(1,1:nof_variables)=2.0*U_C(I)%VAL(2,1:nof_variables)-U_C(I)%VAL(3,1:nof_variables)
+  !U_C(I)%VAL(1,1:nof_variables)=(2.0*U_C(I)%VAL(2,1:nof_variables))-U_C(I)%VAL(3,1:nof_variables)
   
   
   IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
   U_CT(I)%VAL(3,:)=U_CT(I)%VAL(2,:)
   U_CT(I)%VAL(2,:)=U_CT(I)%VAL(1,:)
+<<<<<<< HEAD
   U_CT(I)%VAL(1,:)=2.0*U_CT(I)%VAL(2,:)-U_CT(I)%VAL(3,:)
   END IF
+=======
+  !U_CT(I)%VAL(1,:)=2.0*U_CT(I)%VAL(2,:)-U_CT(I)%VAL(3,:)
+  end if
+>>>>>>> 70fa61f8ced36446e240316abd5dcdf095b0d263
 END DO
 !$OMP END DO
 
@@ -4054,14 +4077,20 @@ SUBROUTINE TIME_MARCHING(N)
 IMPLICIT NONE
 INTEGER,INTENT(IN)::N
 real,dimension(1:5)::DUMMYOUT,DUMMYIN
-INTEGER::I,KMAXE
+INTEGER::I,KMAXE,TTIME
 REAL::CPUT1,CPUT2,CPUT3,CPUT4,CPUT5,CPUT6,CPUT8,timec3,TIMEC1,TIMEC4,TIMEC8,TOTV1,TOTV2,DUMEtg1,DUMEtg2,TOTK
       kill=0
       T=RES_TIME
       iscoun=1
+      
+      EVERY_TIME=RES_TIME+1.0D0
+      
 
 !$OMP BARRIER
 !$OMP MASTER 
+    IF (INITCOND.eq.95)THEN                    
+    CALL CHECKPOINTv3(N)
+    end if
 	CPUT1=CPUX1(1)
 	CPUT4=CPUX1(1)
 	CPUT5=CPUX1(1)
@@ -4162,10 +4191,24 @@ REAL::CPUT1,CPUT2,CPUT3,CPUT4,CPUT5,CPUT6,CPUT8,timec3,TIMEC1,TIMEC4,TIMEC8,TOTV
 			
 			IF (rungekutta.GE.11)THEN
 			dt=timestep
+			IF (INITCOND.eq.95)THEN 
+			DT=MIN(DT,OUT_TIME-T,EVERY_TIME-T)
+			ELSE
 			DT=MIN(DT,OUT_TIME-T)
+<<<<<<< HEAD
 			ELSE
 			DT=MIN(DT,OUT_TIME-T)
 			END IF
+=======
+			END IF
+			else
+			IF (INITCOND.eq.95)THEN 
+			DT=MIN(DT,OUT_TIME-T,EVERY_TIME-T)
+			ELSE
+			DT=MIN(DT,OUT_TIME-T)
+			END IF
+			end if
+>>>>>>> 70fa61f8ced36446e240316abd5dcdf095b0d263
 			
 			!$OMP END MASTER 
 			!$OMP BARRIER	
@@ -4297,6 +4340,22 @@ REAL::CPUT1,CPUT2,CPUT3,CPUT4,CPUT5,CPUT6,CPUT8,timec3,TIMEC1,TIMEC4,TIMEC8,TOTV
 			    END IF
 			CPUT1=MPI_WTIME()
 			END IF
+			
+			IF (INITCOND.eq.95)THEN           
+			if (mod(T, 1.0D0) .eq. 0) then
+                CALL VOLUME_SOLUTION_WRITE
+			     if (outsurf.eq.1)then
+			    call surface_SOLUTION_WRITE
+			    end if
+			    IF (INITCOND.eq.95)THEN                    
+			    CALL CHECKPOINTv4(N)
+			    END IF
+			EVERY_TIME=EVERY_TIME+1.0D0
+            
+           
+           END IF
+           END IF
+			
 			
 			
 			
