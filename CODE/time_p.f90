@@ -3678,19 +3678,12 @@ IF (IT.EQ.RESTART)THEN
 DO I=1,KMAXE 
   U_C(I)%VAL(3,1:NOF_VARIABLES)=U_C(I)%VAL(1,1:NOF_VARIABLES)
   U_C(I)%VAL(2,1:nof_variables)=U_C(I)%VAL(1,1:nof_variables)
-<<<<<<< HEAD
-  IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
-  U_CT(I)%VAL(3,:)=U_CT(I)%VAL(1,:)
-  U_CT(I)%VAL(2,:)=U_CT(I)%VAL(1,:)
-  END IF
-=======
   
   if ((turbulence.gt.0).or.(passivescalar.gt.0))then
   U_CT(I)%VAL(3,:)=U_CT(I)%VAL(1,:)
   U_CT(I)%VAL(2,:)=U_CT(I)%VAL(1,:)
   
   end if
->>>>>>> 70fa61f8ced36446e240316abd5dcdf095b0d263
 END DO
 !$OMP END DO
 END IF
@@ -3854,13 +3847,8 @@ DO I=1,KMAXE
   IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
   U_CT(I)%VAL(3,:)=U_CT(I)%VAL(2,:)
   U_CT(I)%VAL(2,:)=U_CT(I)%VAL(1,:)
-<<<<<<< HEAD
-  U_CT(I)%VAL(1,:)=2.0*U_CT(I)%VAL(2,:)-U_CT(I)%VAL(3,:)
-  END IF
-=======
   !U_CT(I)%VAL(1,:)=2.0*U_CT(I)%VAL(2,:)-U_CT(I)%VAL(3,:)
   end if
->>>>>>> 70fa61f8ced36446e240316abd5dcdf095b0d263
 END DO
 !$OMP END DO
 
@@ -4195,11 +4183,6 @@ REAL::CPUT1,CPUT2,CPUT3,CPUT4,CPUT5,CPUT6,CPUT8,timec3,TIMEC1,TIMEC4,TIMEC8,TOTV
 			DT=MIN(DT,OUT_TIME-T,EVERY_TIME-T)
 			ELSE
 			DT=MIN(DT,OUT_TIME-T)
-<<<<<<< HEAD
-			ELSE
-			DT=MIN(DT,OUT_TIME-T)
-			END IF
-=======
 			END IF
 			else
 			IF (INITCOND.eq.95)THEN 
@@ -4208,7 +4191,6 @@ REAL::CPUT1,CPUT2,CPUT3,CPUT4,CPUT5,CPUT6,CPUT8,timec3,TIMEC1,TIMEC4,TIMEC8,TOTV
 			DT=MIN(DT,OUT_TIME-T)
 			END IF
 			end if
->>>>>>> 70fa61f8ced36446e240316abd5dcdf095b0d263
 			
 			!$OMP END MASTER 
 			!$OMP BARRIER	
