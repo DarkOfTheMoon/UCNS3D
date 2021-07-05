@@ -1592,7 +1592,7 @@ END SUBROUTINE LOCAL_RECONALLOCATION4
 
 
 SUBROUTINE LOCAL_RECONALLOCATION42d(N)
-   !> @brief
+!> @brief
 !> This subroutine allocates memory for reconstruction in 2D
 IMPLICIT NONE
 INTEGER,INTENT(IN)::N
@@ -1608,68 +1608,51 @@ IF (ITESTCASE.LT.3) THEN
 END IF
 CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
 
-
-
-
 DO I=1,KMAXE
 	
-	
-	
-	
-	points=qp_line_n
-	
-	
+    points=qp_line_n
 	
 		
-	IF (ITESTCASE.EQ.4)THEN
+	IF (ITESTCASE.EQ.4)THEN !Linear step?
 		
-	if (fastest.ne.1)then
-	ALLOCATE (ILOCAL_RECON3(I)%ULEFTV(dims,IT-1,ielem(n,i)%ifca,points))
-	else
-	ALLOCATE (ILOCAL_RECON3(I)%ULEFTV(dims,IT-1,ielem(n,i)%ifca,1))
-
-	end if
-	ILOCAL_RECON3(I)%ULEFTV=zero
+        if (fastest.ne.1)then
+            ALLOCATE (ILOCAL_RECON3(I)%ULEFTV(dims,IT-1,ielem(n,i)%ifca,points))
+        else
+            ALLOCATE (ILOCAL_RECON3(I)%ULEFTV(dims,IT-1,ielem(n,i)%ifca,1))
+        end if
+        
+        ILOCAL_RECON3(I)%ULEFTV=zero
 	
-	if ((turbulence.eq.1).or.(passivescalar.gt.0)) then
-	  
-	  SVG=(TURBULENCEEQUATIONS+PASSIVESCALAR)
-	  if (fastest.ne.1)then
-	  ALLOCATE (ILOCAL_RECON3(I)%ULEFTTURBV(dims,svg,ielem(n,i)%ifca,points))	! THE DERIVATIVES OF THE TURBULENCE MODEL
-	 
-	  ALLOCATE (ILOCAL_RECON3(I)%ULEFTTURB(TURBULENCEEQUATIONS+PASSIVESCALAR,ielem(n,i)%ifca,points))
-
-	  else
-	   ALLOCATE (ILOCAL_RECON3(I)%ULEFTTURBV(dims,svg,ielem(n,i)%ifca,1))	! THE DERIVATIVES OF THE TURBULENCE MODEL
-	 
-	  ALLOCATE (ILOCAL_RECON3(I)%ULEFTTURB(TURBULENCEEQUATIONS+PASSIVESCALAR,ielem(n,i)%ifca,1))
-
-
-
-	  end if
-	  ILOCAL_RECON3(I)%ULEFTTURB=zero;ILOCAL_RECON3(I)%ULEFTTURBv=zero
-	  
-	END IF
+        if ((turbulence.eq.1).or.(passivescalar.gt.0)) then
+            SVG=(TURBULENCEEQUATIONS+PASSIVESCALAR)
+            
+            if (fastest.ne.1)then
+                ALLOCATE (ILOCAL_RECON3(I)%ULEFTTURBV(dims,svg,ielem(n,i)%ifca,points))	! THE DERIVATIVES OF THE TURBULENCE MODEL
+            
+                ALLOCATE (ILOCAL_RECON3(I)%ULEFTTURB(TURBULENCEEQUATIONS+PASSIVESCALAR,ielem(n,i)%ifca,points))
+            else
+                ALLOCATE (ILOCAL_RECON3(I)%ULEFTTURBV(dims,svg,ielem(n,i)%ifca,1))	! THE DERIVATIVES OF THE TURBULENCE MODEL
+        
+                ALLOCATE (ILOCAL_RECON3(I)%ULEFTTURB(TURBULENCEEQUATIONS+PASSIVESCALAR,ielem(n,i)%ifca,1))
+            end if
+            
+            ILOCAL_RECON3(I)%ULEFTTURB=zero;ILOCAL_RECON3(I)%ULEFTTURBv=zero  
+        END IF
 	
-	
-	ALLOCATE (ILOCAL_RECON3(I)%GRADS(3+TURBULENCEEQUATIONS+passivescalar+(QSAS_MODEL*2),2))
-	 
+        ALLOCATE (ILOCAL_RECON3(I)%GRADS(3+TURBULENCEEQUATIONS+passivescalar+(QSAS_MODEL*2),2))
 	END IF
 	
 	
 	
-	 if (fastest.ne.1)then
+    if (fastest.ne.1)then
         ALLOCATE (ILOCAL_RECON3(I)%ULEFT(IT,ielem(n,i)%ifca,points))
-	else
-	 ALLOCATE (ILOCAL_RECON3(I)%ULEFT(IT,ielem(n,i)%ifca,1))
+    else
+        ALLOCATE (ILOCAL_RECON3(I)%ULEFT(IT,ielem(n,i)%ifca,1))
 
-	  end if
-	  ILOCAL_RECON3(I)%ULEFT=zero
+    end if
+    ILOCAL_RECON3(I)%ULEFT=zero
 	
-! 	END IF
-	
-	
-	
+
 END DO
 
 
@@ -1681,7 +1664,6 @@ implicit none
    !> @brief
 !> This subroutine allocates memory for all the matrices
 INTEGER::KKD
-
 KKD=nof_variables
 
 !sorting them out first in terms of dimensions, no of variables, turbulence parameters
@@ -1735,7 +1717,6 @@ end if
 end if
 
 end if
-
 
 
 

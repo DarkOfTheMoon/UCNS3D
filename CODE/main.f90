@@ -33,6 +33,7 @@ USE implicit_FLUXES
 USE MOODR
 USE OMP_LIB
 USE PARAMETERS
+USE UNIT_TEST
 
 
 
@@ -661,6 +662,8 @@ end if
    else
    CALL INITIALISE2d(N)
    CALL DG_1
+   CALL RUN_ALL_TESTS(N)
+   !stop
    end if
  
 IF (RESTART.GT.0)THEN
@@ -686,6 +689,7 @@ END IF
  
   
  end if
+ 
 ! 
 ! 
 ! 
@@ -726,7 +730,6 @@ END IF
   
  
 
-
  
  IF (FASTEST_Q.EQ.1)THEN
  CALL MEMORY_FAST(N)
@@ -736,6 +739,7 @@ END IF
 
 
 CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
+
 
   call EXCH_CORDS_opt(N)
   if (dimensiona.eq.3)then
@@ -752,14 +756,12 @@ CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
     call FIX_NODES_LOCAL
 
 CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
-    
   CPUX3(1) = MPI_Wtime()
 !  CALL CPU_TIME(CPUX3(1))
 
   if (n.eq.0)  WRITE(100+N,*)CPUX3(1)-CPUX2(1)
 
    CPUX2(1) = MPI_Wtime()
-
  if (n.eq.0)print*,"UCNS3D Running"
    
    if (dimensiona.eq.3)then
@@ -771,9 +773,7 @@ else
 !$OMP PARALLEL DEFAULT(SHARED)
 CALL TIME_MARCHING2(N)
 !$OMP END PARALLEL
-
 end if
-
 
 CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
   CPUX3(1) = MPI_Wtime()
@@ -783,6 +783,7 @@ CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
 CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
 CALL MPI_FINALIZE(IERROR)
 
+if (n.eq.0) print*,"UCNS3D finished running"
 
 
 END PROGRAM UCNS3D

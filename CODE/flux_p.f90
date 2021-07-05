@@ -5,6 +5,7 @@ USE LOCAL
 USE RIEMANN
 USE FLOW_OPERATIONS
 USE DECLARATION
+USE BASIS
 IMPLICIT NONE
 ! !**************************DEVELOPED BY PANAGIOTIS TSOUTSANIS**************************!
 ! !*****************************FMACS RESEARCH GROUP CRANFIELD **************************!
@@ -140,46 +141,58 @@ SUBROUTINE CALCULATE_FLUXESHI2D(N)
 	REAL::GODFLUX2,sum_detect
 	INTEGER::I,L,NGP,KMAXE,IQP
 	REAL,DIMENSION(1:NUMBEROFPOINTS2)::WEIGHTS_TEMP
+	REAL,DIMENSION(1:NUMBEROFPOINTS)::WEIGHTS_TEMP_AREA
 	KMAXE=XMPIELRANK(N)
 	
-	call  QUADRATURELINE(N,IGQRULES)
-	
+	CALL QUADRATURELINE(N,IGQRULES)
 ! 	WEIGHTS_Q(1:QP_LINE)=WEQUA2D(1:QP_LINE)
-	
 	WEIGHTS_TEMP(1:QP_LINE_n)=WEQUA2D(1:QP_LINE_n)
+	
+	IF (DG.EQ.1) THEN
+        CALL QUADRATURETRIANGLE(N,IGQRULES)
+        WEIGHTS_TEMP_AREA(1:QP_TRIANGLE)=WEQUA3D(1:QP_TRIANGLE)
+    END IF
 	
 	!$OMP DO SCHEDULE (STATIC)
 	DO I=1,KMAXE
-				if (initcond.eq.3)then
-				  lamx=-ielem(n,i)%yyc+0.5d0
-				  lamy=ielem(n,i)%xxc-0.5
-				  end if
+        if (initcond.eq.3)then
+            lamx=-ielem(n,i)%yyc+0.5d0
+            lamy=ielem(n,i)%xxc-0.5
+        end if
+        
 		IF (IELEM(N,I)%INTERIOR.EQ.0)THEN
 		    RHS(I)%VAL(1)=ZERO
 		    
 		    DO L=1,IELEM(N,I)%IFCA
-				  GODFLUX2=ZERO
-				  NX=IELEM(N,I)%FACEANGLEX(L)
-				  NY=IELEM(N,I)%FACEANGLEY(L)
-				  
-! 				  
-				  
-				  NORMALVECT=(NX*LAMX)+(NY*LAMY)
-				  
-				  IQP=QP_LINE_n
-				  do NGP=1,iqp
+                GODFLUX2=ZERO
+                NX=IELEM(N,I)%FACEANGLEX(L)
+                NY=IELEM(N,I)%FACEANGLEY(L)
+                
+                NORMALVECT=(NX*LAMX)+(NY*LAMY)
+                
+                IQP=QP_LINE_n
+                DO NGP=1,iqp
 				      CLEFT(1)=ILOCAL_RECON3(I)%ULEFT(1,L,NGP)
 				      CRIGHT(1)=ILOCAL_RECON3(IELEM(N,I)%INEIGH(L))%ULEFT(1,IELEM(N,I)%INEIGHN(L),NGP)
-
 				     
 				      CALL EXACT_RIEMANN_SOLVER(N,CLEFT,CRIGHT,NORMALVECT,HLLCFLUX)
 
-				      GODFLUX2=GODFLUX2+(HLLCFLUX(1)*(WEIGHTS_TEMP(NGP)*IELEM(N,I)%SURF(L)))	 
-				  END DO
-				    RHS(I)%VAL(1)=RHS(I)%VAL(1)+GODFLUX2
-
+                    IF (DG.EQ.1) THEN
+                        GODFLUX2=GODFLUX2+(HLLCFLUX(1)*(WEIGHTS_TEMP(NGP)*IELEM(N,I)%SURF(L)))
+                        ! flux at interface quadrature points times basis
+                        !GODFLUX2=GODFLUX2+(HLLCFLUX(1)*BASIS_REC2D(N,QPOINTS(1,NGP),QPOINTS(2,NGP),ielem(n,i)%iorder,1,ielem(n,i)%idegfree)*(WEIGHTS_TEMP(NGP)*IELEM(N,I)%SURF(L)))
+                        ! flux at volume(?) quadrature points times derivative of basis
+                        !GODFLUX2=GODFLUX2+(HLLCFLUX(1)*BASIS_REC2D_DERIVATIVE(N,QPOINTS(1,NGP),QPOINTS(2,NGP),ielem(n,i)%iorder,1,ielem(n,i)%idegfree)*(WEIGHTS_TEMP(NGP)*IELEM(N,I)%SURF(L)))
+                    ELSE
+                        GODFLUX2=GODFLUX2+(HLLCFLUX(1)*(WEIGHTS_TEMP(NGP)*IELEM(N,I)%SURF(L)))
+                    END IF
+                END DO
+                
+                RHS(I)%VAL(1)=RHS(I)%VAL(1)+GODFLUX2
 		    END DO
+		    
 		END IF
+		
 		IF (IELEM(N,I)%INTERIOR.EQ.1)THEN
 		    RHS(I)%VAL(1)=ZERO
 		    
@@ -227,7 +240,13 @@ SUBROUTINE CALCULATE_FLUXESHI2D(N)
 				      
 				      CALL EXACT_RIEMANN_SOLVER(N,CLEFT,CRIGHT,NORMALVECT,HLLCFLUX)
 !  				      
-				      GODFLUX2=GODFLUX2+(HLLCFLUX(1)*(WEIGHTS_TEMP(NGP)*IELEM(N,I)%SURF(L)))	
+                    IF (DG.EQ.1) THEN
+                        GODFLUX2=GODFLUX2+(HLLCFLUX(1)*(WEIGHTS_TEMP(NGP)*IELEM(N,I)%SURF(L)))
+                        ! flux times basis
+                        !GODFLUX2=GODFLUX2+(HLLCFLUX(1)*BASIS_REC2D(N,QPOINTS(1,NGP),QPOINTS(2,NGP),ielem(n,i)%iorder,1,ielem(n,i)%idegfree)*(WEIGHTS_TEMP(NGP)*IELEM(N,I)%SURF(L)))
+                    ELSE
+                        GODFLUX2=GODFLUX2+(HLLCFLUX(1)*(WEIGHTS_TEMP(NGP)*IELEM(N,I)%SURF(L)))
+                    END IF
 !  				      
 				  END DO
 				    RHS(I)%VAL(1)=RHS(I)%VAL(1)+GODFLUX2
@@ -237,12 +256,9 @@ SUBROUTINE CALCULATE_FLUXESHI2D(N)
 ! 				
 	END DO
 	!$OMP END DO 
-	END SUBROUTINE CALCULATE_FLUXESHI2D	
-	
-	
+END SUBROUTINE CALCULATE_FLUXESHI2D	
 
-	
-	
+
 SUBROUTINE CALCULATE_FLUXESHI_CONVECTIVE(N)
 !> @brief
 !> This subroutine computes the convective fluxes for hyperbolic conservation laws

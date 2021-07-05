@@ -2943,7 +2943,7 @@ SUBROUTINE INVERT(RFF,INVRFF,IVGT)
     IF (DG.EQ.1)THEN
         !$OMP DO
         DO I=1,KMAXE
-            COUNTERDG=0 !number of quadrature point per element?
+            COUNTERDG=0 !number of quadrature point per element
         
             SELECT CASE(ielem(n,i)%ishape)
             CASE(5)
@@ -2951,7 +2951,7 @@ SUBROUTINE INVERT(RFF,INVRFF,IVGT)
                     VEXT(1:3,1:2)=ELEM_LISTD(k,1:3,1:2)
                     CALL QUADRATUREtriangle(N,IGQRULES)
                     VOLTEMP=TRIANGLEVOLUME(N)/IELEM(N,I)%totvolume
-                    QQP=QP_Triangle
+                    QQP=QP_Triangle ! number of quadrature points for a triangle
                     DO INC=1,QQP
                         POX(1)=QPOINTS(1,INC)
                         POY(1)=QPOINTS(2,INC) 
@@ -2961,8 +2961,8 @@ SUBROUTINE INVERT(RFF,INVRFF,IVGT)
                         y1=poy(1)
                         compwrt=-1
                                 
-                        MASS_MATRIX(I,:,COUNTERDG) = basis_rec2d(N,x1,y1,ielem(n,i)%iorder,1,ielem(n,i)%idegfree)
-                        write(300+n,*)"element",i,counterdg
+                        MASS_MATRIX(I,:,COUNTERDG) = basis_rec2d(N,x1,y1,ielem(n,i)%iorder,I,ielem(n,i)%idegfree)
+                        write(300+n,*)"element",i,counterdg,x1,y1
                         write(300+n,*) mass_matrix(i,1:IELEM(N,I)%IDEGFREE,counterdg)
                     END DO 
                 END DO
@@ -2980,10 +2980,14 @@ SUBROUTINE INVERT(RFF,INVRFF,IVGT)
                     x1=pox(1)-ielem(n,i)%xxc
                     y1=poy(1)-ielem(n,i)%yyc
                     compwrt=-1
-                            
-                    MASS_MATRIX(I,:,COUNTERDG) = basis_rec2d(N,x1,y1,ielem(n,i)%iorder,1,ielem(n,i)%idegfree)
-                    write(300+n,*)"element",i,counterdg
+                                                
+                    MASS_MATRIX(I,:,COUNTERDG) = basis_rec2d(N,x1,y1,ielem(n,i)%iorder,I,ielem(n,i)%idegfree)
+                    write(300+n,*)"element",i,counterdg,x1,y1, NUMBER_OF_DOG, ielem(n,i)%idegfree
                     write(300+n,*) mass_matrix(i,1:IELEM(N,I)%IDEGFREE,counterdg)
+                    write(300+n,*) "INTEG_BASIS",INTEG_BASIS(ICONSIDERED)%value(1:NUMBER_OF_DOG)
+                    
+                    
+                    !CALL TEST_BASIS_REC2D(N, I)
                 
                 END DO
             END SELECT

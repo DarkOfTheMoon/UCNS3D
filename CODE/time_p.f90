@@ -4425,7 +4425,7 @@ DO
     TIMEC1=CPUT2-CPUT1
     DUMMYOUT(2)=TIMEC1
     DUMMYIN=0.0d0
-    TIMEC3=CPUT2-CPUT45
+    TIMEC3=CPUT2-CPUT4
     DUMMYOUT(3)=TIMEC3
     TIMEC4=CPUT2-CPUT5
     DUMMYOUT(4)=TIMEC4
@@ -4523,6 +4523,8 @@ DO
 
     END SELECT
         
+! Increment time
+
     !$OMP MASTER
     IF (rungekutta.GE.11)THEN
         T=T+(DT)
@@ -4532,6 +4534,8 @@ DO
         tz1=tz1+DT
     END IF
 
+    
+! Write output
 
     !$OMP END MASTER 
     !$OMP BARRIER
@@ -4547,10 +4551,10 @@ DO
         END IF
     END IF
     
-    !$OMP MASTER
-    IF (NPROBES.GT.0) CALL PROBING2D
-            
     
+    !$OMP MASTER
+    IF (NPROBES.GT.0) CALL PROBING2D      
+
     IF (TIMEC1.GE.IEVERY)THEN
         CALL VOLUME_SOLUTION_WRITE
         IF (outsurf.eq.1)THEN
@@ -4570,7 +4574,7 @@ DO
         CPUT8=MPI_WTIME()
     END IF
 
-
+! Check end condition
     IF ((TIMEC4.GE.IEVERY2).OR.(TIMEC3.GE.WALLC)) THEN
         CPUT5=MPI_WTIME()
         IF (TIMEC3.GE.WALLC) THEN
@@ -4581,7 +4585,7 @@ DO
             CALL VOLUME_SOLUTION_WRITE
             IF (outsurf.eq.1)THEN
                 CALL surface_SOLUTION_WRITE
-            END IF 
+            END IF
             CALL CHECKPOINTING
         
             IF (AVERAGING.EQ.1)THEN
