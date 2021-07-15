@@ -2987,6 +2987,7 @@ IF (DG.EQ.1)THEN
 DO I=1,KMAXE
     Basis_vector=zero
     totalMM=zero
+
     COUNTERDG=0
     
     DO K=1,IELEM(N,I)%NONODES
