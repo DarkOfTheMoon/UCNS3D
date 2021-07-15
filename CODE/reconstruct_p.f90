@@ -7817,6 +7817,9 @@ END IF
 						IF (POLY.EQ.2) THEN
 						  XDER(K)=DLX(AX,AY,AZ,K);  YDER(K)=DLY(AX,AY,AZ,K);  ZDER(K)=DLZ(AX,AY,AZ,K)
 						END IF
+						IF (POLY.EQ.3) THEN
+						  XDER(K)=DLX(AX,AY,AZ,K);  YDER(K)=DLY(AX,AY,AZ,K);  ZDER(K)=DLZ(AX,AY,AZ,K)
+						END IF
 				      END DO
 					UGRADLOC = ZERO
 					  DO K=1,IDEGFREE
@@ -7838,6 +7841,9 @@ END IF
 							      XDER(K)=DFX(AX,AY,AZ,K);  YDER(K)=DFY(AX,AY,AZ,K);  ZDER(K)=DFZ(AX,AY,AZ,K)
 							END IF
 							IF (POLY.EQ.2) THEN
+							  XDER(K)=DLX(AX,AY,AZ,K);  YDER(K)=DLY(AX,AY,AZ,K);  ZDER(K)=DLZ(AX,AY,AZ,K)
+							END IF
+							IF (POLY.EQ.3) THEN
 							  XDER(K)=DLX(AX,AY,AZ,K);  YDER(K)=DLY(AX,AY,AZ,K);  ZDER(K)=DLZ(AX,AY,AZ,K)
 							END IF
 						END DO

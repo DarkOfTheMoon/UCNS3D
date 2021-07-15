@@ -640,6 +640,56 @@ end function CELL_CENTRE_CORD2
 
 
 
+FUNCTION comp_max_diff(N,NODES_LIST,N_NODE)
+ !> @brief
+!> This function computes the maximum coordinates value given the nodes location
+INTEGER,INTENT(IN)::N,N_NODE
+REAL,ALLOCATABLE,DIMENSION(:,:),INTENT(in)::NODES_LIST
+REAL,DIMENSION(1:2)::comp_max_diff
+INTEGER::Idex
+REAL,DIMENSION(1:2)::tempDIFF
+tempDiff=0.0d0
+comp_max_diff(1:2)=0.0d0
+
+
+DO Idex=2,N_NODE
+    tempDIFF(1)=abs(nodes_list(1,1)-nodes_list(Idex,1))
+    tempDIFF(2)=abs(nodes_list(1,2)-nodes_list(Idex,2))
+    if (tempDiff(1).gt.comp_max_diff(1)) then
+        comp_max_diff(1)=tempDiff(1)
+    end if
+    if (tempDiff(2).gt.comp_max_diff(2)) then
+        comp_max_diff(2)=tempDiff(2)
+    end if
+END DO
+
+END FUNCTION COMP_MAX_DIFF
+
+
+
+FUNCTION comp_min_diff(N,NODES_LIST,N_NODE)
+ !> @brief
+!> This function computes the minimum coordinates value given the nodes location
+INTEGER,INTENT(IN)::N,N_NODE
+REAL,ALLOCATABLE,DIMENSION(:,:),INTENT(in)::NODES_LIST
+REAL,DIMENSION(1:2)::comp_min_diff
+INTEGER::Idex
+REAL,DIMENSION(1:2)::tempDIFF
+tempDiff=0.0d0
+comp_min_diff(1:2)=0.0d0
+
+DO Idex=2,N_NODE
+    tempDIFF(1)=abs(nodes_list(1,1)-nodes_list(Idex,1))
+    tempDIFF(2)=abs(nodes_list(1,2)-nodes_list(Idex,2))
+    if (tempDiff(1).lt.comp_min_diff(1)) then
+        comp_min_diff(1)=tempDiff(1)
+    end if
+    if (tempDiff(2).lt.comp_min_diff(2)) then
+        comp_min_diff(2)=tempDiff(2)
+    end if
+END DO
+
+END FUNCTION COMP_MIN_DIFF
 
 
 
