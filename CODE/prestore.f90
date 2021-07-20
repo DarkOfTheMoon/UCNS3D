@@ -2985,9 +2985,6 @@ SUBROUTINE INVERT(RFF,INVRFF,IVGT)
                     write(300+n,*)"element",i,counterdg,x1,y1, NUMBER_OF_DOG, ielem(n,i)%idegfree
                     write(300+n,*) mass_matrix(i,1:IELEM(N,I)%IDEGFREE,counterdg)
                     write(300+n,*) "INTEG_BASIS",INTEG_BASIS(ICONSIDERED)%value(1:NUMBER_OF_DOG)
-                    
-                    
-                    !CALL TEST_BASIS_REC2D(N, I)
                 
                 END DO
             END SELECT

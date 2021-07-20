@@ -1311,6 +1311,10 @@ end if
 	if (DG.EQ.1)THEN
 	allocate (mass_matrix(kmaxe,1:idegfree,QP_TRIANGLE*2));mass_matrix=zero
 	END IF
+	ALLOCATE(QP_ARRAY(KMAXE,QP_QUAD)); !Allocates for 2D
+	QP_ARRAY(:,:)%X = ZERO
+	QP_ARRAY(:,:)%Y = ZERO
+	QP_ARRAY(:,:)%QP_WEIGHT = ZERO
 	
 	DO I=1,KMAXE
         ALLOCATE (U_C(I)%VAL(ISTAGE,NOF_VARIABLES));U_C(I)%VAL=ZERO
@@ -1328,8 +1332,7 @@ end if
          end select
         
         IF (DG.EQ.1)THEN
-        ALLOCATE (U_C(I)%VALDG(ISTAGE,TOTALPOINTS,NOF_VARIABLES));U_C(I)%VALDG=ZERO
-        
+            ALLOCATE (U_C(I)%VALDG(ISTAGE,NOF_VARIABLES,IELEM(N,I)%IDEGFREE+1));U_C(I)%VALDG=ZERO
         END IF
         
         

@@ -734,7 +734,7 @@ end SUBROUTINE DECOMPOSE3
 
 subroutine DECOMPOSE2
  !> @brief
-!> This function decomposes element into triangles (counterclockwise numbering)
+!> This function writes decomposed triangle element nodes into ELEM_LISTD from NODES_LIST (counterclockwise numbering)
 implicit none
 !!$OMP THREADPRIVATE(DECOMPOSE2)
 
@@ -1628,12 +1628,6 @@ WEQUA2D=0.0d0
 QPOINTS2D=0.0d0
 
 
-
-
-WEQUA2D=0.0d0
-QPOINTS2D=0.0d0
-
-
 SELECT CASE(IGQRULES)
 
 case(1)
@@ -1912,7 +1906,7 @@ END select
 END SUBROUTINE QUADRATURETRIANG
 
 SUBROUTINE QUADRATURETRIANGLE(N,IGQRULES)
- !> @brief
+!> @brief
 !> This subroutine computes the quadrature points and weights for triangle in 2D
 IMPLICIT NONE
 INTEGER,INTENT(IN)::IGQRULES,N
@@ -1920,13 +1914,6 @@ INTEGER::Kk
 
 WEQUA3D=0.0d0
 QPOINTS=0.0d0
-
-
-
-
-WEQUA3D=0.0d0
-QPOINTS=0.0d0
-
 
 select case(IGQRULES)
 

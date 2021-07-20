@@ -1506,8 +1506,8 @@ END FUNCTION BASIS_REC
 
 FUNCTION BASIS_REC2d(N,X1,Y1,NUMBER,ICONSIDERED,NUMBER_OF_DOG)
 !> @brief
-!> This function returns the value of the basis function for a specific polynomial order and coordinates in 2D
-! X1, Y1: coordinates of basis evaluation wrt ?; NUMBER: order of basis; ICONSIDERED: considered cell?; NUMBER_OF_DOG: number of degrees of freedom
+!> This function returns the value of the basis function for a specific polynomial order and coordinates in 2D \n
+!> REQUIRES: X1, Y1: coordinates of basis evaluation wrt ?; NUMBER: order of basis; ICONSIDERED: considered cell?; NUMBER_OF_DOG: number of degrees of freedom
 ! NUMBER and NUMBER_OF_DOG redundant?
 IMPLICIT NONE
 INTEGER,INTENT(IN)::N
@@ -1516,7 +1516,6 @@ REAL,INTENT(IN)::X1,Y1
 REAL::OOV
 real,dimension(number_of_dog)::basis_rec2d
 SB=zero
-OOV=1.0D0/(ILOCAL_RECON3(ICONSIDERED)%VOLUME(1,1))
 
     select case(number)
     
@@ -1618,13 +1617,15 @@ OOV=1.0D0/(ILOCAL_RECON3(ICONSIDERED)%VOLUME(1,1))
     END select
    
     if (compwrt.eq.0)then
-    basis_rec2d(1:NUMBER_OF_DOG)=SB(1:NUMBER_OF_DOG)-((INTEG_BASIS(ICONSIDERED)%value(1:NUMBER_OF_DOG))*OOV)
+        OOV=1.0D0/(ILOCAL_RECON3(ICONSIDERED)%VOLUME(1,1))
+        basis_rec2d(1:NUMBER_OF_DOG)=SB(1:NUMBER_OF_DOG)-((INTEG_BASIS(ICONSIDERED)%value(1:NUMBER_OF_DOG))*OOV)
     end if
     if (compwrt.eq.1)then
-    basis_rec2d(1:NUMBER_OF_DOG)=SB(1:NUMBER_OF_DOG)-((INTEG_BASIS(ICONSIDERED)%valuec(1:NUMBER_OF_DOG))*OOV)
+        OOV=1.0D0/(ILOCAL_RECON3(ICONSIDERED)%VOLUME(1,1))
+        basis_rec2d(1:NUMBER_OF_DOG)=SB(1:NUMBER_OF_DOG)-((INTEG_BASIS(ICONSIDERED)%valuec(1:NUMBER_OF_DOG))*OOV)
     end if
     if (compwrt.eq.-1)then
-    basis_rec2d(1:NUMBER_OF_DOG)=SB(1:NUMBER_OF_DOG)!-((INTEG_BASIS(ICONSIDERED)%valuec(1:NUMBER_OF_DOG))*OOV)
+        basis_rec2d(1:NUMBER_OF_DOG)=SB(1:NUMBER_OF_DOG)!-((INTEG_BASIS(ICONSIDERED)%valuec(1:NUMBER_OF_DOG))*OOV)
     end if
     
     
@@ -1634,73 +1635,139 @@ END FUNCTION BASIS_REC2d
 
 FUNCTION BASIS_REC2D_DERIVATIVE(N,X1,Y1,NUMBER,ICONSIDERED,NUMBER_OF_DOG,DX_OR_DY)
 !> @brief
-!> This function returns the value of the basis function for a specific polynomial order and coordinates in 2D
-! X1, Y1: coordinates of basis evaluation; NUMBER: order of basis; ICONSIDERED: considered cell?; NUMBER_OF_DOG: number of degrees of freedom
+!> This function returns the derivative of the basis function for a specific polynomial order and coordinates in 2D \n
+!> REQUIRES: X1, Y1: coordinates of basis evaluation; NUMBER: order of basis; ICONSIDERED: considered cell?; NUMBER_OF_DOG: number of degrees of freedom; DX_OR_DY: 1 = wrt x, 2 = wrt y
 ! NUMBER and NUMBER_OF_DOG redundant?
-IMPLICIT NONE
-INTEGER,INTENT(IN)::N
-INTEGER,INTENT(IN)::NUMBER,ICONSIDERED,NUMBER_OF_DOG,DX_OR_DY
-REAL,INTENT(IN)::X1,Y1
-REAL::OOV
-REAL,DIMENSION(NUMBER_OF_DOG)::BASIS_REC2D_DERIVATIVE
-INTEGER::BASIS_INDEX,INT_COEFF,X_ORDER,Y_ORDER,NUM_TERMS,CURRENT_ORDER ! For computing basis iteratively
+    IMPLICIT NONE
+    INTEGER,INTENT(IN)::N
+    INTEGER,INTENT(IN)::NUMBER,ICONSIDERED,NUMBER_OF_DOG,DX_OR_DY
+    REAL,INTENT(IN)::X1,Y1
+    !REAL::OOV
+    REAL,DIMENSION(NUMBER_OF_DOG)::BASIS_REC2D_DERIVATIVE
+    INTEGER::BASIS_INDEX,INT_COEFF,X_ORDER,Y_ORDER,NUM_TERMS,CURRENT_ORDER ! For computing basis iteratively
 
-SB=zero
-OOV=1.0D0/(ILOCAL_RECON3(ICONSIDERED)%VOLUME(1,1))
+    BASIS_REC2D_DERIVATIVE=zero
+    !OOV=1.0D0/(ILOCAL_RECON3(ICONSIDERED)%VOLUME(1,1))
 
-SELECT CASE(DX_OR_DY)
+    SELECT CASE(DX_OR_DY)
 
-CASE(1) ! derivative with respect to x
-    IF (NUMBER > 0) THEN
-        SB(1) = 1
-        SB(2) = 0
-    END IF
-    IF (NUMBER > 1) THEN
-        SB(3) = 2 * X1
-        SB(4) = Y1
-        SB(5) = 0
-    END IF
-    IF (NUMBER > 2) THEN
-        SB(6) = 3 * X1 ** 2
-        SB(7) = 2 * X1 * Y1
-        SB(8) = Y1 ** 2
-        SB(9) = 0
-    END IF
-    IF (NUMBER > 3) THEN
-        CURRENT_ORDER = 4
-        INT_COEFF = CURRENT_ORDER
-        X_ORDER = CURRENT_ORDER - 1
-        Y_ORDER = 0
-        NUM_TERMS = 9
-        
-        DO BASIS_INDEX = 4, NUMBER ! compute total number of terms in basis
-            NUM_TERMS = NUM_TERMS + BASIS_INDEX + 1
-        END DO
-        
-        BASIS_INDEX = 10 ! starting from 4th order, 10th basis term
-        DO WHILE (BASIS_INDEX < NUM_TERMS)
-            IF (INT_COEFF == 1) THEN
-                SB(BASIS_INDEX) = INT_COEFF * X1 ** X_ORDER * Y1 ** Y_ORDER
+    CASE(1) ! derivative with respect to x
+        IF (NUMBER > 0) THEN
+            BASIS_REC2D_DERIVATIVE(1) = 1
+            BASIS_REC2D_DERIVATIVE(2) = 0
+        END IF
+        IF (NUMBER > 1) THEN
+            BASIS_REC2D_DERIVATIVE(3) = 2 * X1
+            BASIS_REC2D_DERIVATIVE(4) = Y1
+            BASIS_REC2D_DERIVATIVE(5) = 0
+        END IF
+        IF (NUMBER > 2) THEN
+            BASIS_REC2D_DERIVATIVE(6) = 3 * X1 ** 2
+            BASIS_REC2D_DERIVATIVE(7) = 2 * X1 * Y1
+            BASIS_REC2D_DERIVATIVE(8) = Y1 ** 2
+            BASIS_REC2D_DERIVATIVE(9) = 0
+        END IF
+        IF (NUMBER > 3) THEN
+            CURRENT_ORDER = 4
+            INT_COEFF = CURRENT_ORDER
+            X_ORDER = CURRENT_ORDER - 1
+            Y_ORDER = 0
+            NUM_TERMS = 9
+            
+            DO BASIS_INDEX = 4, NUMBER ! compute total number of terms in basis
+                NUM_TERMS = NUM_TERMS + BASIS_INDEX + 1
+            END DO
+            
+            BASIS_INDEX = 10 ! starting from 4th order, 10th basis term
+            DO WHILE (BASIS_INDEX < NUM_TERMS)
+                IF (INT_COEFF == 1) THEN
+                    BASIS_REC2D_DERIVATIVE(BASIS_INDEX) = INT_COEFF * X1 ** X_ORDER * Y1 ** Y_ORDER
+                    BASIS_INDEX = BASIS_INDEX + 1
+                    BASIS_REC2D_DERIVATIVE(BASIS_INDEX) = 0
+                    CURRENT_ORDER = CURRENT_ORDER + 1
+                    INT_COEFF = CURRENT_ORDER
+                    X_ORDER = CURRENT_ORDER - 1
+                    Y_ORDER = 0
+                ELSE
+                    BASIS_REC2D_DERIVATIVE(BASIS_INDEX) = INT_COEFF * X1 ** X_ORDER * Y1 ** Y_ORDER
+                    INT_COEFF = INT_COEFF - 1
+                    X_ORDER = X_ORDER - 1
+                    Y_ORDER = Y_ORDER + 1
+                END IF
                 BASIS_INDEX = BASIS_INDEX + 1
-                SB(BASIS_INDEX) = 0
-                CURRENT_ORDER = CURRENT_ORDER + 1
-                INT_COEFF = CURRENT_ORDER
-                X_ORDER = CURRENT_ORDER - 1
-                Y_ORDER = 0
-            ELSE
-                SB(BASIS_INDEX) = INT_COEFF * X1 ** X_ORDER * Y1 ** Y_ORDER
-                INT_COEFF = INT_COEFF - 1
-                X_ORDER = X_ORDER - 1
-                Y_ORDER = Y_ORDER + 1
-            END IF
-            BASIS_INDEX = BASIS_INDEX + 1
-        END DO
-    END IF  
-END SELECT
-
-BASIS_REC2D_DERIVATIVE(1:NUMBER_OF_DOG)=SB(1:NUMBER_OF_DOG)
+            END DO
+        END IF
+        
+        CASE(2) ! derivative with respect to y
+        IF (NUMBER > 0) THEN
+            BASIS_REC2D_DERIVATIVE(1) = 0
+            BASIS_REC2D_DERIVATIVE(2) = 1
+        END IF
+        IF (NUMBER > 1) THEN
+            BASIS_REC2D_DERIVATIVE(3) = 0
+            BASIS_REC2D_DERIVATIVE(4) = X1
+            BASIS_REC2D_DERIVATIVE(5) = 2 * Y1
+        END IF
+        IF (NUMBER > 2) THEN
+            BASIS_REC2D_DERIVATIVE(6) = 0
+            BASIS_REC2D_DERIVATIVE(7) = X1 ** 2
+            BASIS_REC2D_DERIVATIVE(8) = 2 * X1 * Y1
+            BASIS_REC2D_DERIVATIVE(9) = 3 * Y1 ** 2
+        END IF
+        IF (NUMBER > 3) THEN
+            CURRENT_ORDER = 4
+            INT_COEFF = CURRENT_ORDER
+            Y_ORDER = CURRENT_ORDER - 1
+            X_ORDER = 0
+            NUM_TERMS = 9
+            
+            DO BASIS_INDEX = 4, NUMBER ! compute total number of terms in basis
+                NUM_TERMS = NUM_TERMS + BASIS_INDEX + 1
+            END DO
+            
+            BASIS_INDEX = 10 ! starting from 4th order, 10th basis term
+            DO WHILE (BASIS_INDEX < NUM_TERMS)
+                IF (INT_COEFF == 1) THEN
+                    BASIS_REC2D_DERIVATIVE(BASIS_INDEX) = INT_COEFF * X1 ** X_ORDER * Y1 ** Y_ORDER
+                    BASIS_INDEX = BASIS_INDEX + 1
+                    BASIS_REC2D_DERIVATIVE(BASIS_INDEX) = 0
+                    CURRENT_ORDER = CURRENT_ORDER + 1
+                    INT_COEFF = CURRENT_ORDER
+                    Y_ORDER = CURRENT_ORDER - 1
+                    X_ORDER = 0
+                ELSE
+                    BASIS_REC2D_DERIVATIVE(BASIS_INDEX) = INT_COEFF * X1 ** X_ORDER * Y1 ** Y_ORDER
+                    INT_COEFF = INT_COEFF - 1
+                    Y_ORDER = Y_ORDER - 1
+                    X_ORDER = X_ORDER + 1
+                END IF
+                BASIS_INDEX = BASIS_INDEX + 1
+            END DO
+        END IF
+    END SELECT
     
 END FUNCTION BASIS_REC2D_DERIVATIVE
 
+FUNCTION DG_SOL(N, X_IN, Y_IN, IORDER, IDEGFREE, U_C_VALDG)
+!> @brief
+!> This function returns the DG scalar solution at a given point (X_IN, Y_IN)\n
+!> REQUIRES: U_C(global): solution values and dofs, IELEM(global): element information, X_IN, Y_IN: coordinates of the point where the solution is requested, POLY(global): type of polynomials used for the basis, NOF_VARIABLES(global): number of solution variables, I_VAR: index of which solution variable to compute
+
+    INTEGER,INTENT(IN)::N,IORDER,IDEGFREE
+    REAL,INTENT(IN)::X_IN,Y_IN ! Coordinates of the point where the solution is requested
+    REAL,DIMENSION(IDEGFREE+1),INTENT(IN)::U_C_VALDG
+    REAL,DIMENSION(IDEGFREE)::BASIS_TEMP
+    INTEGER::I_DOF
+    REAL::DG_SOL
+
+    BASIS_TEMP = BASIS_REC2D(N,X_IN,Y_IN,IORDER,0,IDEGFREE)
+
+    DG_SOL = U_C_VALDG(1) + DOT_PRODUCT(BASIS_TEMP(:), U_C_VALDG(2:IDEGFREE+1))
+
+    !DO I_DOF = 1, IELEM(N,I)%IDEGFREE
+    !    DG_SOL = DG_SOL + BASIS_TEMP(I_DOF) * U_C(I)%VALDG(RKSTAGE,I_VAR,I_DOF+1)
+    !END DO
+
+END FUNCTION DG_SOL
 
 END MODULE BASIS
