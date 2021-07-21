@@ -1318,7 +1318,7 @@ end if
 	
 	
 	if (DG.EQ.1)THEN
-	allocate (mass_matrix(kmaxe,1:idegfree,QP_TRIANGLE*2));mass_matrix=zero
+	allocate (mass_matrix(kmaxe,1:idegfree,1:idegfree,QP_TRIANGLE*2));mass_matrix=zero
 	END IF
 	
 	DO I=1,KMAXE

@@ -2773,6 +2773,7 @@ S1=ZERO
 		    
 		  COMPBASEL=COMPBAStri(N,number_of_dog)
 
+
      END SELECT
 
 END FUNCTION
@@ -2934,63 +2935,167 @@ SUBROUTINE INVERT(RFF,INVRFF,IVGT)
 
  End subroutine INVERT
  
+
+SUBROUTINE DG_1
+IMPLICIT NONE
+INTEGER::COUNTERDG,K,INC,QQP,I,kmaxe, Idex, Jdex
+REAL::maxMM,minMM,variationMM,deltaX,deltaY
+REAL,DIMENSION(idegfree)::Basis_vector
+REAL,DIMENSION(1:2)::MaxCords,MinCords
+REAL,DIMENSION(xmpielrank(n),idegfree,idegfree)::totalMM
+
+kmaxe=xmpielrank(n)
  
- SUBROUTINE DG_1
-    IMPLICIT NONE
-    INTEGER::COUNTERDG,K,INC,QQP,i,kmaxe
-    kmaxe=xmpielrank(n)
+ 
+IF (DG.EQ.1)THEN
+
+!$OMP DO
+DO I=1,KMAXE
+    Basis_vector=zero
+    totalMM=zero
+
+    COUNTERDG=0
     
-    IF (DG.EQ.1)THEN
-        !$OMP DO
-        DO I=1,KMAXE
-            COUNTERDG=0 !number of quadrature point per element
-        
-            SELECT CASE(ielem(n,i)%ishape)
-            CASE(5)
-                DO K=1,ELEM_DEC
-                    VEXT(1:3,1:2)=ELEM_LISTD(k,1:3,1:2)
-                    CALL QUADRATUREtriangle(N,IGQRULES)
-                    VOLTEMP=TRIANGLEVOLUME(N)/IELEM(N,I)%totvolume
-                    QQP=QP_Triangle ! number of quadrature points for a triangle
+    DO K=1,IELEM(N,I)%NONODES
+	    NODES_LIST(k,1:2)=inoder(IELEM(N,I)%NODES(K))%CORD(1:2)
+	    vext(k,1:2)=NODES_LIST(k,1:2)
+    END DO
+    
+
+
+    !write(300+n,*)"nndoes 1",IELEM(N,I)%NONODES!,"QuadraturePoint",counterdg
+    !write(300+n,*)"nnodes 2",n_node!,"QuadraturePoint",counterdg
+    SELECT CASE(ielem(n,i)%ishape)
+
+        CASE(5)
+            DO K=1,ELEM_DEC
+                VEXT(1:3,1:2)=ELEM_LISTD(k,1:3,1:2)
+                CALL QUADRATUREtriangle(N,IGQRULES)
+                VOLTEMP=TRIANGLEVOLUME(N)/IELEM(N,I)%totvolume
+                QQP=QP_Triangle
+                
+                write(300+n,*)"element",i!,"QuadraturePoint",counterdg
+                !write(300+n,*)"n nodes",IELEM(N,I)%NONODES,"max cord",MaxCords,"min cord",MinCords !
+                write(300+n,*)"order",ielem(n,i)%iorder,"deg free",ielem(n,i)%idegfree
+!                 maxCords(:)=comp_max_diff(N,VEXT,IELEM(N,I)%NONODES)
+!                 minCords(:)=comp_min_diff(N,VEXT,IELEM(N,I)%NONODES)
+
+                
                     DO INC=1,QQP
                         POX(1)=QPOINTS(1,INC)
                         POY(1)=QPOINTS(2,INC) 
                         COUNTERDG=COUNTERDG+1
-
-                        x1=pox(1)
-                        y1=poy(1)
-                        compwrt=-1
-                                
-                        MASS_MATRIX(I,:,COUNTERDG) = basis_rec2d(N,x1,y1,ielem(n,i)%iorder,I,ielem(n,i)%idegfree)
-                        write(300+n,*)"element",i,counterdg,x1,y1
-                        write(300+n,*) mass_matrix(i,1:IELEM(N,I)%IDEGFREE,counterdg)
-                    END DO 
-                END DO
-                
-            CASE(6)
-                CALL QUADRATUREtriangle(N,IGQRULES)
-                VOLTEMP=1.0d0
-                QQP=QP_Triangle
-                DO INC=1,QQP
-                    POX(1)=QPOINTS(1,INC)
-                    POY(1)=QPOINTS(2,INC) 
-                    
-                    COUNTERDG=COUNTERDG+1
-
-                    x1=pox(1)-ielem(n,i)%xxc
-                    y1=poy(1)-ielem(n,i)%yyc
-                    compwrt=-1
                                                 
-                    MASS_MATRIX(I,:,COUNTERDG) = basis_rec2d(N,x1,y1,ielem(n,i)%iorder,I,ielem(n,i)%idegfree)
-                    write(300+n,*)"element",i,counterdg,x1,y1, NUMBER_OF_DOG, ielem(n,i)%idegfree
-                    write(300+n,*) mass_matrix(i,1:IELEM(N,I)%IDEGFREE,counterdg)
-                    write(300+n,*) "INTEG_BASIS",INTEG_BASIS(ICONSIDERED)%value(1:NUMBER_OF_DOG)
-                
-                END DO
-            END SELECT
-        END DO
-        !$OMP END DO
-    END IF
-END SUBROUTINE
+                         x1=pox(1)-ielem(n,i)%xxc
+                         y1=poy(1)-ielem(n,i)%yyc
 
+!                         maxCords(:)=comp_max_diff(N,VEXT,IELEM(N,I)%NONODES)
+!                         minCords(:)=comp_min_diff(N,VEXT,IELEM(N,I)%NONODES)
+    
+!                         deltaX=(abs(maxCords(1)-minCords(1)))
+!                         deltaY=(abs(maxCords(2)-minCords(2)))
+                        
+!                          x1=(pox(1)-ielem(n,i)%xxc)/deltaX
+!                          y1=(poy(1)-ielem(n,i)%yyc)/deltaY
+                                                        
+                        compwrt=-1
+                        
+                        Basis_vector(:) = basis_rec2d(N,x1,y1,ielem(n,i)%iorder,I,ielem(n,i)%idegfree)
+                        
+
+                        DO Idex=1,ielem(n,i)%idegfree
+                            DO Jdex=1,ielem(n,i)%idegfree
+                                MASS_MATRIX(I,Idex,Jdex,COUNTERDG)=	basis_vector(Idex)*basis_vector(Jdex)*WEQUA3D(INC)
+                                !write(300+n,*)"MassMatrix at Index",Idex,Jdex,":",mass_matrix(i,Idex,Jdex,counterdg)
+                            END DO    
+                        END DO
+                        
+                    totalMM(I,:,:)=totalMM(I,:,:)+MASS_MATRIX(I,:,:,COUNTERDG)
+                    
+                    END DO 
+                    
+                    
+                !write(300+n,*)"total MassMatrix of element",I,":",totalMM(I,:,:)
+                maxMM=maxval(totalMM)
+                minMM=minval(totalMM)
+                variationMM=maxMM-minMM
+                
+                DO Idex=1,ielem(n,i)%idegfree
+                            DO Jdex=1,ielem(n,i)%idegfree
+                                write(300+n,*)"total MassMatrix at index",Idex,Jdex,":",totalMM(I,Idex,Jdex)
+                            END DO    
+                        END DO
+                 
+                 write(300+n,*)"max val of totalMM:",maxMM 
+                 write(300+n,*)"min val of totalMM:",minMM  
+                 write(300+n,*)"condition of totalMM:",variationMM 
+                END DO
+
+        CASE(6)
+            CALL QUADRATUREtriangle(N,IGQRULES)
+            VOLTEMP=1.0d0
+            QQP=QP_Triangle
+            write(300+n,*)"element",i!,"QuadraturePoint",counterdg
+           ! write(300+n,*)"n nodes",IELEM(N,I)%NONODES,"max cord",MaxCords,"min cord",MinCords
+            write(300+n,*)"order",ielem(n,i)%iorder,"deg free",ielem(n,i)%idegfree
+
+!             maxCords(:)=comp_max_diff(N,VEXT,IELEM(N,I)%NONODES)
+!             minCords(:)=comp_min_diff(N,VEXT,IELEM(N,I)%NONODES)
+!     
+!             deltaX=(abs(maxCords(1)-minCords(1)))
+!             deltaY=(abs(maxCords(2)-minCords(2)))
+            
+            
+            DO INC=1,QQP
+                POX(1)=QPOINTS(1,INC)
+                POY(1)=QPOINTS(2,INC) 
+	  
+                COUNTERDG=COUNTERDG+1
+                
+               x1=pox(1)-ielem(n,i)%xxc
+               y1=poy(1)-ielem(n,i)%yyc
+                        
+!                   x1=(pox(1)-ielem(n,i)%xxc)/deltaX
+!                   y1=(poy(1)-ielem(n,i)%yyc)/deltaY
+                
+                compwrt=-1
+			
+                Basis_vector(:) = basis_rec2d(N,x1,y1,ielem(n,i)%iorder,I,ielem(n,i)%idegfree)
+                
+                DO Idex=1,ielem(n,i)%idegfree
+                    DO Jdex=1,ielem(n,i)%idegfree
+                        MASS_MATRIX(I,Idex,Jdex,COUNTERDG)=	basis_vector(Idex)*basis_vector(Jdex)*WEQUA3D(INC)
+                        !write(300+n,*)"MassMatrix at Index",Idex,Jdex,":",mass_matrix(i,Idex,Jdex,counterdg)
+                    END DO    
+                END DO
+                
+            totalMM(I,:,:)=totalMM(I,:,:)+MASS_MATRIX(I,:,:,COUNTERDG)
+            
+            END DO
+                
+                maxMM=maxval(totalMM)
+                minMM=minval(totalMM)
+                variationMM=maxMM-minMM
+        
+            !write(300+n,*)"total MassMatrix of element",I,":",totalMM(I,:,:)
+             DO Idex=1,ielem(n,i)%idegfree
+                            DO Jdex=1,ielem(n,i)%idegfree
+                                write(300+n,*)"total MassMatrix at index",Idex,Jdex,":",totalMM(I,Idex,Jdex)
+                            END DO    
+                        END DO
+	  
+                 write(300+n,*)"max val of totalMM:",maxMM 
+                 write(300+n,*)"min val of totalMM:",minMM 
+                 write(300+n,*)"condition of totalMM:",variationMM 
+        END SELECT
+    
+END DO
+!$OMP END DO
+
+END IF
+ 
+ 
+END SUBROUTINE
+ 
+ 
 END MODULE PRESTORE

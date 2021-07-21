@@ -1517,6 +1517,8 @@ REAL::OOV
 real,dimension(number_of_dog)::basis_rec2d
 SB=zero
 
+
+    IF (POLY.EQ.1)THEN
     select case(number)
     
     case(1)
@@ -1613,8 +1615,59 @@ SB=zero
     SB(25)= X1**2*Y1**4
     SB(26)= X1*Y1**5
     SB(27)= Y1**6
+
     
     END select
+    end if
+    
+     IF (POLY.EQ.2)THEN
+     select case(number)
+        case(1)
+    !FIRST ORDER FUNCTIONS (2ND-ORDER OF ACCURACY 3)
+    SB(1)=-1.0d0 + 2.0d0*x1
+    SB(2)=-1.0d0 + 2.0d0*y1
+    
+    case(2)
+! SECOND ORDER FUNCTIONS (3RD-ORDER OF ACCURACY 4-9)
+    SB(1)=-1.0d0 + 2.0d0*x1
+    SB(2)=-1.0d0 + 2.0d0*y1
+    SB(3)=1.0d0 - 6.0d0*x1 + 6.0d0*x1**2
+    SB(4)=SB(1)*SB(2)
+    SB(5)=1.0d0 - 6.0d0*y1 + 6.0d0*y1**2
+ 
+ case(3)
+! THIRD ORDER FUNCTIONS (4TH-ORDER OF ACCURACY  10-19)
+    SB(1)=-1.0d0 + 2.0d0*x1
+    SB(2)=-1.0d0 + 2.0d0*y1
+    SB(3)=1.0d0 - 6.0d0*x1 + 6.0d0*x1**2
+    SB(4)=SB(1)*SB(2)
+    SB(5)=1.0d0 - 6.0d0*y1 + 6.0d0*y1**2 
+    SB(6)=-1.0d0 + 12.0d0*x1 - 30.0d0*x1**2 + 20.0d0*x1**3
+    SB(7)=SB(3)*SB(2)
+    SB(8)=SB(1)*SB(5)
+    SB(9)=-1.0d0 + 12.0d0*y1 - 30.0d0*y1**2 + 20.0d0*y1**3  
+    
+    
+    end select
+    end if
+    
+    IF(POLY.EQ.3)THEN
+    select case(number)
+        case(1)
+     !FIRST ORDER FUNCTIONS (2ND-ORDER OF ACCURACY 3)
+    SB(1)=x1
+    SB(2)=y1   
+        case(2)
+! SECOND ORDER FUNCTIONS (3RD-ORDER OF ACCURACY 4-9)
+    SB(1)=x1
+    SB(2)=y1
+    SB(3)=(x1)**2
+    SB(4)=SB(1)*SB(2)
+    SB(5)=(y1)**2
+
+ 
+     end select 
+    end if
    
     if (compwrt.eq.0)then
         OOV=1.0D0/(ILOCAL_RECON3(ICONSIDERED)%VOLUME(1,1))
@@ -1625,7 +1678,13 @@ SB=zero
         basis_rec2d(1:NUMBER_OF_DOG)=SB(1:NUMBER_OF_DOG)-((INTEG_BASIS(ICONSIDERED)%valuec(1:NUMBER_OF_DOG))*OOV)
     end if
     if (compwrt.eq.-1)then
-        basis_rec2d(1:NUMBER_OF_DOG)=SB(1:NUMBER_OF_DOG)!-((INTEG_BASIS(ICONSIDERED)%valuec(1:NUMBER_OF_DOG))*OOV)
+!    basis_rec2d(1:NUMBER_OF_DOG)=SB(1:NUMBER_OF_DOG)!-((INTEG_BASIS(ICONSIDERED)%valuec(1:NUMBER_OF_DOG))*OOV)
+        if(poly.eq.3)then
+            basis_rec2d(1:2)=SB(1:2)
+            basis_rec2d(3:NUMBER_OF_DOG)=SB(3:NUMBER_OF_DOG)-((INTEG_BASIS(ICONSIDERED)%valuec(3:NUMBER_OF_DOG))*OOV)
+        else
+            basis_rec2d(1:NUMBER_OF_DOG)=SB(1:NUMBER_OF_DOG)
+        end if
     end if
     
     
