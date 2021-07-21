@@ -175,6 +175,11 @@ SUBROUTINE CALCULATE_FLUXESHI2D(N)
                 NORMALVECT=(NX*LAMX)+(NY*LAMY)
                 
                 NUM_NODES = 2
+		
+		!ILOCAL_RECON3(I)%QPOINTS(L,NGP,1), l=face number, NGP=gaussian quadrature point, 1=x, 2=y, 3=z
+		!howver these coordinates have been mapped to a reference space, so we need to bypass their transformation from phyiscal to reference space.
+		
+		
                 DO K = 1,NUM_NODES
                     WRITE(400,*) K,SHAPE(VEXT(K,1:DIMS)),'face',IELEM(N,I)%NODES_FACES(L,K),'size',shape(INODER)
                     WRITE(400,*) INODER(IELEM(N,I)%NODES_FACES(L,K))%cord(1)
