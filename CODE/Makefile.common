@@ -61,7 +61,7 @@ implicit_fluxes.mod implicit_fluxes.o : implicit_fluxes.f90 declaration.mod libr
 implicit_time.mod implicit_time.o : implicit_time.f90 library.mod transform.mod flow_operations.mod implicit_fluxes.mod communications.mod
 	$(F90) $(FFLAGS)  -c    implicit_time.f90
 
-initialisation.mod init_p.o : init_p.f90 declaration.mod library.mod transform.mod fluxes.mod profile.mod
+initialisation.mod init_p.o : init_p.f90 declaration.mod library.mod transform.mod profile.mod
 	$(F90) $(FFLAGS)  -c    init_p.f90
 
 io.mod io.o : io.f90 mpiinfo.mod declaration.mod flow_operations.mod transform.mod

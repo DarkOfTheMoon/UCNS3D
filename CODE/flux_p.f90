@@ -139,7 +139,7 @@ SUBROUTINE CALCULATE_FLUXESHI2D(N)
 	IMPLICIT NONE
 	INTEGER,INTENT(IN)::N
 	REAL::GODFLUX2,sum_detect
-	INTEGER::I,L,NGP,KMAXE,IQP
+	INTEGER::I,L,K,NGP,KMAXE,IQP,NUM_NODES
 	REAL,DIMENSION(QP_LINE_N)::WEIGHTS_TEMP_LINE !Quadrature weights for interfaces
 	REAL,DIMENSION(2,QP_LINE_N)::QPOINTS_LINE !Quadrature points for interfaces
 	
@@ -147,7 +147,6 @@ SUBROUTINE CALCULATE_FLUXESHI2D(N)
 	
 	CALL QUADRATURELINE(N,IGQRULES)
 	WEIGHTS_TEMP_LINE = WEQUA2D(1:QP_LINE_N)
-	QPOINTS_LINE = QPOINTS(1:2,1:QP_LINE_N)
 	
 	!$OMP DO SCHEDULE (STATIC)
 	DO I=1,KMAXE
@@ -167,7 +166,7 @@ SUBROUTINE CALCULATE_FLUXESHI2D(N)
             END DO
         END IF
         
-		IF (IELEM(N,I)%INTERIOR.EQ.0)THEN
+		IF (IELEM(N,I)%INTERIOR.EQ.0)THEN !Element is interior
 		    DO L=1,IELEM(N,I)%IFCA
                 GODFLUX2=ZERO
                 NX=IELEM(N,I)%FACEANGLEX(L)
@@ -175,16 +174,27 @@ SUBROUTINE CALCULATE_FLUXESHI2D(N)
                 
                 NORMALVECT=(NX*LAMX)+(NY*LAMY)
                 
+                NUM_NODES = 2
+                DO K = 1,NUM_NODES
+                    WRITE(400,*) K,SHAPE(VEXT(K,1:DIMS)),'face',IELEM(N,I)%NODES_FACES(L,K),'size',shape(INODER)
+                    WRITE(400,*) INODER(IELEM(N,I)%NODES_FACES(L,K))%cord(1)
+                    VEXT(K,1:DIMS)=INODER(IELEM(N,I)%NODES_FACES(L,K))%CORD(1:DIMS)
+                END DO
+                
+                CALL QUADRATURELINE(N,IGQRULES)
+                QPOINTS_LINE = QPOINTS(1:2,1:QP_LINE_N)
+        
+                
                 IQP=QP_LINE_N
                 DO NGP=1,IQP
-				      CLEFT(1)=ILOCAL_RECON3(I)%ULEFT(1,L,NGP)
-				      CRIGHT(1)=ILOCAL_RECON3(IELEM(N,I)%INEIGH(L))%ULEFT(1,IELEM(N,I)%INEIGHN(L),NGP)
-				     
-				      CALL EXACT_RIEMANN_SOLVER(N,CLEFT,CRIGHT,NORMALVECT,HLLCFLUX)
+                    CLEFT(1)=ILOCAL_RECON3(I)%ULEFT(1,L,NGP)
+                    CRIGHT(1)=ILOCAL_RECON3(IELEM(N,I)%INEIGH(L))%ULEFT(1,IELEM(N,I)%INEIGHN(L),NGP)
+                    
+                    CALL EXACT_RIEMANN_SOLVER(N,CLEFT,CRIGHT,NORMALVECT,HLLCFLUX)
 
                     IF (DG.EQ.1) THEN
                         !Riemann flux at interface quadrature points times basis
-                        GODFLUX2 = GODFLUX2 + HLLCFLUX(1) * WEIGHTS_TEMP_LINE(NGP) * IELEM(N,I)%SURF(L) * SUM(BASIS_REC2D(N,QPOINTS(1,NGP),QPOINTS(2,NGP),ielem(n,i)%iorder,I,ielem(n,i)%idegfree))
+                        GODFLUX2 = GODFLUX2 + HLLCFLUX(1) * WEIGHTS_TEMP_LINE(NGP) * IELEM(N,I)%SURF(L) * SUM(BASIS_REC2D(N,QPOINTS_LINE(1,NGP),QPOINTS_LINE(2,NGP),ielem(n,i)%iorder,I,ielem(n,i)%idegfree))
                     ELSE
                         GODFLUX2=GODFLUX2+(HLLCFLUX(1)*(WEIGHTS_TEMP_LINE(NGP)*IELEM(N,I)%SURF(L)))
                     END IF

@@ -1186,34 +1186,26 @@ SUBROUTINE SURFACE_CALCULATOR2(N)
 !> This subroutine computes the length of edges of elements in 2D
 IMPLICIT NONE
 INTEGER,INTENT(IN)::N
-!$ integer::OMP_IN_PARALLEL,OMP_GET_THREAD_NUM
-INTEGER::I,K,KMAXE,jx,JX2,nnd,j
-real::DUMV1,DUMV2,dumr
- KMAXE=XMPIELRANK(N)
+!$ INTEGER::OMP_IN_PARALLEL,OMP_GET_THREAD_NUM
+INTEGER::I,K,KMAXE,JX,JX2,NND,J
+REAL::DUMV1,DUMV2,DUMR
 
-!$OMP PARALLEL DEFAULT(SHARED) PRIVATE(DUMV1,DUMV2,dumr,I,JX,jx2,K,nnd,j) 
+KMAXE=XMPIELRANK(N)
+
+!$OMP PARALLEL DEFAULT(SHARED) PRIVATE(DUMV1,DUMV2,DUMR,I,JX,JX2,K,NND,J) 
 !$OMP DO SCHEDULE (STATIC) 
- DO I=1,KMAXE
-    
-    
+
+DO I=1,KMAXE
     DO J=1,IELEM(N,I)%IFCA
-    				
-					 
-					  NND=2
-				      do K=1,nnd
-					VEXT(k,1:dims)=inoder(IELEM(N,I)%NODES_FACES(J,K))%CORD(1:dims)
-				      END DO
-					  
-					  
-					  IELEM(N,I)%surf(J)=linearea(N)
-					  
-				  
-				
-    
-    
-    
+        NND=2
+        
+        DO K=1,NND
+            VEXT(K,1:DIMS)=INODER(IELEM(N,I)%NODES_FACES(J,K))%CORD(1:DIMS)
+        END DO
+        
+        IELEM(N,I)%SURF(J)=LINEAREA(N)
     END DO
-    END DO
+END DO
 !$OMP END DO 
 !$OMP END PARALLEL 
 
