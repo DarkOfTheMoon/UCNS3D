@@ -170,7 +170,9 @@ KMAXE=XMPIELRANK(N)
 					  IF (IDUMMY.EQ.0)THEN
 					  do K=1,nnd
 					    VEXT(k,1:2)=inoder(IELEM(N,I)%NODES_FACES(L,K))%CORD(1:dims)
-					    VEXT(k,1:2)=MATMUL(ILOCAL_RECON3(I)%INVCCJAC(:,:),VEXT(K,1:2)-ILOCAL_RECON3(I)%VEXT_REF(1:2))
+					    !takis you need to bypass (skip) the following lines where the coordinates are transformed!
+					   ! VEXT(k,1:2)=MATMUL(ILOCAL_RECON3(I)%INVCCJAC(:,:),VEXT(K,1:2)-ILOCAL_RECON3(I)%VEXT_REF(1:2))
+					    !end takis
 					  END DO
 					  ELSE
 					  facex=l;
