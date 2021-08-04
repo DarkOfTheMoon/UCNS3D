@@ -1807,25 +1807,23 @@ FUNCTION BASIS_REC2D_DERIVATIVE(N,X1,Y1,NUMBER,ICONSIDERED,NUMBER_OF_DOG,DX_OR_D
     
 END FUNCTION BASIS_REC2D_DERIVATIVE
 
-FUNCTION DG_SOL(N, X_IN, Y_IN, IORDER, IDEGFREE, U_C_VALDG)
+FUNCTION DG_SOL(N, X_IN, Y_IN, NUM_VARIABLES, IORDER, IDEGFREE, U_C_VALDG)
 !> @brief
-!> This function returns the DG scalar solution at a given point (X_IN, Y_IN)\n
-!> REQUIRES: U_C(global): solution values and dofs, IELEM(global): element information, X_IN, Y_IN: coordinates of the point where the solution is requested, POLY(global): type of polynomials used for the basis, NOF_VARIABLES(global): number of solution variables, I_VAR: index of which solution variable to compute
+!> This function returns the DG solution at a given point (X_IN, Y_IN)\n
+!> REQUIRES: X_IN, Y_IN: coordinates of the point where the solution is requested, NUM_VARIABLES: number of solution variables, IDEGFREE: number of basis terms
 
-    INTEGER,INTENT(IN)::N,IORDER,IDEGFREE
+    INTEGER,INTENT(IN)::N,IORDER,IDEGFREE,NUM_VARIABLES
     REAL,INTENT(IN)::X_IN,Y_IN ! Coordinates of the point where the solution is requested
-    REAL,DIMENSION(IDEGFREE+1),INTENT(IN)::U_C_VALDG
+    REAL,DIMENSION(NUM_VARIABLES,IDEGFREE+1),INTENT(IN)::U_C_VALDG
     REAL,DIMENSION(IDEGFREE)::BASIS_TEMP
-    INTEGER::I_DOF
-    REAL::DG_SOL
+    INTEGER::I_DOF, I_VAR
+    REAL,DIMENSION(NUM_VARIABLES)::DG_SOL
 
     BASIS_TEMP = BASIS_REC2D(N,X_IN,Y_IN,IORDER,0,IDEGFREE)
 
-    DG_SOL = U_C_VALDG(1) + DOT_PRODUCT(BASIS_TEMP(:), U_C_VALDG(2:IDEGFREE+1))
-
-    !DO I_DOF = 1, IELEM(N,I)%IDEGFREE
-    !    DG_SOL = DG_SOL + BASIS_TEMP(I_DOF) * U_C(I)%VALDG(RKSTAGE,I_VAR,I_DOF+1)
-    !END DO
+    DO I_VAR = 1, NUM_VARIABLES
+        DG_SOL = U_C_VALDG(I_VAR,1) + DOT_PRODUCT(BASIS_TEMP(:), U_C_VALDG(I_VAR,2:))
+    END DO
 
 END FUNCTION DG_SOL
 

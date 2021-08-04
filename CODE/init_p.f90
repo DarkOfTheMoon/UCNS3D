@@ -788,7 +788,6 @@ SUBROUTINE INITIALISE2d(N)
 IMPLICIT NONE
 integer,INTENT(IN)::N
 REAL,allocatable,DIMENSION(:)::RG,ARG
-REAL::DGX1,DGY1,DGZ1
 CHARACTER(LEN=20)::PROC,RESTFILE,PROC3
 INTEGER:: prev_turbequation,INITIAL,III,i,k,jx,QQP,INC,kmaxe,jkn,ki,iterr,JX2
 
@@ -895,14 +894,15 @@ IF (RESTART.EQ.0)THEN
             END DO
             CALL DECOMPOSE2
     
-            IF (DG.EQ.1)THEN ! Do I need to store the initial solution at qps?
+            IF (DG.EQ.1)THEN
                 POX(1) = IELEM(N,I)%XXC !POX,POY required for LINEAR_INIT2D
                 POY(1) = IELEM(N,I)%YYC
                  
                 U_C(I)%VALDG(1,1,1)=LINEAR_INIT2D(N)   !THIS IS JUST THE INITIAL SOLUTION
+                U_C(I)%VALDG(1,1,2:IELEM(N,I)%IDEGFREE+1) = ZERO
                 
                 WRITE(200+N,*) "ELEMENT", I,"DG INITIAL"
-                WRITE(200+N,*) "SOLUTION", U_C(I)%VALDG(1,1,1)
+                WRITE(200+N,*) "SOLUTION", U_C(I)%VALDG(1,1,:)
             END IF
             
             SELECT CASE(ielem(n,i)%ishape)
