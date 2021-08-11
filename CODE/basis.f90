@@ -1652,23 +1652,23 @@ OOV=1.0D0/(ILOCAL_RECON3(ICONSIDERED)%VOLUME(1,1))
     end select
     end if
     
-    IF(POLY.EQ.3)THEN
-    select case(number)
-        case(1)
-     !FIRST ORDER FUNCTIONS (2ND-ORDER OF ACCURACY 3)
-    SB(1)=x1
-    SB(2)=y1   
-        case(2)
-! SECOND ORDER FUNCTIONS (3RD-ORDER OF ACCURACY 4-9)
-    SB(1)=x1
-    SB(2)=y1
-    SB(3)=(x1)**2
-    SB(4)=SB(1)*SB(2)
-    SB(5)=(y1)**2
-
- 
-     end select 
-    end if
+!     IF(POLY.EQ.3)THEN
+!     select case(number)
+!         case(1)
+!      !FIRST ORDER FUNCTIONS (2ND-ORDER OF ACCURACY 3)
+!     SB(1)=x1
+!     SB(2)=y1   
+!         case(2)
+! ! SECOND ORDER FUNCTIONS (3RD-ORDER OF ACCURACY 4-9)
+!     SB(1)=x1
+!     SB(2)=y1
+!     SB(3)=(x1)**2
+!     SB(4)=SB(1)*SB(2)
+!     SB(5)=(y1)**2
+! 
+!  
+!      end select 
+!     end if
    
     if (compwrt.eq.0)then
     basis_rec2d(1:NUMBER_OF_DOG)=SB(1:NUMBER_OF_DOG)-((INTEG_BASIS(ICONSIDERED)%value(1:NUMBER_OF_DOG))*OOV)
@@ -1677,18 +1677,97 @@ OOV=1.0D0/(ILOCAL_RECON3(ICONSIDERED)%VOLUME(1,1))
     basis_rec2d(1:NUMBER_OF_DOG)=SB(1:NUMBER_OF_DOG)-((INTEG_BASIS(ICONSIDERED)%valuec(1:NUMBER_OF_DOG))*OOV)
     end if
     if (compwrt.eq.-1)then
-!    basis_rec2d(1:NUMBER_OF_DOG)=SB(1:NUMBER_OF_DOG)!-((INTEG_BASIS(ICONSIDERED)%valuec(1:NUMBER_OF_DOG))*OOV)
-        if(poly.eq.3)then
-            basis_rec2d(1:2)=SB(1:2)
-            basis_rec2d(3:NUMBER_OF_DOG)=SB(3:NUMBER_OF_DOG)-((INTEG_BASIS(ICONSIDERED)%valuec(3:NUMBER_OF_DOG))*OOV)
-        else
-            basis_rec2d(1:NUMBER_OF_DOG)=SB(1:NUMBER_OF_DOG)
-        end if
+    basis_rec2d(1:NUMBER_OF_DOG)=SB(1:NUMBER_OF_DOG)!-((INTEG_BASIS(ICONSIDERED)%valuec(1:NUMBER_OF_DOG))*OOV)
+!         if(poly.eq.3)then
+!             basis_rec2d(1:2)=SB(1:2)
+!             basis_rec2d(3:NUMBER_OF_DOG)=SB(3:NUMBER_OF_DOG)-((INTEG_BASIS(ICONSIDERED)%valuec(3:NUMBER_OF_DOG))*OOV)
+!         else
+!             basis_rec2d(1:NUMBER_OF_DOG)=SB(1:NUMBER_OF_DOG)
+!         end if
     end if
     
     
 
 END FUNCTION BASIS_REC2d
+
+
+
+FUNCTION gammafunc(order)
+
+IMPLICIT NONE
+real,INTENT(IN)::order
+real::gammafunc
+integer::ind
+gammafunc = 1
+if (order .eq. 0)then 
+    gammafunc =1
+else 
+    do ind=1,order-1
+    gammafunc = gammafunc * ind
+    end do
+end if
+!write(600+n,*)"gammafunc",gammafunc!,"QuadraturePoint",counterdg
+END FUNCTION gammafunc
+
+
+FUNCTION BASIS_REC_Jacobi2d(N,X1,Y1,NUMBER,ICONSIDERED,NUMBER_OF_DOG)
+
+IMPLICIT NONE
+INTEGER,INTENT(IN)::N
+INTEGER,INTENT(IN)::NUMBER,ICONSIDERED,NUMBER_OF_DOG
+REAL,INTENT(IN)::X1,Y1
+REAL,DIMENSION(NUMBER_OF_DOG)::SBX,SBY
+REAL::OOV,alpha,beta,gamma0,gamma1,H1,H2,aold,anew,bnew
+INTEGER::ind
+real,dimension(number_of_dog)::BASIS_REC_Jacobi2d
+SB=zero
+OOV=1.0D0/(ILOCAL_RECON3(ICONSIDERED)%VOLUME(1,1))
+
+alpha=0
+beta=0
+
+gamma0=2**(alpha+beta+1)/(alpha+beta+1)*gammafunc(alpha+1)*gammafunc(beta+1)/(gammafunc(alpha+beta+1))
+gamma1=(alpha+1)*(beta+1)/(alpha+beta+3)*gamma0
+SBX(1)=1.0d0/sqrt(gamma0)
+SBX(2)=((alpha+beta+2)*X1/2+(alpha-beta)/2)/sqrt(gamma1)
+
+aold=2/(2+alpha+beta)*sqrt((alpha+1)*(beta+1)/(alpha+beta+3))
+
+DO ind=1,NUMBER_OF_DOG-2
+    H1 = 2*ind+alpha+beta
+    anew = 2/(h1+2)*sqrt((ind+1)*(ind+1+alpha+beta)*(ind+1+alpha)*(ind+1+beta)/(H1+1)/(H1+3))
+    bnew = -(alpha**2-beta**2)/H1/(H1+2)
+    SBX(ind+2)=1/anew*(-aold*SBX(ind)+(X1-bnew)*SBX(ind+1))
+    aold=anew
+END DO
+
+   
+DO ind=1,NUMBER_OF_DOG-2
+    alpha = 2*ind+1
+    beta = 0.0d0
+    gamma0 = 2**(alpha+beta+1)/(alpha+beta+1)*gammafunc(alpha+1)*gammafunc(beta+1)/(gammafunc(alpha+beta+1))
+    gamma1 = (alpha+1)*(beta+1)/(alpha+beta+3)*gamma0    
+    SBY(1)=1.0d0/sqrt(gamma0)
+    SBY(2)=((alpha+beta+2)*Y1/2+(alpha-beta)/2)/sqrt(gamma1)
+
+    aold=2/(2+alpha+beta)*sqrt((alpha+1)*(beta+1)/(alpha+beta+3))
+    H1 = 2*ind+alpha+beta
+    anew = 2/(h1+2)*sqrt((ind+1)*(ind+1+alpha+beta)*(ind+1+alpha)*(ind+1+beta)/(H1+1)/(H1+3))
+    bnew = -(alpha**2-beta**2)/H1/(H1+2)
+    SBY(ind+2)=1/anew*(-aold*SBY(ind)+(Y1-bnew)*SBY(ind+1))
+    aold=anew    
+END DO    
+
+
+DO ind=1,NUMBER_OF_DOG
+SB(ind)=sqrt(2.0d0)*SBX(ind)*SBY(ind)*(1-Y1)**ind
+END DO
+
+basis_rec_jacobi2d(1:NUMBER_OF_DOG)=SB(1:NUMBER_OF_DOG)
+
+END FUNCTION BASIS_REC_Jacobi2d
+
+
 
 
 FUNCTION BASIS_REC2D_DERIVATIVE(N,X1,Y1,NUMBER,ICONSIDERED,NUMBER_OF_DOG,DX_OR_DY)

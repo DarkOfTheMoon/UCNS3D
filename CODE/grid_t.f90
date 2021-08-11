@@ -3979,12 +3979,28 @@ ANGLEFACEX=(vext(2,2)-vext(1,2))/length
 ANGLEFACEy=-(vext(2,1)-vext(1,1))/length
 
 
-
 END SUBROUTINE ANGLE2D
 
 
 
 
+SUBROUTINE MAPtoREFsq (POX,POY,mpox,mpoy)
+IMPLICIT NONE
+REAL,ALLOCATABLE,DIMENSION(:),INTENT(IN) ::POX,POY
+REAL,INTENT(out) ::mpox,mpoy
+
+mPOX=0.0d0
+mPOY=0.0d0
+
+if (POY(1).ne.1) then
+    mPOX=2*(1+pox(1))/(1-poy(1))-1
+else 
+    mPOX=-1
+end if
+
+mPOY=poy(1)
+
+END SUBROUTINE MAPtoREFsq
 
 
 

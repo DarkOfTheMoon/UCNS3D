@@ -2939,30 +2939,34 @@ SUBROUTINE INVERT(RFF,INVRFF,IVGT)
 SUBROUTINE DG_1
 IMPLICIT NONE
 INTEGER::COUNTERDG,K,INC,QQP,I,kmaxe, Idex, Jdex
-REAL::maxMM,minMM,variationMM,deltaX,deltaY
+REAL::maxMM,minMM,variationMM,deltaX,deltaY,eta1,eta2,mpox,mpoy,mx1,my1
 REAL,DIMENSION(idegfree)::Basis_vector
 REAL,DIMENSION(1:2)::MaxCords,MinCords
-REAL,DIMENSION(xmpielrank(n),idegfree,idegfree)::totalMM
+REAL,DIMENSION(xmpielrank(n),idegfree,idegfree)::totalMM,invMM
 
 kmaxe=xmpielrank(n)
- 
+
+totalMM=zero
+invMM=zero
+
  
 IF (DG.EQ.1)THEN
 
 !$OMP DO
 DO I=1,KMAXE
     Basis_vector=zero
-    totalMM=zero
-
+    maxMM=0.0d0
+    minMM=0.0d0
+    mpox=0.0d0
+    mpoy=0.0d0
     COUNTERDG=0
     
     DO K=1,IELEM(N,I)%NONODES
 	    NODES_LIST(k,1:2)=inoder(IELEM(N,I)%NODES(K))%CORD(1:2)
 	    vext(k,1:2)=NODES_LIST(k,1:2)
     END DO
+    CALL DECOMPOSE2
     
-
-
     !write(300+n,*)"nndoes 1",IELEM(N,I)%NONODES!,"QuadraturePoint",counterdg
     !write(300+n,*)"nnodes 2",n_node!,"QuadraturePoint",counterdg
     SELECT CASE(ielem(n,i)%ishape)
@@ -2973,12 +2977,11 @@ DO I=1,KMAXE
                 CALL QUADRATUREtriangle(N,IGQRULES)
                 VOLTEMP=TRIANGLEVOLUME(N)/IELEM(N,I)%totvolume
                 QQP=QP_Triangle
-                
-                write(300+n,*)"element",i!,"QuadraturePoint",counterdg
+!                write(500+n,*)"vext",vext!,"QuadraturePoint",counterdg
+!                 write(300+n,*)"element",i!,"QuadraturePoint",counterdg
+!                 write(500+n,*)"element",i!,"QuadraturePoint",counterdg
                 !write(300+n,*)"n nodes",IELEM(N,I)%NONODES,"max cord",MaxCords,"min cord",MinCords !
-                write(300+n,*)"order",ielem(n,i)%iorder,"deg free",ielem(n,i)%idegfree
-!                 maxCords(:)=comp_max_diff(N,VEXT,IELEM(N,I)%NONODES)
-!                 minCords(:)=comp_min_diff(N,VEXT,IELEM(N,I)%NONODES)
+                !write(300+n,*)"order",ielem(n,i)%iorder,"deg free",ielem(n,i)%idegfree
 
                 
                     DO INC=1,QQP
@@ -2986,21 +2989,29 @@ DO I=1,KMAXE
                         POY(1)=QPOINTS(2,INC) 
                         COUNTERDG=COUNTERDG+1
                                                 
-                         x1=pox(1)-ielem(n,i)%xxc
-                         y1=poy(1)-ielem(n,i)%yyc
-
-!                         maxCords(:)=comp_max_diff(N,VEXT,IELEM(N,I)%NONODES)
-!                         minCords(:)=comp_min_diff(N,VEXT,IELEM(N,I)%NONODES)
+                   
+                                                
+!                            x1=pox(1)-ielem(n,i)%xxc
+!                            y1=poy(1)-ielem(n,i)%yyc
+                          
+                          !TRANSFORM FIRST TO REFERENCE SQUARE CORDS. SYST.                        
+!                         CALL MAPtoREFsq(POX,POY,mpox,mpoy)   
+!                         write(500+n,*)"qpoints",POX(1),POY(1)!,"QuadraturePoint",counterdg
+!                          write(500+n,*)"Mapped qpoints",mpox,mPOY!,"QuadraturePoint",counterdg
+                          
+                        maxCords(:)=comp_max_diff(N,VEXT,IELEM(N,I)%NONODES)
+                        minCords(:)=comp_min_diff(N,VEXT,IELEM(N,I)%NONODES)
     
-!                         deltaX=(abs(maxCords(1)-minCords(1)))
-!                         deltaY=(abs(maxCords(2)-minCords(2)))
+                        deltaX=(abs(maxCords(1)-minCords(1)))
+                        deltaY=(abs(maxCords(2)-minCords(2)))
                         
-!                          x1=(pox(1)-ielem(n,i)%xxc)/deltaX
-!                          y1=(poy(1)-ielem(n,i)%yyc)/deltaY
+                         x1=(pox(1)-ielem(n,i)%xxc)/deltaX
+                         y1=(poy(1)-ielem(n,i)%yyc)/deltaY
                                                         
                         compwrt=-1
                         
                         Basis_vector(:) = basis_rec2d(N,x1,y1,ielem(n,i)%iorder,I,ielem(n,i)%idegfree)
+!                        Basis_vector(:) = basis_rec_jacobi2d(N,mpox,mpoy,ielem(n,i)%iorder,I,ielem(n,i)%idegfree)
                         
 
                         DO Idex=1,ielem(n,i)%idegfree
@@ -3016,34 +3027,38 @@ DO I=1,KMAXE
                     
                     
                 !write(300+n,*)"total MassMatrix of element",I,":",totalMM(I,:,:)
-                maxMM=maxval(totalMM)
-                minMM=minval(totalMM)
-                variationMM=maxMM-minMM
+!                 maxMM=maxval(totalMM(I,:,:))
+!                 minMM=minval(totalMM(I,:,:))
+!                 variationMM=maxMM-minMM
                 
-                DO Idex=1,ielem(n,i)%idegfree
-                            DO Jdex=1,ielem(n,i)%idegfree
-                                write(300+n,*)"total MassMatrix at index",Idex,Jdex,":",totalMM(I,Idex,Jdex)
-                            END DO    
-                        END DO
+!                 DO Idex=1,ielem(n,i)%idegfree
+!                             DO Jdex=1,ielem(n,i)%idegfree
+!                                 write(300+n,*)"total MassMatrix at index",Idex,Jdex,":",totalMM(I,Idex,Jdex)
+!                             END DO    
+!                         END DO
                  
-                 write(300+n,*)"max val of totalMM:",maxMM 
-                 write(300+n,*)"min val of totalMM:",minMM  
-                 write(300+n,*)"condition of totalMM:",variationMM 
+!                  write(300+n,*)"max val of totalMM:",maxMM 
+!                  write(300+n,*)"min val of totalMM:",minMM  
+!                  write(300+n,*)"condition of totalMM:",variationMM 
+                 
                 END DO
-
+                
         CASE(6)
             CALL QUADRATUREtriangle(N,IGQRULES)
             VOLTEMP=1.0d0
             QQP=QP_Triangle
-            write(300+n,*)"element",i!,"QuadraturePoint",counterdg
+            
+!            write(500+n,*)"element",i!,"QuadraturePoint",counterdg
+!            write(500+n,*)"vext",vext!,"QuadraturePoint",counterdg
+!            write(300+n,*)"element",i!,"QuadraturePoint",counterdg
            ! write(300+n,*)"n nodes",IELEM(N,I)%NONODES,"max cord",MaxCords,"min cord",MinCords
-            write(300+n,*)"order",ielem(n,i)%iorder,"deg free",ielem(n,i)%idegfree
+!            write(300+n,*)"order",ielem(n,i)%iorder,"deg free",ielem(n,i)%idegfree
 
-!             maxCords(:)=comp_max_diff(N,VEXT,IELEM(N,I)%NONODES)
-!             minCords(:)=comp_min_diff(N,VEXT,IELEM(N,I)%NONODES)
-!     
-!             deltaX=(abs(maxCords(1)-minCords(1)))
-!             deltaY=(abs(maxCords(2)-minCords(2)))
+            maxCords(:)=comp_max_diff(N,VEXT,IELEM(N,I)%NONODES)
+            minCords(:)=comp_min_diff(N,VEXT,IELEM(N,I)%NONODES)
+    
+            deltaX=(abs(maxCords(1)-minCords(1)))
+            deltaY=(abs(maxCords(2)-minCords(2)))
             
             
             DO INC=1,QQP
@@ -3051,16 +3066,23 @@ DO I=1,KMAXE
                 POY(1)=QPOINTS(2,INC) 
 	  
                 COUNTERDG=COUNTERDG+1
-                
-               x1=pox(1)-ielem(n,i)%xxc
-               y1=poy(1)-ielem(n,i)%yyc
-                        
-!                   x1=(pox(1)-ielem(n,i)%xxc)/deltaX
-!                   y1=(poy(1)-ielem(n,i)%yyc)/deltaY
+             
+!                 x1=pox(1)-ielem(n,i)%xxc
+!                 y1=poy(1)-ielem(n,i)%yyc
+               
+               
+               !TRANSFORM FIRST TO REFERENCE SQUARE CORDS. SYST.
+!                CALL MAPtoREFsq(POX,POY,mpox,mpoy)                                
+!                write(500+n,*)"qpoints",POX(1),POY(1)
+!                write(500+n,*)"mapped qpoints",mPOX,mPOY
+               
+              x1=(pox(1)-ielem(n,i)%xxc)/deltaX
+              y1=(poy(1)-ielem(n,i)%yyc)/deltaY
                 
                 compwrt=-1
-			
+                
                 Basis_vector(:) = basis_rec2d(N,x1,y1,ielem(n,i)%iorder,I,ielem(n,i)%idegfree)
+!                Basis_vector(:) = basis_rec_jacobi2d(N,mpox,mpoy,ielem(n,i)%iorder,I,ielem(n,i)%idegfree)
 
                 
                 DO Idex=1,ielem(n,i)%idegfree
@@ -3074,29 +3096,219 @@ DO I=1,KMAXE
             
             END DO
                 
-                maxMM=maxval(totalMM)
-                minMM=minval(totalMM)
-                variationMM=maxMM-minMM
+!                 maxMM=maxval(totalMM(I,:,:))
+!                 minMM=minval(totalMM(I,:,:))
+!                 variationMM=maxMM-minMM
         
             !write(300+n,*)"total MassMatrix of element",I,":",totalMM(I,:,:)
-             DO Idex=1,ielem(n,i)%idegfree
-                            DO Jdex=1,ielem(n,i)%idegfree
-                                write(300+n,*)"total MassMatrix at index",Idex,Jdex,":",totalMM(I,Idex,Jdex)
-                            END DO    
-                        END DO
+!              DO Idex=1,ielem(n,i)%idegfree
+!                             DO Jdex=1,ielem(n,i)%idegfree
+!                                 write(300+n,*)"total MassMatrix at index",Idex,Jdex,":",totalMM(I,Idex,Jdex)
+!                             END DO    
+!                         END DO
 	  
-                 write(300+n,*)"max val of totalMM:",maxMM 
-                 write(300+n,*)"min val of totalMM:",minMM 
-                 write(300+n,*)"condition of totalMM:",variationMM 
+!                  write(300+n,*)"max val of totalMM:",maxMM 
+!                  write(300+n,*)"min val of totalMM:",minMM 
+!                  write(300+n,*)"condition of totalMM:",variationMM 
         END SELECT
     
 END DO
 !$OMP END DO
 
+CALL COMPMASSINV(totalMM,invMM,idegfree,kmaxe)
+
+ Do I=1,kmaxe
+    write(300+n,*)"Element",i!,"QuadraturePoint",counterdg
+!  DO Idex=1,idegfree
+!     DO Jdex=1,idegfree
+! !            write(600+n,*)"inverse total MassMatrix at index",Idex,Jdex,":",invMM(I,Idex,Jdex)
+!              write(600+n,*)invMM(I,Idex,Jdex)
+! !            write(600+n,*)"should be identity at index",Idex,Jdex,":",matmul(invMM(I,:,:),totalMM(I,:,:))
+!     END DO    
+! END DO
+!write(600+n,*)"size of totalMM:",shape(totalMM),"size of invMM:",shape(invMM)
+!write(600+n,*)"element",i!,"QuadraturePoint",counterdg
+
+    maxMM=maxval(totalMM(I,:,:))
+    minMM=minval(totalMM(I,:,:))
+    variationMM=maxMM-minMM
+
+    write(300+n,*)"total MassMatrix:"!,Idex,Jdex,":",totalMM(I,Idex,Jdex)
+    write(300+n,*)totalMM(I,:,:)
+    write(300+n,*)"inverse total MassMatrix :"!,invMM(I,:,:)
+    write(300+n,*) invMM(I,:,:)
+    write(300+n,*)"Multiplied should be identity Matrix:"!,matmul(invMM(I,:,:),totalMM(I,:,:))
+    write(300+n,*)matmul(invMM(I,:,:),totalMM(I,:,:))
+    write(300+n,*)"max val of totalMM:",maxMM 
+    write(300+n,*)"min val of totalMM:",minMM  
+    write(300+n,*)"condition of totalMM:",variationMM
+
+end do
+
 END IF
- 
- 
+
 END SUBROUTINE
+
+
+
+SUBROUTINE COMPMASSINV(totalMM,invMM,n,kmaxe)
+!Calculate the inverse of the input matrix with Gauss-Jordan Elimination
+IMPLICIT NONE
+ 
+integer :: i,j,k,l,m,irow,P
+real:: big,dum
+real,DIMENSION(IDEGFREE,IDEGFREE)::a,b
+integer,INTENT(IN)::n,kmaxe
+REAL,DIMENSION(:,:,:),INTENT(IN)::totalMM
+REAL,DIMENSION(:,:,:),INTENT(INOUT)::invMM
+
+DO P=1,kmaxe
+
+a(:,:)=totalMM(P,:,:)
+b(:,:)=zero
+
+do i = 1,n
+    do j = 1,n
+        b(i,j) = 0.0
+    end do
+    b(i,i) = 1.0
+end do 
+
+do i = 1,n   
+   big = a(i,i)
+   do j = i,n
+     if (a(j,i).gt.big) then
+       big = a(j,i)
+       irow = j
+     end if
+   end do
+   ! interchange lines i with irow for both a() and b() matrices
+   if (big.gt.a(i,i)) then
+     do k = 1,n
+       dum = a(i,k)                      ! matrix a()
+       a(i,k) = a(irow,k)
+       a(irow,k) = dum
+       dum = b(i,k)                 ! matrix b()
+       b(i,k) = b(irow,k)
+       b(irow,k) = dum
+     end do
+   end if
+   ! divide all entries in line i from a(i,j) by the value a(i,i); 
+   ! same operation for the identity matrix
+   dum = a(i,i)
+   do j = 1,n
+     a(i,j) = a(i,j)/dum
+     b(i,j) = b(i,j)/dum
+   end do
+   ! make zero all entries in the column a(j,i); same operation for indent()
+   do j = i+1,n
+     dum = a(j,i)
+     do k = 1,n
+       a(j,k) = a(j,k) - dum*a(i,k)
+       b(j,k) = b(j,k) - dum*b(i,k)               
+            
+     end do
+   end do
+end do
+  
+ do i = 1,n-1
+   do j = i+1,n
+     dum = a(i,j)
+     do l = 1,n
+       a(i,l) = a(i,l)-dum*a(j,l)
+       b(i,l) = b(i,l)-dum*b(j,l)
+     end do
+   end do
+ end do
+ 
+ invMM(P,:,:)=b(:,:)
+  
+END DO
+ 
+END SUBROUTINE COMPMASSINV 
+
+
+
+SUBROUTINE COMPMASSINV2 (totalMM,invMM,n,kmaxe)
+!Calculate the inverse of the input matrix with Doolittle LU decomposition
+implicit none 
+!integer n
+!double precision a(n,n), c(n,n)
+double precision L(n,n), U(n,n), b(n), d(n), x(n)
+double precision coeff
+integer i, j, k, P
+double precision,DIMENSION(IDEGFREE,IDEGFREE)::a,C
+integer,INTENT(IN)::n,kmaxe
+REAL,DIMENSION(:,:,:),INTENT(IN)::totalMM
+REAL,DIMENSION(:,:,:),INTENT(INOUT)::invMM
+
+! step 0: initialization for matrices L and U and b
+L=0.0
+U=0.0
+b=0.0
+
+
+DO P=1,kmaxe
+
+a(:,:)=totalMM(P,:,:)
+
+! step 1: forward elimination
+do k=1, n-1
+   do i=k+1,n
+      coeff=a(i,k)/a(k,k)
+      L(i,k) = coeff
+      do j=k+1,n
+         a(i,j) = a(i,j)-coeff*a(k,j)
+      end do
+   end do
+end do
+
+! Step 2: prepare L and U matrices 
+! L matrix is a matrix of the elimination coefficient
+! + the diagonal elements are 1.0
+do i=1,n
+  L(i,i) = 1.0
+end do
+! U matrix is the upper triangular part of A
+do j=1,n
+  do i=1,j
+    U(i,j) = a(i,j)
+  end do
+end do
+
+! Step 3: compute columns of the inverse matrix C
+do k=1,n
+  b(k)=1.0
+  d(1) = b(1)
+! Step 3a: Solve Ld=b using the forward substitution
+  do i=2,n
+    d(i)=b(i)
+    do j=1,i-1
+      d(i) = d(i) - L(i,j)*d(j)
+    end do
+  end do
+! Step 3b: Solve Ux=d using the back substitution
+  x(n)=d(n)/U(n,n)
+  do i = n-1,1,-1
+    x(i) = d(i)
+    do j=n,i+1,-1
+      x(i)=x(i)-U(i,j)*x(j)
+    end do
+    x(i) = x(i)/u(i,i)
+  end do
+! Step 3c: fill the solutions x(n) into column k of C
+  do i=1,n
+    c(i,k) = x(i)
+  end do
+  b(k)=0.0
+end do
+
+ invMM(P,:,:)=c(:,:)
+ 
+ end do
+
+END SUBROUTINE COMPMASSINV2
+ 
  
  
 END MODULE PRESTORE
