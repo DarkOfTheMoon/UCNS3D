@@ -641,7 +641,7 @@ end function CELL_CENTRE_CORD2
 
 
 FUNCTION comp_max_diff(N,NODES_LIST,N_NODE)
- !> @brief
+!> @brief
 !> This function computes the maximum coordinates value given the nodes location
 INTEGER,INTENT(IN)::N,N_NODE
 REAL,ALLOCATABLE,DIMENSION(:,:),INTENT(in)::NODES_LIST
@@ -668,7 +668,7 @@ END FUNCTION COMP_MAX_DIFF
 
 
 FUNCTION comp_min_diff(N,NODES_LIST,N_NODE)
- !> @brief
+!> @brief
 !> This function computes the minimum coordinates value given the nodes location
 INTEGER,INTENT(IN)::N,N_NODE
 REAL,ALLOCATABLE,DIMENSION(:,:),INTENT(in)::NODES_LIST

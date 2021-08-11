@@ -6,6 +6,7 @@ USE BASIS
 USE TRANSFORM
 USE LOCAL
 USE LAPCK
+USE DG_FUNCTIONS
 IMPLICIT NONE
 
 
@@ -2961,7 +2962,7 @@ DO I=1,KMAXE
 	    vext(k,1:2)=NODES_LIST(k,1:2)
     END DO
     
-
+    IELEM(N,I)%DELTA_XYZ = CALC_DELTA_XYZ(N, IELEM(N,I)%NONODES, DIMENSIONA, NODES_LIST)
 
     !write(300+n,*)"nndoes 1",IELEM(N,I)%NONODES!,"QuadraturePoint",counterdg
     !write(300+n,*)"nnodes 2",n_node!,"QuadraturePoint",counterdg

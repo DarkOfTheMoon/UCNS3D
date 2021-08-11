@@ -82,7 +82,7 @@ memory.mod memory.o : memory.f90 mpiinfo.mod declaration.mod
 partition.mod parts.o : parts.f90 mpiinfo.mod declaration.mod
 	$(F90) $(FFLAGS)  -c    parts.f90
 
-prestore.mod prestore.o : prestore.f90 declaration.mod derivatives.mod library.mod basis.mod transform.mod local.mod lapck.mod
+prestore.mod prestore.o : prestore.f90 declaration.mod derivatives.mod library.mod basis.mod transform.mod local.mod lapck.mod dg_functions.mod
 	$(F90) $(FFLAGS)  -c    prestore.f90
 
 profile.mod profile.o : profile.f90 declaration.mod library.mod
