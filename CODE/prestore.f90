@@ -48,6 +48,9 @@ END DO
 
 
 else
+
+CALL PRESTORE_DG
+
 !$OMP PARALLEL DEFAULT(SHARED) 
 !$OMP DO
 DO I=1,KMAXE
@@ -68,6 +71,8 @@ CALL FIND_ROT_ANGLES2D(N,I)
 END DO
 !$OMP END DO
 !$OMP END PARALLEL
+
+
 end if
 
 
@@ -2938,6 +2943,8 @@ SUBROUTINE INVERT(RFF,INVRFF,IVGT)
  
 
 SUBROUTINE DG_1
+!> @brief
+!> Store mass matrix
 IMPLICIT NONE
 INTEGER::COUNTERDG,K,INC,QQP,I,kmaxe, Idex, Jdex
 REAL::maxMM,minMM,variationMM,deltaX,deltaY
@@ -2961,8 +2968,6 @@ DO I=1,KMAXE
 	    NODES_LIST(k,1:2)=inoder(IELEM(N,I)%NODES(K))%CORD(1:2)
 	    vext(k,1:2)=NODES_LIST(k,1:2)
     END DO
-    
-    IELEM(N,I)%DELTA_XYZ = CALC_DELTA_XYZ(N, IELEM(N,I)%NONODES, DIMENSIONA, NODES_LIST)
 
     !write(300+n,*)"nndoes 1",IELEM(N,I)%NONODES!,"QuadraturePoint",counterdg
     !write(300+n,*)"nnodes 2",n_node!,"QuadraturePoint",counterdg

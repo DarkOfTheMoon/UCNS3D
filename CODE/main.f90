@@ -534,10 +534,7 @@ end if
 				  !$OMP END MASTER
   
 
- if ((fastest.ne.1).and.(ischeme.ge.2))then
-
-call PRESTORE_1(N)
-end if
+if ((fastest.ne.1).and.(ischeme.ge.2)) call PRESTORE_1(N)
 
 
 

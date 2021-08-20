@@ -34,7 +34,7 @@ boundary.mod bc_p.o : bc_p.f90 library.mod transform.mod
 dg_functions.mod dg_functions.o : dg_functions.f90 basis.mod
 	$(F90) $(FFLAGS)  -c    dg_functions.f90
 
-communications.mod communications.o : communications.f90 mpiinfo.mod declaration.mod transform.mod
+communications.mod communications.o : communications.f90 mpiinfo.mod declaration.mod transform.mod dg_functions.mod
 	$(F90) $(FFLAGS)  -c    communications.f90
 
 derivatives.mod der_r.o : der_r.f90 mpiinfo.mod
@@ -106,7 +106,7 @@ moodr.mod mood.o : mood.f90 mpiinfo.mod declaration.mod translate.mod memory.mod
 advance.mod time_p.o : time_p.f90 library.mod transform.mod fluxes.mod source.mod initialisation.mod boundary.mod recon.mod local.mod flow_operations.mod communications.mod implicit_time.mod implicit_fluxes.mod io.mod
 	$(F90) $(FFLAGS)  -c    time_p.f90
 
-unit_test.mod unit_test.o : unit_test.f90 basis.mod
+unit_test.mod unit_test.o : unit_test.f90 basis.mod dg_functions.mod
 	$(F90) $(FFLAGS)  -c    unit_test.f90
 
 clean:
