@@ -113,7 +113,141 @@ SUBROUTINE PRESTORE_DG
         END DO
     END DO
     
+    CALL ASS_MASS_MATRIX(N)
+    
 END SUBROUTINE PRESTORE_DG
+
+
+SUBROUTINE ASS_MASS_MATRIX(N)
+!> @brief
+!> Assembles the mass matrix
+!> REQUIRES: Globals: IELEM, QP_QUAD, QP_TRIANGLE, MASS_MATRIX
+    IMPLICIT NONE
+    INTEGER,INTENT(IN)::N
+    INTEGER::I_ELEM, I_QP, N_QP, I_DOF, J_DOF, KMAXE
+    REAL,DIMENSION(IDEGFREE)::BASIS_VECTOR
+    
+    KMAXE = XMPIELRANK(N)
+    
+    ALLOCATE(MASS_MATRIX_CENTERS(N:N,KMAXE,IDEGFREE,IDEGFREE)); MASS_MATRIX_CENTERS(N,:,:,:) = ZERO
+    
+    DO I_ELEM = 1, KMAXE
+        SELECT CASE(IELEM(N,I_ELEM)%ISHAPE)
+        CASE(5) ! Quadrilateral
+            N_QP = QP_QUAD
+        CASE(6) ! Triangle
+            N_QP = QP_TRIANGLE
+        END SELECT
+                        
+        DO I_QP = 1, N_QP
+            BASIS_VECTOR = BASIS_REC2D(N,QP_ARRAY(I_ELEM,I_QP)%X,QP_ARRAY(I_ELEM,I_QP)%Y,IORDER,I_ELEM,IDEGFREE)
+            
+            DO I_DOF = 1, IDEGFREE
+                DO J_DOF = 1, IDEGFREE
+                    MASS_MATRIX_CENTERS(N, I_ELEM, I_DOF, J_DOF) = MASS_MATRIX_CENTERS(N, I_ELEM, I_DOF, J_DOF) + BASIS_VECTOR(I_DOF) * BASIS_VECTOR(J_DOF) * QP_ARRAY(I_ELEM,I_QP)%QP_WEIGHT
+                END DO
+            END DO
+        END DO
+        
+        MASS_MATRIX_CENTERS(N, I_ELEM, :, :) = MASS_MATRIX_CENTERS(N, I_ELEM, :, :) * IELEM(N,I_ELEM)%TOTVOLUME
+    END DO
+    
+    ALLOCATE(INV_MASS_MATRIX(N:N,KMAXE,IDEGFREE,IDEGFREE)); INV_MASS_MATRIX(N,:,:,:) = ZERO
+    
+    CALL COMPMASSINV(MASS_MATRIX_CENTERS(N,:,:,:), INV_MASS_MATRIX(N,:,:,:), IDEGFREE, KMAXE)
+    
+    DO I_ELEM = 1, KMAXE
+        WRITE(500+N,*) I_ELEM
+        DO I_QP = 1, N_QP
+            WRITE(500+N,*) 'QP_ARRAY', QP_ARRAY(I_ELEM,I_QP)%X, QP_ARRAY(I_ELEM,I_QP)%Y, QP_ARRAY(I_ELEM,I_QP)%QP_WEIGHT
+            WRITE(500+N,*) 'BASIS,', BASIS_REC2D(N,QP_ARRAY(I_ELEM,I_QP)%X,QP_ARRAY(I_ELEM,I_QP)%Y,IORDER,I_ELEM,IDEGFREE)
+        END DO
+        WRITE(500+N,*) 'XYZ', IELEM(N,I_ELEM)%NODES
+        WRITE(500+N,*) 'DELTAXYZ', IELEM(N,I_ELEM)%DELTA_XYZ
+        WRITE(500+N,*) 'MMC', MASS_MATRIX_CENTERS(N,I_ELEM,:,:)
+        WRITE(500+N,*) 'Inverse,', INV_MASS_MATRIX(N,I_ELEM,:,:)
+        WRITE(500+N,*) 'Identity', MATMUL(MASS_MATRIX_CENTERS(N,I_ELEM,:,:),INV_MASS_MATRIX(N,I_ELEM,:,:))
+    END DO
+    
+END SUBROUTINE ASS_MASS_MATRIX
+
+SUBROUTINE COMPMASSINV(totalMM,invMM,n,kmaxe)
+!Calculate the inverse of the input matrix with Gauss-Jordan Elimination
+IMPLICIT NONE
+ 
+integer :: i,j,k,l,m,irow,P
+real:: big,dum
+real,DIMENSION(IDEGFREE,IDEGFREE)::a,b
+integer,INTENT(IN)::n,kmaxe
+REAL,DIMENSION(:,:,:),INTENT(IN)::totalMM
+REAL,DIMENSION(:,:,:),INTENT(INOUT)::invMM
+
+DO P=1,kmaxe
+
+a(:,:)=totalMM(P,:,:)
+b(:,:)=zero
+
+do i = 1,n
+    do j = 1,n
+        b(i,j) = 0.0
+    end do
+    b(i,i) = 1.0
+end do 
+
+do i = 1,n   
+   big = a(i,i)
+   do j = i,n
+     if (a(j,i).gt.big) then
+       big = a(j,i)
+       irow = j
+     end if
+   end do
+   ! interchange lines i with irow for both a() and b() matrices
+   if (big.gt.a(i,i)) then
+     do k = 1,n
+       dum = a(i,k)                      ! matrix a()
+       a(i,k) = a(irow,k)
+       a(irow,k) = dum
+       dum = b(i,k)                 ! matrix b()
+       b(i,k) = b(irow,k)
+       b(irow,k) = dum
+     end do
+   end if
+   ! divide all entries in line i from a(i,j) by the value a(i,i); 
+   ! same operation for the identity matrix
+   dum = a(i,i)
+   do j = 1,n
+     a(i,j) = a(i,j)/dum
+     b(i,j) = b(i,j)/dum
+   end do
+   ! make zero all entries in the column a(j,i); same operation for indent()
+   do j = i+1,n
+     dum = a(j,i)
+     do k = 1,n
+       a(j,k) = a(j,k) - dum*a(i,k)
+       b(j,k) = b(j,k) - dum*b(i,k)               
+            
+     end do
+   end do
+end do
+  
+ do i = 1,n-1
+   do j = i+1,n
+     dum = a(i,j)
+     do l = 1,n
+       a(i,l) = a(i,l)-dum*a(j,l)
+       b(i,l) = b(i,l)-dum*b(j,l)
+     end do
+   end do
+ end do
+ 
+ invMM(P,:,:)=b(:,:)
+  
+END DO
+ 
+END SUBROUTINE COMPMASSINV 
+
+
 
 ! FUNCTION LUO_LSQ_RECONSTRUCT(N, N_DIM)
 ! !> @brief
