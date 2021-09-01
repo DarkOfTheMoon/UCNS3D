@@ -38,7 +38,7 @@ FUNCTION DG_RHS_INTEGRAL(N,I_ELEM,QP_X,QP_Y,QP_WEIGHT,NUM_VARS,ORDER,NUM_DOFS,CE
     REAL,INTENT(IN)::QP_X,QP_Y,QP_WEIGHT,CELL_VOL_OR_SURF
     REAL,DIMENSION(:),INTENT(IN)::FLUX_TERM
     INTEGER::I_VAR
-    REAL,DIMENSION(NUM_VARS,NUM_DOFS+1)::DG_RHS_INTEGRAL
+    REAL,DIMENSION(NUM_DOFS+1,NUM_VARS)::DG_RHS_INTEGRAL
     
     IF (SIZE(FLUX_TERM) /= NUM_VARS) THEN
         WRITE(400+N,*) 'DG_RHS_INTEGRAL: FLUX_TERM WRONG DIMENSIONS:', SHAPE(FLUX_TERM)
@@ -47,13 +47,13 @@ FUNCTION DG_RHS_INTEGRAL(N,I_ELEM,QP_X,QP_Y,QP_WEIGHT,NUM_VARS,ORDER,NUM_DOFS,CE
     
     IF (VOL_OR_SURF == 1) THEN ! VOLUME INTEGRAL
         DO I_VAR = 1, NUM_VARS
-            DG_RHS_INTEGRAL(I_VAR,1) = 0
-            DG_RHS_INTEGRAL(I_VAR,2:) = FLUX_TERM(I_VAR) * QP_WEIGHT * CELL_VOL_OR_SURF * (BASIS_REC2D_DERIVATIVE(N,QP_X,QP_Y,ORDER,0,NUM_DOFS,1) + BASIS_REC2D_DERIVATIVE(N,QP_X,QP_Y,ORDER,0,NUM_DOFS,2))
+            DG_RHS_INTEGRAL(1,I_VAR) = 0
+            DG_RHS_INTEGRAL(2:,I_VAR) = FLUX_TERM(I_VAR) * QP_WEIGHT * CELL_VOL_OR_SURF * (BASIS_REC2D_DERIVATIVE(N,QP_X,QP_Y,ORDER,0,NUM_DOFS,1) + BASIS_REC2D_DERIVATIVE(N,QP_X,QP_Y,ORDER,0,NUM_DOFS,2))
         END DO
     ELSE IF (VOL_OR_SURF == 2) THEN ! SURFACE INTEGRAL
         DO I_VAR = 1, NUM_VARS
-            DG_RHS_INTEGRAL(I_VAR,1) = FLUX_TERM(I_VAR) * QP_WEIGHT * CELL_VOL_OR_SURF
-            DG_RHS_INTEGRAL(I_VAR,2:) = FLUX_TERM(I_VAR) * QP_WEIGHT * CELL_VOL_OR_SURF * BASIS_REC2D(N,QP_X,QP_Y,ORDER,I_ELEM,NUM_DOFS)
+            DG_RHS_INTEGRAL(1,I_VAR) = FLUX_TERM(I_VAR) * QP_WEIGHT * CELL_VOL_OR_SURF
+            DG_RHS_INTEGRAL(2:,I_VAR) = FLUX_TERM(I_VAR) * QP_WEIGHT * CELL_VOL_OR_SURF * BASIS_REC2D(N,QP_X,QP_Y,ORDER,I_ELEM,NUM_DOFS)
         END DO
     END IF
 
@@ -129,7 +129,7 @@ SUBROUTINE ASS_MASS_MATRIX(N)
     
     KMAXE = XMPIELRANK(N)
     
-    ALLOCATE(MASS_MATRIX_CENTERS(N:N,KMAXE,IDEGFREE,IDEGFREE)); MASS_MATRIX_CENTERS(N,:,:,:) = ZERO
+    ALLOCATE(MASS_MATRIX_CENTERS(N:N,KMAXE,NUM_DG_DOFS,NUM_DG_DOFS)); MASS_MATRIX_CENTERS(N,:,:,:) = ZERO; MASS_MATRIX_CENTERS(N,:,1,1) = 1.0D0
     
     DO I_ELEM = 1, KMAXE
         SELECT CASE(IELEM(N,I_ELEM)%ISHAPE)
@@ -138,13 +138,16 @@ SUBROUTINE ASS_MASS_MATRIX(N)
         CASE(6) ! Triangle
             N_QP = QP_TRIANGLE
         END SELECT
-                        
+        
         DO I_QP = 1, N_QP
             BASIS_VECTOR = BASIS_REC2D(N,QP_ARRAY(I_ELEM,I_QP)%X,QP_ARRAY(I_ELEM,I_QP)%Y,IORDER,I_ELEM,IDEGFREE)
             
             DO I_DOF = 1, IDEGFREE
+                MASS_MATRIX_CENTERS(N, I_ELEM, 1, I_DOF+1) = MASS_MATRIX_CENTERS(N, I_ELEM, 1, I_DOF+1) + BASIS_VECTOR(I_DOF) * QP_ARRAY(I_ELEM,I_QP)%QP_WEIGHT
+                MASS_MATRIX_CENTERS(N, I_ELEM, I_DOF+1, 1) = MASS_MATRIX_CENTERS(N, I_ELEM, I_DOF+1, 1) + BASIS_VECTOR(I_DOF) * QP_ARRAY(I_ELEM,I_QP)%QP_WEIGHT
+                
                 DO J_DOF = 1, IDEGFREE
-                    MASS_MATRIX_CENTERS(N, I_ELEM, I_DOF, J_DOF) = MASS_MATRIX_CENTERS(N, I_ELEM, I_DOF, J_DOF) + BASIS_VECTOR(I_DOF) * BASIS_VECTOR(J_DOF) * QP_ARRAY(I_ELEM,I_QP)%QP_WEIGHT
+                    MASS_MATRIX_CENTERS(N, I_ELEM, I_DOF+1, J_DOF+1) = MASS_MATRIX_CENTERS(N, I_ELEM, I_DOF, J_DOF) + BASIS_VECTOR(I_DOF) * BASIS_VECTOR(J_DOF) * QP_ARRAY(I_ELEM,I_QP)%QP_WEIGHT
                 END DO
             END DO
         END DO
@@ -152,18 +155,18 @@ SUBROUTINE ASS_MASS_MATRIX(N)
         MASS_MATRIX_CENTERS(N, I_ELEM, :, :) = MASS_MATRIX_CENTERS(N, I_ELEM, :, :) * IELEM(N,I_ELEM)%TOTVOLUME
     END DO
     
-    ALLOCATE(INV_MASS_MATRIX(N:N,KMAXE,IDEGFREE,IDEGFREE)); INV_MASS_MATRIX(N,:,:,:) = ZERO
+    ALLOCATE(INV_MASS_MATRIX(N:N,KMAXE,NUM_DG_DOFS,NUM_DG_DOFS)); INV_MASS_MATRIX(N,:,:,:) = ZERO
     
-    CALL COMPMASSINV(MASS_MATRIX_CENTERS(N,:,:,:), INV_MASS_MATRIX(N,:,:,:), IDEGFREE, KMAXE)
+    CALL COMPMASSINV(MASS_MATRIX_CENTERS(N,:,:,:), INV_MASS_MATRIX(N,:,:,:), NUM_DG_DOFS, KMAXE)
     
     DO I_ELEM = 1, KMAXE
         WRITE(500+N,*) I_ELEM
-        DO I_QP = 1, N_QP
-            WRITE(500+N,*) 'QP_ARRAY', QP_ARRAY(I_ELEM,I_QP)%X, QP_ARRAY(I_ELEM,I_QP)%Y, QP_ARRAY(I_ELEM,I_QP)%QP_WEIGHT
-            WRITE(500+N,*) 'BASIS,', BASIS_REC2D(N,QP_ARRAY(I_ELEM,I_QP)%X,QP_ARRAY(I_ELEM,I_QP)%Y,IORDER,I_ELEM,IDEGFREE)
-        END DO
+!         DO I_QP = 1, N_QP
+!             WRITE(500+N,*) 'QP_ARRAY', QP_ARRAY(I_ELEM,I_QP)%X, QP_ARRAY(I_ELEM,I_QP)%Y, QP_ARRAY(I_ELEM,I_QP)%QP_WEIGHT
+!             WRITE(500+N,*) 'BASIS,', BASIS_REC2D(N,QP_ARRAY(I_ELEM,I_QP)%X,QP_ARRAY(I_ELEM,I_QP)%Y,IORDER,I_ELEM,IDEGFREE)
+!         END DO
         WRITE(500+N,*) 'XYZ', IELEM(N,I_ELEM)%NODES
-        WRITE(500+N,*) 'DELTAXYZ', IELEM(N,I_ELEM)%DELTA_XYZ
+!         WRITE(500+N,*) 'DELTAXYZ', IELEM(N,I_ELEM)%DELTA_XYZ
         WRITE(500+N,*) 'MMC', MASS_MATRIX_CENTERS(N,I_ELEM,:,:)
         WRITE(500+N,*) 'Inverse,', INV_MASS_MATRIX(N,I_ELEM,:,:)
         WRITE(500+N,*) 'Identity', MATMUL(MASS_MATRIX_CENTERS(N,I_ELEM,:,:),INV_MASS_MATRIX(N,I_ELEM,:,:))
@@ -171,14 +174,14 @@ SUBROUTINE ASS_MASS_MATRIX(N)
     
 END SUBROUTINE ASS_MASS_MATRIX
 
-SUBROUTINE COMPMASSINV(totalMM,invMM,n,kmaxe)
+SUBROUTINE COMPMASSINV(totalMM,invMM,N_DOFS,kmaxe)
 !Calculate the inverse of the input matrix with Gauss-Jordan Elimination
 IMPLICIT NONE
  
 integer :: i,j,k,l,m,irow,P
 real:: big,dum
-real,DIMENSION(IDEGFREE,IDEGFREE)::a,b
-integer,INTENT(IN)::n,kmaxe
+real,DIMENSION(N_DOFS,N_DOFS)::a,b
+integer,INTENT(IN)::N_DOFS,kmaxe
 REAL,DIMENSION(:,:,:),INTENT(IN)::totalMM
 REAL,DIMENSION(:,:,:),INTENT(INOUT)::invMM
 
@@ -187,16 +190,16 @@ DO P=1,kmaxe
 a(:,:)=totalMM(P,:,:)
 b(:,:)=zero
 
-do i = 1,n
-    do j = 1,n
+do i = 1,N_DOFS
+    do j = 1,N_DOFS
         b(i,j) = 0.0
     end do
     b(i,i) = 1.0
 end do 
 
-do i = 1,n   
+do i = 1,N_DOFS   
    big = a(i,i)
-   do j = i,n
+   do j = i,N_DOFS
      if (a(j,i).gt.big) then
        big = a(j,i)
        irow = j
@@ -204,7 +207,7 @@ do i = 1,n
    end do
    ! interchange lines i with irow for both a() and b() matrices
    if (big.gt.a(i,i)) then
-     do k = 1,n
+     do k = 1,N_DOFS
        dum = a(i,k)                      ! matrix a()
        a(i,k) = a(irow,k)
        a(irow,k) = dum
@@ -216,14 +219,14 @@ do i = 1,n
    ! divide all entries in line i from a(i,j) by the value a(i,i); 
    ! same operation for the identity matrix
    dum = a(i,i)
-   do j = 1,n
+   do j = 1,N_DOFS
      a(i,j) = a(i,j)/dum
      b(i,j) = b(i,j)/dum
    end do
    ! make zero all entries in the column a(j,i); same operation for indent()
-   do j = i+1,n
+   do j = i+1,N_DOFS
      dum = a(j,i)
-     do k = 1,n
+     do k = 1,N_DOFS
        a(j,k) = a(j,k) - dum*a(i,k)
        b(j,k) = b(j,k) - dum*b(i,k)               
             
@@ -231,10 +234,10 @@ do i = 1,n
    end do
 end do
   
- do i = 1,n-1
-   do j = i+1,n
+ do i = 1,N_DOFS-1
+   do j = i+1,N_DOFS
      dum = a(i,j)
-     do l = 1,n
+     do l = 1,N_DOFS
        a(i,l) = a(i,l)-dum*a(j,l)
        b(i,l) = b(i,l)-dum*b(j,l)
      end do

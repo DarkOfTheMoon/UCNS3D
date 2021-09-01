@@ -745,32 +745,32 @@ SUBROUTINE READ_UCNS3D
 	  
 	  END SELECT
 	  
-	  IF (N.EQ.0)THEN
-	    OPEN(63,FILE='history.txt',FORM='FORMATTED',ACTION='WRITE',POSITION='APPEND')
-	    write(63,*)'Order of Accuracy in space:',spatialorder
-	    CLOSE(63)
-	END IF
+        IF (N.EQ.0)THEN
+            OPEN(63,FILE='history.txt',FORM='FORMATTED',ACTION='WRITE',POSITION='APPEND')
+            write(63,*)'Order of Accuracy in space:',spatialorder
+            CLOSE(63)
+        END IF
 	   
-	  ! Temporal order
-	  RUNGEKUTTA = temporder 
+        ! Temporal order
+        RUNGEKUTTA = temporder 
 	  
-	if ( iboundary .eq. 0 ) then 
-	    IPERIODICITY = -3 
-	    end if
-	    if ( iboundary .eq. 1 ) then 
-	    IPERIODICITY = 1 
-	    end if
+        if ( iboundary .eq. 0 ) then 
+            IPERIODICITY = -3 
+        else if ( iboundary .eq. 1 ) then 
+            IPERIODICITY = 1 
+        end if
 
-	    if (guassianquadra.eq.0)then
-	  IGQRULES=min(iorder,6)
-	else
-
-	if (guassianquadra.gt.1)then
-	IGQRULES = guassianquadra-1
-	  else
-	IGQRULES =guassianquadra
-	end if
-	End if
+        IF (DG == 1) THEN
+            IGQRULES = MIN(IORDER+1,6)
+	    ELSE if (guassianquadra.eq.0) then
+            IGQRULES=min(iorder,6)
+        else 
+            if (guassianquadra.gt.1)then
+                IGQRULES = guassianquadra-1
+            else
+                IGQRULES =guassianquadra
+            end if
+        End if
 	    
 	    
 	  !-------------------------END DISCRETISATION 6---------------------------------!
