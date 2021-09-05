@@ -899,7 +899,7 @@ IF (RESTART.EQ.0)THEN
                 POY(1) = IELEM(N,I)%YYC
                  
                 U_C(I)%VALDG(1,1,1)=LINEAR_INIT2D(N)   !THIS IS JUST THE INITIAL SOLUTION
-                U_C(I)%VALDG(1,1,2:IELEM(N,I)%IDEGFREE+1) = ZERO
+                U_C(I)%VALDG(1,1,2:IELEM(N,I)%IDEGFREE+1) = ZERO ! Eq. 2.2, Cockburn/Shu 2001
                 
                 WRITE(200+N,*) "ELEMENT", I,"DG INITIAL"
                 WRITE(200+N,*) "SOLUTION", U_C(I)%VALDG(1,1,:)

@@ -1775,7 +1775,7 @@ FUNCTION BASIS_REC2D_DERIVATIVE(N,X1,Y1,ORDER,ICONSIDERED,NUMBER_OF_DOG,DX_OR_DY
             END DO
         END IF
         
-        CASE(2) ! derivative with respect to y
+    CASE(2) ! derivative with respect to y
         IF (ORDER > 0) THEN
             BASIS_REC2D_DERIVATIVE(1) = 0
             BASIS_REC2D_DERIVATIVE(2) = 1

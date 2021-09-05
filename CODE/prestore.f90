@@ -2980,9 +2980,9 @@ DO I=1,KMAXE
                 VOLTEMP=TRIANGLEVOLUME(N)/IELEM(N,I)%totvolume
                 QQP=QP_Triangle
                 
-                write(300+n,*)"element",i!,"QuadraturePoint",counterdg
-                !write(300+n,*)"n nodes",IELEM(N,I)%NONODES,"max cord",MaxCords,"min cord",MinCords !
-                write(300+n,*)"order",ielem(n,i)%iorder,"deg free",ielem(n,i)%idegfree
+!                 write(300+n,*)"element",i!,"QuadraturePoint",counterdg
+!                 write(300+n,*)"n nodes",IELEM(N,I)%NONODES,"max cord",MaxCords,"min cord",MinCords !
+!                 write(300+n,*)"order",ielem(n,i)%iorder,"deg free",ielem(n,i)%idegfree
 !                 maxCords(:)=comp_max_diff(N,VEXT,IELEM(N,I)%NONODES)
 !                 minCords(:)=comp_min_diff(N,VEXT,IELEM(N,I)%NONODES)
 
@@ -3028,22 +3028,22 @@ DO I=1,KMAXE
                 
                 DO Idex=1,ielem(n,i)%idegfree
                             DO Jdex=1,ielem(n,i)%idegfree
-                                write(300+n,*)"total MassMatrix at index",Idex,Jdex,":",totalMM(I,Idex,Jdex)
+!                                 write(300+n,*)"total MassMatrix at index",Idex,Jdex,":",totalMM(I,Idex,Jdex)
                             END DO    
                         END DO
                  
-                 write(300+n,*)"max val of totalMM:",maxMM 
-                 write(300+n,*)"min val of totalMM:",minMM  
-                 write(300+n,*)"condition of totalMM:",variationMM 
+!                  write(300+n,*)"max val of totalMM:",maxMM 
+!                  write(300+n,*)"min val of totalMM:",minMM  
+!                  write(300+n,*)"condition of totalMM:",variationMM 
                 END DO
 
         CASE(6)
             CALL QUADRATUREtriangle(N,IGQRULES)
             VOLTEMP=1.0d0
             QQP=QP_Triangle
-            write(300+n,*)"element",i!,"QuadraturePoint",counterdg
-           ! write(300+n,*)"n nodes",IELEM(N,I)%NONODES,"max cord",MaxCords,"min cord",MinCords
-            write(300+n,*)"order",ielem(n,i)%iorder,"deg free",ielem(n,i)%idegfree
+!             write(300+n,*)"element",i!,"QuadraturePoint",counterdg
+!             write(300+n,*)"n nodes",IELEM(N,I)%NONODES,"max cord",MaxCords,"min cord",MinCords
+!             write(300+n,*)"order",ielem(n,i)%iorder,"deg free",ielem(n,i)%idegfree
 
 !             maxCords(:)=comp_max_diff(N,VEXT,IELEM(N,I)%NONODES)
 !             minCords(:)=comp_min_diff(N,VEXT,IELEM(N,I)%NONODES)
@@ -3086,13 +3086,13 @@ DO I=1,KMAXE
             !write(300+n,*)"total MassMatrix of element",I,":",totalMM(I,:,:)
              DO Idex=1,ielem(n,i)%idegfree
                             DO Jdex=1,ielem(n,i)%idegfree
-                                write(300+n,*)"total MassMatrix at index",Idex,Jdex,":",totalMM(I,Idex,Jdex)
+!                                 write(300+n,*)"total MassMatrix at index",Idex,Jdex,":",totalMM(I,Idex,Jdex)
                             END DO    
                         END DO
 	  
-                 write(300+n,*)"max val of totalMM:",maxMM 
-                 write(300+n,*)"min val of totalMM:",minMM 
-                 write(300+n,*)"condition of totalMM:",variationMM 
+!                  write(300+n,*)"max val of totalMM:",maxMM 
+!                  write(300+n,*)"min val of totalMM:",minMM 
+!                  write(300+n,*)"condition of totalMM:",variationMM 
         END SELECT
     
 END DO
