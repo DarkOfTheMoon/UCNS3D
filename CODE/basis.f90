@@ -1622,33 +1622,31 @@ CASE(1) ! Generic
     END select
     
 CASE(2) ! Legendre
-     select case(number)
-        case(1)
-    !FIRST ORDER FUNCTIONS (2ND-ORDER OF ACCURACY 3)
-    SB(1)=-1.0d0 + 2.0d0*x1
-    SB(2)=-1.0d0 + 2.0d0*y1
-    
+    select case(number)
+    case(1)
+        !FIRST ORDER FUNCTIONS (2ND-ORDER OF ACCURACY 3)
+        SB(1)=-1.0d0 + 2.0d0*x1
+        SB(2)=-1.0d0 + 2.0d0*y1
+
     case(2)
-! SECOND ORDER FUNCTIONS (3RD-ORDER OF ACCURACY 4-9)
-    SB(1)=-1.0d0 + 2.0d0*x1
-    SB(2)=-1.0d0 + 2.0d0*y1
-    SB(3)=1.0d0 - 6.0d0*x1 + 6.0d0*x1**2
-    SB(4)=SB(1)*SB(2)
-    SB(5)=1.0d0 - 6.0d0*y1 + 6.0d0*y1**2
- 
- case(3)
-! THIRD ORDER FUNCTIONS (4TH-ORDER OF ACCURACY  10-19)
-    SB(1)=-1.0d0 + 2.0d0*x1
-    SB(2)=-1.0d0 + 2.0d0*y1
-    SB(3)=1.0d0 - 6.0d0*x1 + 6.0d0*x1**2
-    SB(4)=SB(1)*SB(2)
-    SB(5)=1.0d0 - 6.0d0*y1 + 6.0d0*y1**2 
-    SB(6)=-1.0d0 + 12.0d0*x1 - 30.0d0*x1**2 + 20.0d0*x1**3
-    SB(7)=SB(3)*SB(2)
-    SB(8)=SB(1)*SB(5)
-    SB(9)=-1.0d0 + 12.0d0*y1 - 30.0d0*y1**2 + 20.0d0*y1**3  
-    
-    
+        ! SECOND ORDER FUNCTIONS (3RD-ORDER OF ACCURACY 4-9)
+        SB(1)=-1.0d0 + 2.0d0*x1
+        SB(2)=-1.0d0 + 2.0d0*y1
+        SB(3)=1.0d0 - 6.0d0*x1 + 6.0d0*x1**2
+        SB(4)=SB(1)*SB(2)
+        SB(5)=1.0d0 - 6.0d0*y1 + 6.0d0*y1**2
+
+    case(3)
+        ! THIRD ORDER FUNCTIONS (4TH-ORDER OF ACCURACY  10-19)
+        SB(1)=-1.0d0 + 2.0d0*x1
+        SB(2)=-1.0d0 + 2.0d0*y1
+        SB(3)=1.0d0 - 6.0d0*x1 + 6.0d0*x1**2
+        SB(4)=SB(1)*SB(2)
+        SB(5)=1.0d0 - 6.0d0*y1 + 6.0d0*y1**2 
+        SB(6)=-1.0d0 + 12.0d0*x1 - 30.0d0*x1**2 + 20.0d0*x1**3
+        SB(7)=SB(3)*SB(2)
+        SB(8)=SB(1)*SB(5)
+        SB(9)=-1.0d0 + 12.0d0*y1 - 30.0d0*y1**2 + 20.0d0*y1**3  
     end select
     
 CASE(3) ! Taylor
@@ -1726,101 +1724,128 @@ FUNCTION BASIS_REC2D_DERIVATIVE(N,X1,Y1,ORDER,ICONSIDERED,NUMBER_OF_DOG,DX_OR_DY
     BASIS_REC2D_DERIVATIVE=zero
     !OOV=1.0D0/(ILOCAL_RECON3(ICONSIDERED)%VOLUME(1,1))
 
-    SELECT CASE(DX_OR_DY)
-
-    CASE(1) ! derivative with respect to x
-        IF (ORDER > 0) THEN
-            BASIS_REC2D_DERIVATIVE(1) = 1
-            BASIS_REC2D_DERIVATIVE(2) = 0
-        END IF
-        IF (ORDER > 1) THEN
-            BASIS_REC2D_DERIVATIVE(3) = 2 * X1
-            BASIS_REC2D_DERIVATIVE(4) = Y1
-            BASIS_REC2D_DERIVATIVE(5) = 0
-        END IF
-        IF (ORDER > 2) THEN
-            BASIS_REC2D_DERIVATIVE(6) = 3 * X1 ** 2
-            BASIS_REC2D_DERIVATIVE(7) = 2 * X1 * Y1
-            BASIS_REC2D_DERIVATIVE(8) = Y1 ** 2
-            BASIS_REC2D_DERIVATIVE(9) = 0
-        END IF
-        IF (ORDER > 3) THEN
-            CURRENT_ORDER = 4
-            INT_COEFF = CURRENT_ORDER
-            X_ORDER = CURRENT_ORDER - 1
-            Y_ORDER = 0
-            NUM_TERMS = 9
-            
-            DO BASIS_INDEX = 4, ORDER ! compute total number of terms in basis
-                NUM_TERMS = NUM_TERMS + BASIS_INDEX + 1
-            END DO
-            
-            BASIS_INDEX = 10 ! starting from 4th order, 10th basis term
-            DO WHILE (BASIS_INDEX < NUM_TERMS)
-                IF (INT_COEFF == 1) THEN
-                    BASIS_REC2D_DERIVATIVE(BASIS_INDEX) = INT_COEFF * X1 ** X_ORDER * Y1 ** Y_ORDER
+    SELECT CASE(POLY)
+    CASE(1) ! Generic
+        SELECT CASE(DX_OR_DY)
+        CASE(1) ! Derivative with respect to x
+            IF (ORDER > 0) THEN
+                BASIS_REC2D_DERIVATIVE(1) = 1
+                BASIS_REC2D_DERIVATIVE(2) = 0
+            END IF
+            IF (ORDER > 1) THEN
+                BASIS_REC2D_DERIVATIVE(3) = 2 * X1
+                BASIS_REC2D_DERIVATIVE(4) = Y1
+                BASIS_REC2D_DERIVATIVE(5) = 0
+            END IF
+            IF (ORDER > 2) THEN
+                BASIS_REC2D_DERIVATIVE(6) = 3 * X1 ** 2
+                BASIS_REC2D_DERIVATIVE(7) = 2 * X1 * Y1
+                BASIS_REC2D_DERIVATIVE(8) = Y1 ** 2
+                BASIS_REC2D_DERIVATIVE(9) = 0
+            END IF
+            IF (ORDER > 3) THEN
+                CURRENT_ORDER = 4
+                INT_COEFF = CURRENT_ORDER
+                X_ORDER = CURRENT_ORDER - 1
+                Y_ORDER = 0
+                NUM_TERMS = 9
+                
+                DO BASIS_INDEX = 4, ORDER ! compute total number of terms in basis
+                    NUM_TERMS = NUM_TERMS + BASIS_INDEX + 1
+                END DO
+                
+                BASIS_INDEX = 10 ! starting from 4th order, 10th basis term
+                DO WHILE (BASIS_INDEX < NUM_TERMS)
+                    IF (INT_COEFF == 1) THEN
+                        BASIS_REC2D_DERIVATIVE(BASIS_INDEX) = INT_COEFF * X1 ** X_ORDER * Y1 ** Y_ORDER
+                        BASIS_INDEX = BASIS_INDEX + 1
+                        BASIS_REC2D_DERIVATIVE(BASIS_INDEX) = 0
+                        CURRENT_ORDER = CURRENT_ORDER + 1
+                        INT_COEFF = CURRENT_ORDER
+                        X_ORDER = CURRENT_ORDER - 1
+                        Y_ORDER = 0
+                    ELSE
+                        BASIS_REC2D_DERIVATIVE(BASIS_INDEX) = INT_COEFF * X1 ** X_ORDER * Y1 ** Y_ORDER
+                        INT_COEFF = INT_COEFF - 1
+                        X_ORDER = X_ORDER - 1
+                        Y_ORDER = Y_ORDER + 1
+                    END IF
                     BASIS_INDEX = BASIS_INDEX + 1
-                    BASIS_REC2D_DERIVATIVE(BASIS_INDEX) = 0
-                    CURRENT_ORDER = CURRENT_ORDER + 1
-                    INT_COEFF = CURRENT_ORDER
-                    X_ORDER = CURRENT_ORDER - 1
-                    Y_ORDER = 0
-                ELSE
-                    BASIS_REC2D_DERIVATIVE(BASIS_INDEX) = INT_COEFF * X1 ** X_ORDER * Y1 ** Y_ORDER
-                    INT_COEFF = INT_COEFF - 1
-                    X_ORDER = X_ORDER - 1
-                    Y_ORDER = Y_ORDER + 1
-                END IF
-                BASIS_INDEX = BASIS_INDEX + 1
-            END DO
-        END IF
-        
-    CASE(2) ! derivative with respect to y
-        IF (ORDER > 0) THEN
-            BASIS_REC2D_DERIVATIVE(1) = 0
-            BASIS_REC2D_DERIVATIVE(2) = 1
-        END IF
-        IF (ORDER > 1) THEN
-            BASIS_REC2D_DERIVATIVE(3) = 0
-            BASIS_REC2D_DERIVATIVE(4) = X1
-            BASIS_REC2D_DERIVATIVE(5) = 2 * Y1
-        END IF
-        IF (ORDER > 2) THEN
-            BASIS_REC2D_DERIVATIVE(6) = 0
-            BASIS_REC2D_DERIVATIVE(7) = X1 ** 2
-            BASIS_REC2D_DERIVATIVE(8) = 2 * X1 * Y1
-            BASIS_REC2D_DERIVATIVE(9) = 3 * Y1 ** 2
-        END IF
-        IF (ORDER > 3) THEN
-            CURRENT_ORDER = 4
-            INT_COEFF = CURRENT_ORDER
-            Y_ORDER = CURRENT_ORDER - 1
-            X_ORDER = 0
-            NUM_TERMS = 9
+                END DO
+            END IF
             
-            DO BASIS_INDEX = 4, ORDER ! compute total number of terms in basis
-                NUM_TERMS = NUM_TERMS + BASIS_INDEX + 1
-            END DO
-            
-            BASIS_INDEX = 10 ! starting from 4th order, 10th basis term
-            DO WHILE (BASIS_INDEX < NUM_TERMS)
-                IF (INT_COEFF == 1) THEN
-                    BASIS_REC2D_DERIVATIVE(BASIS_INDEX) = INT_COEFF * X1 ** X_ORDER * Y1 ** Y_ORDER
+        CASE(2) ! Derivative with respect to y
+            IF (ORDER > 0) THEN
+                BASIS_REC2D_DERIVATIVE(1) = 0
+                BASIS_REC2D_DERIVATIVE(2) = 1
+            END IF
+            IF (ORDER > 1) THEN
+                BASIS_REC2D_DERIVATIVE(3) = 0
+                BASIS_REC2D_DERIVATIVE(4) = X1
+                BASIS_REC2D_DERIVATIVE(5) = 2 * Y1
+            END IF
+            IF (ORDER > 2) THEN
+                BASIS_REC2D_DERIVATIVE(6) = 0
+                BASIS_REC2D_DERIVATIVE(7) = X1 ** 2
+                BASIS_REC2D_DERIVATIVE(8) = 2 * X1 * Y1
+                BASIS_REC2D_DERIVATIVE(9) = 3 * Y1 ** 2
+            END IF
+            IF (ORDER > 3) THEN
+                CURRENT_ORDER = 4
+                INT_COEFF = CURRENT_ORDER
+                Y_ORDER = CURRENT_ORDER - 1
+                X_ORDER = 0
+                NUM_TERMS = 9
+                
+                DO BASIS_INDEX = 4, ORDER ! compute total number of terms in basis
+                    NUM_TERMS = NUM_TERMS + BASIS_INDEX + 1
+                END DO
+                
+                BASIS_INDEX = 10 ! starting from 4th order, 10th basis term
+                DO WHILE (BASIS_INDEX < NUM_TERMS)
+                    IF (INT_COEFF == 1) THEN
+                        BASIS_REC2D_DERIVATIVE(BASIS_INDEX) = INT_COEFF * X1 ** X_ORDER * Y1 ** Y_ORDER
+                        BASIS_INDEX = BASIS_INDEX + 1
+                        BASIS_REC2D_DERIVATIVE(BASIS_INDEX) = 0
+                        CURRENT_ORDER = CURRENT_ORDER + 1
+                        INT_COEFF = CURRENT_ORDER
+                        Y_ORDER = CURRENT_ORDER - 1
+                        X_ORDER = 0
+                    ELSE
+                        BASIS_REC2D_DERIVATIVE(BASIS_INDEX) = INT_COEFF * X1 ** X_ORDER * Y1 ** Y_ORDER
+                        INT_COEFF = INT_COEFF - 1
+                        Y_ORDER = Y_ORDER - 1
+                        X_ORDER = X_ORDER + 1
+                    END IF
                     BASIS_INDEX = BASIS_INDEX + 1
-                    BASIS_REC2D_DERIVATIVE(BASIS_INDEX) = 0
-                    CURRENT_ORDER = CURRENT_ORDER + 1
-                    INT_COEFF = CURRENT_ORDER
-                    Y_ORDER = CURRENT_ORDER - 1
-                    X_ORDER = 0
-                ELSE
-                    BASIS_REC2D_DERIVATIVE(BASIS_INDEX) = INT_COEFF * X1 ** X_ORDER * Y1 ** Y_ORDER
-                    INT_COEFF = INT_COEFF - 1
-                    Y_ORDER = Y_ORDER - 1
-                    X_ORDER = X_ORDER + 1
-                END IF
-                BASIS_INDEX = BASIS_INDEX + 1
-            END DO
-        END IF
+                END DO
+            END IF
+        END SELECT
+    CASE(2) ! Legendre
+        SELECT CASE(DX_OR_DY)
+        CASE(1) ! Derivative with respect to x
+            IF (ORDER > 0) THEN
+                BASIS_REC2D_DERIVATIVE(1) = 2
+                BASIS_REC2D_DERIVATIVE(2) = 0
+            END IF
+            IF (ORDER > 1) THEN
+                BASIS_REC2D_DERIVATIVE(3) = 12 * X1 - 6
+                BASIS_REC2D_DERIVATIVE(4) = (1.0d0 - 6.0d0*y1 + 6.0d0*y1**2) * (-6 + 12 * X1)
+                BASIS_REC2D_DERIVATIVE(5) = 0
+            END IF           
+        CASE(2) ! Derivative with respect to y
+            IF (ORDER > 0) THEN
+                BASIS_REC2D_DERIVATIVE(1) = 0
+                BASIS_REC2D_DERIVATIVE(2) = 2
+            END IF
+            IF (ORDER > 1) THEN
+                BASIS_REC2D_DERIVATIVE(3) = 0
+                BASIS_REC2D_DERIVATIVE(4) = (1.0d0 - 6.0d0*X1 + 6.0d0*X1**2) * (-6 + 12 * Y1)
+                BASIS_REC2D_DERIVATIVE(5) = 12 * Y1 - 6
+            END IF
+        END SELECT
+    CASE(3) ! Taylor
+        BASIS_REC2D_DERIVATIVE = TAYLOR_BASIS_DERIVATIVE((/ X1,Y1 /), (/ IELEM(N,ICONSIDERED)%XXC,IELEM(N,ICONSIDERED)%YYC /), IELEM(N,ICONSIDERED)%DELTA_XYZ, ORDER, NUMBER_OF_DOG, DX_OR_DY)
     END SELECT
     
 END FUNCTION BASIS_REC2D_DERIVATIVE
@@ -1860,5 +1885,36 @@ FUNCTION TAYLOR_BASIS(XYZ_IN, XCYCZC_IN, DELTA_XYZ_IN, QP_XYZ, QP_WEIGHTS, N_QP,
         END IF            
     END IF
 END FUNCTION TAYLOR_BASIS
+
+FUNCTION TAYLOR_BASIS_DERIVATIVE(XYZ_IN, XCYCZC_IN, DELTA_XYZ_IN, ORDER, N_DOFS, DX_OR_DY)
+    IMPLICIT NONE
+    INTEGER,INTENT(IN)::ORDER, DX_OR_DY, N_DOFS
+    REAL,DIMENSION(:),INTENT(IN)::XYZ_IN, XCYCZC_IN, DELTA_XYZ_IN
+    REAL,DIMENSION(N_DOFS)::TAYLOR_BASIS_DERIVATIVE
+    
+    SELECT CASE(DX_OR_DY)
+    CASE(1) ! Derivative with respect to x
+        IF (ORDER > 0) THEN
+            TAYLOR_BASIS_DERIVATIVE(1) = 1
+            TAYLOR_BASIS_DERIVATIVE(2) = 0
+        END IF
+        IF (ORDER > 1) THEN
+            TAYLOR_BASIS_DERIVATIVE(3) = (XYZ_IN(1) - XCYCZC_IN(1)) / DELTA_XYZ_IN(1)
+            TAYLOR_BASIS_DERIVATIVE(4) = 0
+            TAYLOR_BASIS_DERIVATIVE(5) = (XYZ_IN(2) - XCYCZC_IN(2)) / DELTA_XYZ_IN(2)
+        END IF
+    CASE(2) ! Derivative with respect to y
+        IF (ORDER > 0) THEN
+            TAYLOR_BASIS_DERIVATIVE(1) = 0
+            TAYLOR_BASIS_DERIVATIVE(2) = 1
+        END IF
+        IF (ORDER > 1) THEN
+            TAYLOR_BASIS_DERIVATIVE(3) = 0
+            TAYLOR_BASIS_DERIVATIVE(4) = (XYZ_IN(2) - XCYCZC_IN(2)) / DELTA_XYZ_IN(2)
+            TAYLOR_BASIS_DERIVATIVE(5) = (XYZ_IN(1) - XCYCZC_IN(1)) / DELTA_XYZ_IN(1)
+        END IF
+    END SELECT
+    
+END FUNCTION TAYLOR_BASIS_DERIVATIVE
 
 END MODULE BASIS
