@@ -1686,7 +1686,7 @@ CASE(3) ! Taylor
 END SELECT
    
     IF (DG == 1) THEN
-        basis_rec2d(1:NUMBER_OF_DOG)=SB(1:NUMBER_OF_DOG)
+        basis_rec2d=SB
     ELSE if (compwrt.eq.0)then
         OOV=1.0D0/(ILOCAL_RECON3(ICONSIDERED)%VOLUME(1,1))
         basis_rec2d(1:NUMBER_OF_DOG)=SB(1:NUMBER_OF_DOG)-((INTEG_BASIS(ICONSIDERED)%value(1:NUMBER_OF_DOG))*OOV)
