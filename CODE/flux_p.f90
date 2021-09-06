@@ -158,6 +158,7 @@ SUBROUTINE CALCULATE_FLUXESHI2D(N)
         
         RHS(I)%VAL=ZERO
         RHS(I)%VALDG = ZERO
+        DG_RHS = ZERO
         
         IF (DG.EQ.1) THEN
             IF (IELEM(N,I)%ISHAPE == 5) IQP = QP_QUAD
