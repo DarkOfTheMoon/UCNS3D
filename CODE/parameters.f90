@@ -404,32 +404,32 @@ SUBROUTINE READ_UCNS3D
 	 
 	 
 	 
-	  CASE (100)           !FOR DG method
+    CASE (100)           !FOR DG method
 	
 	LOWMEMORY=0 	!MEMORY USAGE: |0: HIGH(FASTER) |1:LOW (SLOWER)|| 
-	binio=1	    	!I/O (ASCII=0, BINARY=1) 
+	BINIO=1	    	!I/O (ASCII=0, BINARY=1) 
 	LOWMEM=0    	!GLOBAL ARRAYS SETTING (0=WITHOUT BETTER SUITED FOR NON PERIODIC BOUND,1=WITH (LARGE MEMORY FOOTPRINT))
-	reduce_comp=0	!QUADRATURE FREE FLUX=0 NOT TRUE,1 TRUE
-	turbulencemodel=1 !TURBULENCE MODEL SELECTION: |1:Spalart-Allmaras |2:k-w SST	
-	!icoupleturb=1	!COUPLING TURBULENCE MODEL: |1:COUPLED | 0: DECOUPLED
-	ihybrid=0	!HYBRID TURBULENCE : |1:ENABLED|0:DISABLED
+	REDUCE_COMP=0	!QUADRATURE FREE FLUX=0 NOT TRUE,1 TRUE
+	TURBULENCEMODEL=1 !TURBULENCE MODEL SELECTION: |1:SPALART-ALLMARAS |2:K-W SST	
+	!ICOUPLETURB=1	!COUPLING TURBULENCE MODEL: |1:COUPLED | 0: DECOUPLED
+	IHYBRID=0	!HYBRID TURBULENCE : |1:ENABLED|0:DISABLED
 	HYBRIDIST=0.0D0 !HYBRID DISTANCE
-	swirl=0		!swirling flow:0 deactivated, 1 activated
+	SWIRL=0		!SWIRLING FLOW:0 DEACTIVATED, 1 ACTIVATED
 	IADAPT=0	!ADAPTIVE NUMERICAL SCHEME (0 NOT TRUE,1 TRUE)
 	ICOMPACT=0	!COMPACT STENCIL MODE(0 NOT TRUE,1 TRUE)
-	extf=2		!STENCILS STABILITY VALUES FROM 1.2 TO 3 (DEFAULT 2)
+	EXTF=2		!STENCILS STABILITY VALUES FROM 1.2 TO 3 (DEFAULT 2)
 	WEIGHT_LSQR=0	!WEIGHTED LEAST SQUARES(0 NOT TRUE,1 TRUE)
-	guassianquadra=0!GAUSSIAN QUADRATURE RULE (1,2,5,6), DEFAULT 0 WILL USE THE APPROPRIATE NUMBER
-	FASTEST_Q=1	!STORE gqp POINTS (1 =YES FASTER, 0= SLOWER)
-        relax=1		!RELAXATION PARAMETER : |1:BLOCK JACOBI |2: LU-SGS
+	GUASSIANQUADRA=0!GAUSSIAN QUADRATURE RULE (1,2,5,6), DEFAULT 0 WILL USE THE APPROPRIATE NUMBER
+	FASTEST_Q=1	!STORE GQP POINTS (1 =YES FASTER, 0= SLOWER)
+    RELAX=1		!RELAXATION PARAMETER : |1:BLOCK JACOBI |2: LU-SGS
 	CFLMAX=30	!CFLMAX:TO BE USED WITH RAMPING
 	CFLRAMP=0	!CFL RAMPING: |0: DEACTIVATED |1:ACTIVATED
-	emetis=6    	!Metis partitioner : 1: Hybrid metis, 2:adaptive weights for hybrid grids, 3: Uniform metis partionioner,4:NODAL,6=PARMETS 
-	itold=10000	!TOLERANCE=n_iterations
+	EMETIS=6    	!METIS PARTITIONER : 1: HYBRID METIS, 2:ADAPTIVE WEIGHTS FOR HYBRID GRIDS, 3: UNIFORM METIS PARTIONIONER,4:NODAL,6=PARMETS 
+	ITOLD=10000	!TOLERANCE=N_ITERATIONS
 	GRIDAR1=5.0	! 0	  5.0    7.0  LIMIT ASPECT RATIO CELLS,
 	GRIDAR2=7.0	! LIMIT VOLUME CELLS
-	fastest=0	! 0		       		||Fastest, no coordinate mapping (1: engaged,0:with transformation)
-	lmach_style=0	!0			||LOW MACH TREATMENT (1 ACTIVATE, 0 DISABLE),lmach_style(0=only normal component,1=all components)
+	FASTEST=0	! 0		       		||FASTEST, NO COORDINATE MAPPING (1: ENGAGED,0:WITH TRANSFORMATION)
+	LMACH_STYLE=0	!0			||LOW MACH TREATMENT (1 ACTIVATE, 0 DISABLE),LMACH_STYLE(0=ONLY NORMAL COMPONENT,1=ALL COMPONENTS)
 	LAMX=1.0D0;LAMY=1.0D0;LAMZ=1.0D0	!LINEAR ADVECTION COEFFICIENTS (LAMX, LAMY,LAMZ)
 	DG=1    !0=DEACTIVATED FV ONLY, 1=ACTIVATED DG ONLY, 2=HYBRID
 	
@@ -487,17 +487,6 @@ SUBROUTINE READ_UCNS3D
 	END SELECT
 	    
 	    
-	    
-	    
-	   
-	    
-	    
-	    
-	    
-	    
-	    
-	    
-	    
 	
 	 IF (N.EQ.0)THEN
       OPEN(63,FILE='history.txt',FORM='FORMATTED',ACTION='WRITE',POSITION='APPEND')
@@ -535,7 +524,7 @@ SUBROUTINE READ_UCNS3D
 	     
 	     !-------------------------2---------------------------------!
 	     !NUMBER OF VARIABLES SETUP
-	     if (governingequations.le.2)then
+	     if (governingequations.le.2)then ! NS or Euler
 		  if (dimensiona.eq.3)then
 		      nof_variables=5;dims=3
 		  else
@@ -543,9 +532,10 @@ SUBROUTINE READ_UCNS3D
 		  end if
 		  
 		  
-	      else
+	      else ! Linear advection
 		  nof_variables=1
-		    if (dimensiona.eq.3)then
+		  
+		  if (dimensiona.eq.3)then
 		    dims=3
 		    else
 		    dims=2
@@ -755,32 +745,32 @@ SUBROUTINE READ_UCNS3D
 	  
 	  END SELECT
 	  
-	  IF (N.EQ.0)THEN
-	    OPEN(63,FILE='history.txt',FORM='FORMATTED',ACTION='WRITE',POSITION='APPEND')
-	    write(63,*)'Order of Accuracy in space:',spatialorder
-	    CLOSE(63)
-	END IF
+        IF (N.EQ.0)THEN
+            OPEN(63,FILE='history.txt',FORM='FORMATTED',ACTION='WRITE',POSITION='APPEND')
+            write(63,*)'Order of Accuracy in space:',spatialorder
+            CLOSE(63)
+        END IF
 	   
-	  ! Temporal order
-	  RUNGEKUTTA = temporder 
+        ! Temporal order
+        RUNGEKUTTA = temporder 
 	  
-	if ( iboundary .eq. 0 ) then 
-	    IPERIODICITY = -3 
-	    end if
-	    if ( iboundary .eq. 1 ) then 
-	    IPERIODICITY = 1 
-	    end if
+        if ( iboundary .eq. 0 ) then 
+            IPERIODICITY = -3 
+        else if ( iboundary .eq. 1 ) then 
+            IPERIODICITY = 1 
+        end if
 
-	    if (guassianquadra.eq.0)then
-	  IGQRULES=min(iorder,6)
-	else
-
-	if (guassianquadra.gt.1)then
-	IGQRULES = guassianquadra-1
-	  else
-	IGQRULES =guassianquadra
-	end if
-	End if
+        IF (DG == 1) THEN
+            IGQRULES = MIN(IORDER+1,6)
+	    ELSE if (guassianquadra.eq.0) then
+            IGQRULES=min(iorder,6)
+        else 
+            if (guassianquadra.gt.1)then
+                IGQRULES = guassianquadra-1
+            else
+                IGQRULES =guassianquadra
+            end if
+        End if
 	    
 	    
 	  !-------------------------END DISCRETISATION 6---------------------------------!

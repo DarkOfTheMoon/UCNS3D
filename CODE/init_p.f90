@@ -2,7 +2,7 @@ MODULE INITIALISATION
 USE DECLARATION
 USE LIBRARY
 USE TRANSFORM
-USE FLUXES
+!USE FLUXES
 USE PROFILE
 IMPLICIT NONE
 
@@ -134,8 +134,8 @@ IF (RESTART.EQ.0)THEN
       if (IELEM(N,I)%MODE.eq.0)then
       CALL QUADRATUREHEXA(N,IGQRULES)
       VOLTEMP=HEXAVOLUME(N)/IELEM(N,I)%totvolume
-!       CALL QUADRATUREHEXA(N,IGQRULES)
-            QQP=QP_HEXA
+      QQP=QP_HEXA
+      
 	  DO INC=1,QQP
 	  POX(1)=QPOINTS(1,INC)
 	  POY(1)=QPOINTS(2,INC) 
@@ -788,9 +788,8 @@ SUBROUTINE INITIALISE2d(N)
 IMPLICIT NONE
 integer,INTENT(IN)::N
 REAL,allocatable,DIMENSION(:)::RG,ARG
-REAL::DGX1,DGY1,DGZ1
 CHARACTER(LEN=20)::PROC,RESTFILE,PROC3
-INTEGER:: prev_turbequation,INITIAL,III,i,k,jx,QQP,INC,kmaxe,jkn,ki,iterr,JX2,COUNTERDG
+INTEGER:: prev_turbequation,INITIAL,III,i,k,jx,QQP,INC,kmaxe,jkn,ki,iterr,JX2
 
 IF (LAMPS.EQ.1)THEN
 III=1
@@ -821,7 +820,6 @@ CALL MPI_BARRIER(MPI_COMM_WORLD,IERROR)
 
 
 
-
 IF (RESTART.EQ.0)THEN
 !$OMP PARALLEL DEFAULT(SHARED) private(iNITIAL,i,QQP,INC)
 	IF (ISCHEME.LT.2)THEN
@@ -839,8 +837,8 @@ IF (RESTART.EQ.0)THEN
                 pox(1)=IELEM(N,INITIAL)%XXC
                 poy(1)=IELEM(N,INITIAL)%yyC
                 
-                U_C(INITIAL)%VAL(1,1)=LINEAR_INIT2D(N)
                 U_E(INITIAL)%VAL(1,1)=U_C(INITIAL)%VAL(1,1)
+                U_C(INITIAL)%VAL(1,1)=LINEAR_INIT2D(N)
             END DO
 !$OMP END DO
 		END IF
@@ -875,8 +873,6 @@ IF (RESTART.EQ.0)THEN
 	ELSE ! Original if statement: IF (ISCHEME.LT.2)THEN
 !$OMP DO SCHEDULE (STATIC)
         DO I=1,KMAXE
-            COUNTERDG=0
-            iconsidered=i
             VEXT=ZERO
         !     NODES_LIST=ZERO
         !     ELTYPE=IELEM(N,I)%ISHAPE
@@ -893,21 +889,35 @@ IF (RESTART.EQ.0)THEN
             ELTYPE=IELEM(N,I)%ISHAPE
             ELEM_DEC=IELEM(N,I)%VDEC
             DO K=1,IELEM(N,I)%NONODES
-                NODES_LIST(k,1:2)=inoder(IELEM(N,I)%NODES(K))%CORD(1:2)
-                vext(k,1:2)=NODES_LIST(k,1:2)
+                NODES_LIST(k,1:2)=INODER(IELEM(N,I)%NODES(K))%CORD(1:2)
+                VEXT(k,1:2)=NODES_LIST(k,1:2)
             END DO
             CALL DECOMPOSE2
     
+            IF (DG.EQ.1)THEN
+                POX(1) = IELEM(N,I)%XXC !POX,POY required for LINEAR_INIT2D
+                POY(1) = IELEM(N,I)%YYC
+                 
+                U_C(I)%VALDG(1,1,1)=LINEAR_INIT2D(N)   !THIS IS JUST THE INITIAL SOLUTION
+                U_C(I)%VALDG(1,1,2:IELEM(N,I)%IDEGFREE+1) = ZERO ! Eq. 2.2, Cockburn/Shu 2001
+                
+                WRITE(200+N,*) "ELEMENT", I,"DG INITIAL"
+                WRITE(200+N,*) "SOLUTION", U_C(I)%VALDG(1,1,:)
+            END IF
+            
             SELECT CASE(ielem(n,i)%ishape)
 
             CASE(5)
-                IF (IELEM(N,I)%MODE.EQ.0)THEN
-                    CALL QUADRATUREquad(N,IGQRULES)
+                IF (IELEM(N,I)%MODE.EQ.0 .OR. DG == 1)THEN
+                    CALL QUADRATUREQUAD(N,IGQRULES)
+                    
                     VOLTEMP=1.0d0
-                            QQP=QP_quad
+                    QQP=QP_quad
+                    
                     DO INC=1,QQP
-                        POX(1)=QPOINTS(1,INC)
-                        POY(1)=QPOINTS(2,INC) 
+                        
+                        POX(1)=QP_ARRAY(I,INC)%X !POX,POY required for LINEAR_INIT2D
+                        POY(1)=QP_ARRAY(I,INC)%Y 
                     
                             IF (ITESTCASE.LE.2)THEN
                             U_C(I)%VAL(1,1)=U_C(I)%VAL(1,1)+LINEAR_INIT2D(N)*WEQUA3D(INC)*(VOLTEMP)
@@ -928,9 +938,8 @@ IF (RESTART.EQ.0)THEN
                             END IF
                     END DO
                 ELSE
-                
-                !1 this is where the initialisation will be performed for every decomposed element.
-                !INITIALISE COUNTER OF GAUSSIAN QUADRATURE POINT
+                ! this is where the initialisation will be performed for every decomposed element.
+                ! INITIALISE COUNTER OF GAUSSIAN QUADRATURE POINT
                 
                     DO K=1,ELEM_DEC
                         VEXT(1:3,1:2)=ELEM_LISTD(k,1:3,1:2)
@@ -939,78 +948,86 @@ IF (RESTART.EQ.0)THEN
                         
                         VOLTEMP=TRIANGLEVOLUME(N)/IELEM(N,I)%totvolume
                         QQP=QP_Triangle
-                        DO INC=1,QQP
-                            POX(1)=QPOINTS(1,INC)
-                            POY(1)=QPOINTS(2,INC) 
-                    
-                            IF (ITESTCASE.LE.2)THEN
-                                U_C(I)%VAL(1,1)=U_C(I)%VAL(1,1)+LINEAR_INIT2D(N)*WEQUA3D(INC)*(VOLTEMP)  !numerical
-                                U_E(I)%VAL(1,1)=U_C(I)%VAL(1,1)  !exact
-                                
-                                IF (DG.EQ.1)THEN
-                                    COUNTERDG=COUNTERDG+1
+                        
+                        !DO INC=1,QQP
+                        !    QP_ARRAY(I,INC,K)%X = QPOINTS(1,INC)
+                        !    QP_ARRAY(I,INC,K)%Y = QPOINTS(2,INC)
+                        !    QP_ARRAY(I,INC,K)%QP_WEIGHT = WEQUA3D(INC)
+                        !END DO
+                        
+                        IF (DG.EQ.1)THEN
+                        !    POX(1) = IELEM(N,I)%XXC !POX,POY required for LINEAR_INIT2D
+                        !    POY(1) = IELEM(N,I)%YYC
+                            
+                        !    U_C(I)%VALDG(1,1,1)=LINEAR_INIT2D(N)   !THIS IS JUST THE INITIAL SOLUTION
+                        !    
+                        !    WRITE(200+N,*) "ELEMENT", I,"DG INITIAL"
+                        !    WRITE(200+N,*) "SOLUTION", U_C(I)%VALDG(1,1,1)
+                        ELSE                        
+                            DO INC=1,QQP                        
+                                POX(1)=QPOINTS(1,INC) !POX,POY required for LINEAR_INIT2D
+                                POY(1)=QPOINTS(2,INC)
+                        
+                                IF (ITESTCASE.LE.2)THEN ! Linear advection
+                                    U_C(I)%VAL(1,1)=U_C(I)%VAL(1,1)+LINEAR_INIT2D(N)*WEQUA3D(INC)*(VOLTEMP)  !numerical
+                                    U_E(I)%VAL(1,1)=U_C(I)%VAL(1,1)  !exact
                                     
-                                    U_C(I)%VALDG(1,COUNTERDG,1)=LINEAR_INIT2D(N)   !THIS IS JUST THE INITIAL SOLUTION
-                                                        
-                                    WRITE(200+N,*)"ELEMENT", I,"DG INITIAL", COUNTERDG
-                                    WRITE(200+N,*)"SOLUTION", U_C(I)%VALDG(1,COUNTERDG,1)
-                                END IF
-                                
-                            ELSE
-                                CALL INITIALISE_EULER2D(N)
-                                
-                                IF ((turbulence .eq. 1).or.(passivescalar.gt.0)) THEN
-                                    U_C(I)%VAL(1,1:nof_Variables)=U_C(I)%VAL(1,1:nof_Variables)+VECCOS(1:nof_Variables)*WEQUA3D(INC)*(VOLTEMP)
-                                    U_CT(I)%VAL(1,1:0+turbulenceequations+passivescalar)=U_CT(I)%VAL(1,1:0+turbulenceequations+passivescalar)+&
-                                    VECCOS(5:4+turbulenceequations+passivescalar)*WEQUA3D(INC)*(VOLTEMP)
                                 ELSE
-                                    U_C(I)%VAL(1,:)=U_C(I)%VAL(1,:)+VECCOS(:)*WEQUA3D(INC)*(VOLTEMP)
+                                    CALL INITIALISE_EULER2D(N)
                                     
-                                    IF (itestcase.eq.3)THEN
-                                        U_E(I)%VAL(1,:)=U_C(I)%VAL(1,:)
+                                    IF ((turbulence .eq. 1).or.(passivescalar.gt.0)) THEN
+                                        U_C(I)%VAL(1,1:nof_Variables)=U_C(I)%VAL(1,1:nof_Variables)+VECCOS(1:nof_Variables)*WEQUA3D(INC)*(VOLTEMP)
+                                        U_CT(I)%VAL(1,1:0+turbulenceequations+passivescalar)=U_CT(I)%VAL(1,1:0+turbulenceequations+passivescalar)+&
+                                        VECCOS(5:4+turbulenceequations+passivescalar)*WEQUA3D(INC)*(VOLTEMP)
+                                    ELSE
+                                        U_C(I)%VAL(1,:)=U_C(I)%VAL(1,:)+VECCOS(:)*WEQUA3D(INC)*(VOLTEMP)
+                                        
+                                        IF (itestcase.eq.3)THEN
+                                            U_E(I)%VAL(1,:)=U_C(I)%VAL(1,:)
+                                        END IF
                                     END IF
                                 END IF
-                            END IF
-                        END DO !NC=1,QQP
+                            END DO !INC=1,QQP  
+                        END IF !DG.EQ.1
                     END DO !K=1,ELEM_DEC
                 END IF
 
-            CASE(6)    
-                CALL QUADRATUREtriangle(N,IGQRULES)
+            CASE(6)
+                CALL QUADRATURETRIANGLE(N,IGQRULES)
                 VOLTEMP=1.0d0
                 QQP=QP_Triangle
-                DO INC=1,QQP
-                POX(1)=QPOINTS(1,INC)
-                POY(1)=QPOINTS(2,INC) 
-                
-                
+                            
+                IF (DG.EQ.1)THEN
+                    !POX(1) = IELEM(N,I)%XXC !POX,POY required for LINEAR_INIT2D
+                    !POY(1) = IELEM(N,I)%YYC
+                    
+                    !U_C(I)%VALDG(1,1,1)=LINEAR_INIT2D(N)   !THIS IS JUST THE INITIAL SOLUTION
+                            
+                    !WRITE(200+N,*) "ELEMENT", I,"DG INITIAL"
+                    !WRITE(200+N,*) "SOLUTION", U_C(I)%VALDG(1,1,1)
+                ELSE
+                    DO INC=1,QQP
+                        POX(1)=QP_ARRAY(I,INC)%X !POX,POY required for LINEAR_INIT2D
+                        POY(1)=QP_ARRAY(I,INC)%Y
+                        
                         IF (ITESTCASE.LE.2)THEN
-                        U_C(I)%VAL(1,1)=U_C(I)%VAL(1,1)+LINEAR_INIT2D(N)*WEQUA3D(INC)*(VOLTEMP)
-                        U_E(I)%VAL(1,1)=U_C(I)%VAL(1,1)
-                        
-                        IF (DG.EQ.1)THEN
-                        COUNTERDG=COUNTERDG+1
-                        
-                        U_C(I)%VALDG(1,COUNTERDG,1)=LINEAR_INIT2D(N)   !THIS IS JUST THE INITIAL SOLUTION
-                        
-                        WRITE(200+N,*)"ELEMENT", I,"DG INITIAL", COUNTERDG
-                        WRITE(200+N,*)"SOLUTION", U_C(I)%VALDG(1,COUNTERDG,1)
-                        END IF
-                        
+                            U_C(I)%VAL(1,1)=U_C(I)%VAL(1,1)+LINEAR_INIT2D(N)*WEQUA3D(INC)*(VOLTEMP)
+                            U_E(I)%VAL(1,1)=U_C(I)%VAL(1,1)
                         ELSE
-                        CALL INITIALISE_EULER2D(N)
-                        if ((turbulence .eq. 1).or.(passivescalar.gt.0)) then
-                        U_C(I)%VAL(1,1:nof_Variables)=U_C(I)%VAL(1,1:nof_Variables)+VECCOS(1:nof_Variables)*WEQUA3D(INC)*(VOLTEMP)
-                        U_CT(I)%VAL(1,1:0+turbulenceequations+passivescalar)=U_CT(I)%VAL(1,1:0+turbulenceequations+passivescalar)+&
-                        VECCOS(5:4+turbulenceequations+passivescalar)*WEQUA3D(INC)*(VOLTEMP)
-                        else
-                        U_C(I)%VAL(1,:)=U_C(I)%VAL(1,:)+VECCOS(:)*WEQUA3D(INC)*(VOLTEMP)
-                        if (itestcase.eq.3)then
-                        U_E(I)%VAL(1,:)=U_C(I)%VAL(1,:)
-                        end if
-                        end if
+                            CALL INITIALISE_EULER2D(N)
+                            IF ((turbulence .eq. 1).or.(passivescalar.gt.0)) THEN
+                                U_C(I)%VAL(1,1:nof_Variables)=U_C(I)%VAL(1,1:nof_Variables)+VECCOS(1:nof_Variables)*WEQUA3D(INC)*(VOLTEMP)
+                                U_CT(I)%VAL(1,1:0+turbulenceequations+passivescalar)=U_CT(I)%VAL(1,1:0+turbulenceequations+passivescalar)+&
+                                VECCOS(5:4+turbulenceequations+passivescalar)*WEQUA3D(INC)*(VOLTEMP)
+                            ELSE
+                                U_C(I)%VAL(1,:)=U_C(I)%VAL(1,:)+VECCOS(:)*WEQUA3D(INC)*(VOLTEMP)
+                                IF (itestcase.eq.3) THEN
+                                    U_E(I)%VAL(1,:)=U_C(I)%VAL(1,:)
+                                END IF
+                            END IF
                         END IF
-                END DO
+                    END DO
+                END IF
             END SELECT
         END DO
 !$OMP END DO
@@ -1018,8 +1035,6 @@ IF (RESTART.EQ.0)THEN
 !$OMP END PARALLEL 
 	RES_TIME=ZERO
 END IF
-
-
 
 
 
