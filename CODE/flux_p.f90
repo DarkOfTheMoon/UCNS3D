@@ -204,11 +204,7 @@ SUBROUTINE CALCULATE_FLUXESHI2D(N)
                     END IF
                 END DO
                 
-                IF (DG == 1) THEN
-                    RHS(I)%VALDG = RHS(I)%VALDG + DG_RHS
-                ELSE
-                    RHS(I)%VAL(1)=RHS(I)%VAL(1)+GODFLUX2
-                END IF
+                IF (DG /= 1) RHS(I)%VAL(1)=RHS(I)%VAL(1)+GODFLUX2
 		    END DO
 		
         ELSE IF (IELEM(N,I)%INTERIOR.EQ.1)THEN
@@ -271,14 +267,11 @@ SUBROUTINE CALCULATE_FLUXESHI2D(N)
   
                 END DO
                 
-                IF (DG == 1) THEN
-                    RHS(I)%VALDG = RHS(I)%VALDG + DG_RHS
-                ELSE
-                    RHS(I)%VAL(1)=RHS(I)%VAL(1)+GODFLUX2	    
-                END IF
-                
+                IF (DG /= 1) RHS(I)%VAL(1)=RHS(I)%VAL(1)+GODFLUX2
 		    END DO
 		END IF
+		
+        IF (DG == 1) RHS(I)%VALDG = RHS(I)%VALDG + DG_RHS
 		IF (I == 1) WRITE(500+N,*) "RHS(I)%VAL:", RHS(I)%VALDG
 	END DO
 	!$OMP END DO 
