@@ -125,6 +125,7 @@ INTEGER::ZERO_TURB_INIT				!FLAG FOR TYPE OF INITIALIZATION FOR K-OMEGA
 INTEGER::DES_MODEL 				!INTEGER SWITCHES FOR SST
 INTEGER:: NPROBES,totwalls,NOF_INTERIOR,NOF_BOUNDED				!NUMBER OF PROBES FOR TRANSIENT DATA
 INTEGER::NUM_DG_DOFS !NUMBER OF DEGREES OF FREEDOM FOR DG POLYNOMIAL APPROXIMATION
+INTEGER::NUM_DG_RECONSTRUCT_DOFS !NUMBER OF DEGREES OF FREEDOM FOR DG ORDER + 1, NOT INCLUDING NUM_DG_DOFS
 
 !--------------------------------------------------------------------------------------------------------------------------!
 !oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo!
