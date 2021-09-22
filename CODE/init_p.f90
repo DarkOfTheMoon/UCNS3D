@@ -782,6 +782,8 @@ DEALLOCATE(VECCOS)
 END SUBROUTINE INITIALISE
 
 
+!INITIALISATION WITH BASIS
+
 SUBROUTINE INITIALISE2d(N)
  !> @brief
 !> This subroutine calls the initialisation of the computational domain in 2D
@@ -789,7 +791,8 @@ IMPLICIT NONE
 integer,INTENT(IN)::N
 REAL,allocatable,DIMENSION(:)::RG,ARG
 CHARACTER(LEN=20)::PROC,RESTFILE,PROC3
-INTEGER:: prev_turbequation,INITIAL,III,i,k,jx,QQP,INC,kmaxe,jkn,ki,iterr,JX2
+INTEGER:: prev_turbequation,INITIAL,III,i,k,jx,QQP,INC,kmaxe,jkn,ki,iterr,JX2,IDX
+REAL,DIMENSION(IDEGFREE)::BASIS_VECTOR
 
 IF (LAMPS.EQ.1)THEN
 III=1
@@ -894,21 +897,25 @@ IF (RESTART.EQ.0)THEN
             END DO
             CALL DECOMPOSE2
     
-            IF (DG.EQ.1)THEN
-                POX(1) = IELEM(N,I)%XXC !POX,POY required for LINEAR_INIT2D
-                POY(1) = IELEM(N,I)%YYC
-                 
-                U_C(I)%VALDG(1,1,1)=LINEAR_INIT2D(N)   !THIS IS JUST THE INITIAL SOLUTION
-                U_C(I)%VALDG(1,1,2:IELEM(N,I)%IDEGFREE+1) = ZERO ! Eq. 2.2, Cockburn/Shu 2001
-                
-                WRITE(200+N,*) "ELEMENT", I,"DG INITIAL"
-                WRITE(200+N,*) "SOLUTION", U_C(I)%VALDG(1,1,:)
-            END IF
+!             IF (DG.EQ.1)THEN
+!                 POX(1) = IELEM(N,I)%XXC !POX,POY required for LINEAR_INIT2D
+!                 POY(1) = IELEM(N,I)%YYC
+!                 BASIS_VECTOR = BASIS_REC2D(N,QP_ARRAY(I_ELEM,I_QP)%X,QP_ARRAY(I_ELEM,I_QP)%Y,IORDER,I_ELEM,IDEGFREE) 
+!                 
+!                 U_C(I)%VALDG(1,1,1)=LINEAR_INIT2D(N)   !THIS IS JUST THE INITIAL SOLUTION
+!                 DO IDX=1,NUM_DG_DOFS
+!                 U_C(I)%VALDG(1,1,IDX+1) = DOT_PRODUCT(BASIS_VECTOR(IDX), LINEAR_INIT2D(N)) ! Eq. 2.2, Cockburn/Shu 2001
+!                 END DO
+!                 
+!                 
+!                 WRITE(200+N,*) "ELEMENT", I,"DG INITIAL"
+!                 WRITE(200+N,*) "SOLUTION", U_C(I)%VALDG(1,1,:)
+!             END IF
             
             SELECT CASE(ielem(n,i)%ishape)
 
             CASE(5)
-                IF (IELEM(N,I)%MODE.EQ.0 .OR. DG == 1)THEN
+                IF (IELEM(N,I)%MODE.EQ.0)THEN
                     CALL QUADRATUREQUAD(N,IGQRULES)
                     
                     VOLTEMP=1.0d0
@@ -916,8 +923,8 @@ IF (RESTART.EQ.0)THEN
                     
                     DO INC=1,QQP
                         
-                        POX(1)=QP_ARRAY(I,INC)%X !POX,POY required for LINEAR_INIT2D
-                        POY(1)=QP_ARRAY(I,INC)%Y 
+                        POX(1)=QPOINTS(1,INC) !POX,POY required for LINEAR_INIT2D
+                        POY(1)=QPOINTS(2,INC) 
                     
                             IF (ITESTCASE.LE.2)THEN
                             U_C(I)%VAL(1,1)=U_C(I)%VAL(1,1)+LINEAR_INIT2D(N)*WEQUA3D(INC)*(VOLTEMP)
@@ -937,6 +944,27 @@ IF (RESTART.EQ.0)THEN
                             end if
                             END IF
                     END DO
+                    
+                    IF (DG.EQ.1)THEN
+!                     
+                         DO INC=1,QQP
+                            POX(1) = QPOINTS(1,INC)  !POX,POY required for LINEAR_INIT2D
+                            POY(1) = QPOINTS(2,INC) 
+                            QP_ARRAY(I,INC)%X = QPOINTS(1,INC) - IELEM(N,I)%XXC !POX,POY required for LINEAR_INIT2D
+                            QP_ARRAY(I,INC)%Y = QPOINTS(2,INC) - IELEM(N,I)%YYC
+                            QP_ARRAY(I,INC)%QP_WEIGHT = WEQUA3D(INC)
+                           
+                            BASIS_VECTOR = BASIS_REC2D(N,QP_ARRAY(I,INC)%X,QP_ARRAY(I,INC)%Y,IORDER,I,IDEGFREE) 
+                            
+                            U_C(I)%VALDG(1,1,1)=U_C(I)%VALDG(1,1,1)+LINEAR_INIT2D(N)*WEQUA3D(INC)*(VOLTEMP)   !THIS IS JUST THE INITIAL SOLUTION
+                            DO IDX=1,IDEGFREE
+                                U_C(I)%VALDG(1,1,IDX+1) = U_C(I)%VALDG(1,1,IDX+1)+(BASIS_VECTOR(IDX)*LINEAR_INIT2D(N))*WEQUA3D(INC)*(VOLTEMP) ! Eq. 2.2, Cockburn/Shu 2001
+                            END DO
+                         END DO 
+                           
+                            WRITE(200+N,*) "ELEMENT", I,"DG INITIAL"
+                            WRITE(200+N,*) "SOLUTION", U_C(I)%VALDG(1,1,:)
+                     ENDIF
                 ELSE
                 ! this is where the initialisation will be performed for every decomposed element.
                 ! INITIALISE COUNTER OF GAUSSIAN QUADRATURE POINT
@@ -949,21 +977,28 @@ IF (RESTART.EQ.0)THEN
                         VOLTEMP=TRIANGLEVOLUME(N)/IELEM(N,I)%totvolume
                         QQP=QP_Triangle
                         
-                        !DO INC=1,QQP
-                        !    QP_ARRAY(I,INC,K)%X = QPOINTS(1,INC)
-                        !    QP_ARRAY(I,INC,K)%Y = QPOINTS(2,INC)
-                        !    QP_ARRAY(I,INC,K)%QP_WEIGHT = WEQUA3D(INC)
-                        !END DO
-                        
                         IF (DG.EQ.1)THEN
-                        !    POX(1) = IELEM(N,I)%XXC !POX,POY required for LINEAR_INIT2D
-                        !    POY(1) = IELEM(N,I)%YYC
+!                         POX(1) = QPOINTS(1,INC) !POX,POY required for LINEAR_INIT2D
+!                         POY(1) = QPOINTS(2,INC)
+                            DO INC=1,QQP
+                                POX(1) = QPOINTS(1,INC)  !POX,POY required for LINEAR_INIT2D
+                                POY(1) = QPOINTS(2,INC) 
+                                QP_ARRAY(I,INC)%X = QPOINTS(1,INC) - IELEM(N,I)%XXC !POX,POY required for LINEAR_INIT2D
+                                QP_ARRAY(I,INC)%Y = QPOINTS(2,INC) - IELEM(N,I)%YYC
+                                QP_ARRAY(I,INC)%QP_WEIGHT = WEQUA3D(INC)
+
+                                BASIS_VECTOR = BASIS_REC2D(N,QP_ARRAY(I,INC)%X,QP_ARRAY(I,INC)%Y,IORDER,I,IDEGFREE) 
                             
-                        !    U_C(I)%VALDG(1,1,1)=LINEAR_INIT2D(N)   !THIS IS JUST THE INITIAL SOLUTION
-                        !    
-                        !    WRITE(200+N,*) "ELEMENT", I,"DG INITIAL"
-                        !    WRITE(200+N,*) "SOLUTION", U_C(I)%VALDG(1,1,1)
-                        ELSE                        
+                                U_C(I)%VALDG(1,1,1)=U_C(I)%VALDG(1,1,1)+LINEAR_INIT2D(N)*WEQUA3D(INC)*(VOLTEMP)   !THIS IS JUST THE INITIAL SOLUTION
+                                DO IDX=1,IDEGFREE
+                                U_C(I)%VALDG(1,1,IDX+1) =U_C(I)%VALDG(1,1,IDX+1)+(BASIS_VECTOR(IDX)*LINEAR_INIT2D(N))*WEQUA3D(INC)*(VOLTEMP) ! Eq. 2.2, Cockburn/Shu 2001
+                                END DO
+                            END DO 
+                           
+                            WRITE(200+N,*) "ELEMENT", I,"DG INITIAL"
+                            WRITE(200+N,*) "SOLUTION", U_C(I)%VALDG(1,1,:)
+                        ENDIF
+                                               
                             DO INC=1,QQP                        
                                 POX(1)=QPOINTS(1,INC) !POX,POY required for LINEAR_INIT2D
                                 POY(1)=QPOINTS(2,INC)
@@ -988,7 +1023,6 @@ IF (RESTART.EQ.0)THEN
                                     END IF
                                 END IF
                             END DO !INC=1,QQP  
-                        END IF !DG.EQ.1
                     END DO !K=1,ELEM_DEC
                 END IF
 
@@ -998,17 +1032,29 @@ IF (RESTART.EQ.0)THEN
                 QQP=QP_Triangle
                             
                 IF (DG.EQ.1)THEN
-                    !POX(1) = IELEM(N,I)%XXC !POX,POY required for LINEAR_INIT2D
-                    !POY(1) = IELEM(N,I)%YYC
-                    
-                    !U_C(I)%VALDG(1,1,1)=LINEAR_INIT2D(N)   !THIS IS JUST THE INITIAL SOLUTION
+                
+                        DO INC=1,QQP
+                            POX(1) = QPOINTS(1,INC)  !POX,POY required for LINEAR_INIT2D
+                            POY(1) = QPOINTS(2,INC) 
+                            QP_ARRAY(I,INC)%X = QPOINTS(1,INC) - IELEM(N,I)%XXC !POX,POY required for LINEAR_INIT2D
+                            QP_ARRAY(I,INC)%Y = QPOINTS(2,INC) - IELEM(N,I)%YYC
+                            QP_ARRAY(I,INC)%QP_WEIGHT = WEQUA3D(INC)
+                           
+                            BASIS_VECTOR = BASIS_REC2D(N,QP_ARRAY(I,INC)%X,QP_ARRAY(I,INC)%Y,IORDER,I,IDEGFREE) 
                             
-                    !WRITE(200+N,*) "ELEMENT", I,"DG INITIAL"
-                    !WRITE(200+N,*) "SOLUTION", U_C(I)%VALDG(1,1,1)
-                ELSE
+                            U_C(I)%VALDG(1,1,1)=U_C(I)%VALDG(1,1,1)+LINEAR_INIT2D(N)*WEQUA3D(INC)*(VOLTEMP)  !THIS IS JUST THE INITIAL SOLUTION
+                            DO IDX=1,IDEGFREE
+                                U_C(I)%VALDG(1,1,IDX+1) = U_C(I)%VALDG(1,1,IDX+1)+(BASIS_VECTOR(IDX)*LINEAR_INIT2D(N))*WEQUA3D(INC)*(VOLTEMP) ! Eq. 2.2, Cockburn/Shu 2001
+                            END DO
+                        END DO 
+                           
+                            WRITE(200+N,*) "ELEMENT", I,"DG INITIAL"
+                            WRITE(200+N,*) "SOLUTION", U_C(I)%VALDG(1,1,:)
+                ENDIF
+                
                     DO INC=1,QQP
-                        POX(1)=QP_ARRAY(I,INC)%X !POX,POY required for LINEAR_INIT2D
-                        POY(1)=QP_ARRAY(I,INC)%Y
+                        POX(1)=QPOINTS(1,INC) !POX,POY required for LINEAR_INIT2D
+                        POY(1)=QPOINTS(2,INC)
                         
                         IF (ITESTCASE.LE.2)THEN
                             U_C(I)%VAL(1,1)=U_C(I)%VAL(1,1)+LINEAR_INIT2D(N)*WEQUA3D(INC)*(VOLTEMP)
@@ -1027,7 +1073,7 @@ IF (RESTART.EQ.0)THEN
                             END IF
                         END IF
                     END DO
-                END IF
+                !END IF
             END SELECT
         END DO
 !$OMP END DO

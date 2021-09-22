@@ -245,14 +245,17 @@ i_cnt5=i_cnt3*i_cnt4
 DO I=1,INDL
 
 	IF (ITESTCASE.Le.3)THEN
-	ALLOCATE(IEXBOUNDHIR(I)%FACESOL(IEXCHANGER(I)%MUCHINEED(1),nof_variables))
-! 	ALLOCATE(IEXBOUNDHIRR(I)%vertpp(IEXCHANGER(I)%MUCHINEED(1),i_cnt2))
+        ALLOCATE(IEXBOUNDHIR(I)%FACESOL(IEXCHANGER(I)%MUCHINEED(1),nof_variables))
+    ! 	ALLOCATE(IEXBOUNDHIRR(I)%vertpp(IEXCHANGER(I)%MUCHINEED(1),i_cnt2))
 
-    if (mood.eq.1)then
-	
+
+        IF (DG == 1)THEN
+            ALLOCATE(IEXBOUNDHIR(I)%FACESOL_DG(IEXCHANGER(I)%MUCHINEED(1),NOF_VARIABLES))
+        END IF
+        
+        if (mood.eq.1)then
             ALLOCATE(IEXBOUNDHIR(I)%FACESOL_m(IEXCHANGER(I)%MUCHINEED(1),1))
-            
-            end if
+        end if
 
 	Else
 	
@@ -274,10 +277,13 @@ END DO
 
 DO I=1,TNDL
 	IF (ITESTCASE.Le.3)THEN
-	ALLOCATE(IEXBOUNDHIs(I)%FACESOL(IEXCHANGEs(I)%MUCHTHEYNEED(1),nof_variables))
-	
-	 if (mood.eq.1)then
-	
+        ALLOCATE(IEXBOUNDHIs(I)%FACESOL(IEXCHANGEs(I)%MUCHTHEYNEED(1),nof_variables))
+        
+        IF (DG == 1)THEN
+            ALLOCATE(IEXBOUNDHIS(I)%FACESOL_DG(IEXCHANGER(I)%MUCHINEED(1),NOF_VARIABLES))
+        END IF
+        
+        if (mood.eq.1)then
             ALLOCATE(IEXBOUNDHIs(I)%FACESOL_m(IEXCHANGEs(I)%MUCHTHEYNEED(1),1))
         end if
 
