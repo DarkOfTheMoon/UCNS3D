@@ -140,12 +140,11 @@ SUBROUTINE CALCULATE_FLUXESHI2D(N)
 	IMPLICIT NONE
 	INTEGER,INTENT(IN)::N
 	REAL::GODFLUX2,sum_detect
-	INTEGER::I,L,K,NGP,KMAXE,IQP,NUM_NODES,I_VAR,NEIGHBOR_INDEX
-	REAL,DIMENSION(4,QP_LINE_N,DIMENSIONA)::SURF_QP_TEMP
+	INTEGER::I,L,K,NGP,KMAXE,IQP, NEIGHBOR_INDEX, NEIGHBOR_FACE_INDEX
 	REAL,DIMENSION(QP_LINE_N)::WEIGHTS_TEMP_LINE !Quadrature weights for interfaces
 	REAL,DIMENSION(NUM_DG_DOFS, NOF_VARIABLES)::DG_RHS
 	
-	KMAXE=XMPIELRANK(N)
+	KMAXE = XMPIELRANK(N)
 	
 	CALL QUADRATURELINE(N,IGQRULES)
 	WEIGHTS_TEMP_LINE = WEQUA2D(1:QP_LINE_N)
@@ -161,20 +160,14 @@ SUBROUTINE CALCULATE_FLUXESHI2D(N)
         RHS(I)%VALDG = ZERO
         DG_RHS = ZERO
         
-        DO L=1,IELEM(N,I)%IFCA
-            DO NGP=1,QP_LINE_N
-                SURF_QP_TEMP(L,NGP,:) = ILOCAL_RECON3(I)%QPOINTS(L,NGP,:) - (/ IELEM(N,I)%XXC, IELEM(N,I)%YYC /)
-            END DO
-        END DO
-        
         IF (DG.EQ.1) THEN
             IF (IELEM(N,I)%ISHAPE == 5) IQP = QP_QUAD
             IF (IELEM(N,I)%ISHAPE == 6) IQP = QP_TRIANGLE
             DO NGP = 1, IQP
                 ! Flux at volume quadrature points times derivative of basis for scalars
-                RHS(I)%VALDG = RHS(I)%VALDG - DG_RHS_INTEGRAL(N, I, QP_ARRAY(I,NGP)%X, QP_ARRAY(I,NGP)%Y, QP_ARRAY(I,NGP)%QP_WEIGHT, NOF_VARIABLES, IELEM(N,I)%IORDER, IELEM(N,I)%IDEGFREE, IELEM(N,I)%TOTVOLUME, DG_SOL(N, I, QP_ARRAY(I,NGP)%X, QP_ARRAY(I,NGP)%Y, NOF_VARIABLES, IELEM(N,I)%IORDER, IELEM(N,I)%IDEGFREE, U_C(I)%VALDG(1,:,:)), 1)
+                RHS(I)%VALDG = RHS(I)%VALDG - DG_RHS_INTEGRAL(N, I, QP_ARRAY(I,NGP)%X, QP_ARRAY(I,NGP)%Y, QP_ARRAY(I,NGP)%QP_WEIGHT, NOF_VARIABLES, IELEM(N,I)%IORDER, IELEM(N,I)%IDEGFREE, IELEM(N,I)%TOTVOLUME, ILOCAL_RECON3(I)%DG_VOL_SOL(:,NGP), 1)
+                IF (I == 1) WRITE(500+N,*) 'DG_RHS_VOL_INTEGRAL', I, NGP, QP_ARRAY(I,NGP)%X, QP_ARRAY(I,NGP)%Y, QP_ARRAY(I,NGP)%QP_WEIGHT, ILOCAL_RECON3(I)%DG_VOL_SOL(:,NGP), RHS(I)%VALDG
             END DO
-            IF (I == 1) WRITE(500+N,*) 'DG_RHS_VOL_INTEGRAL', I, RHS(I)%VALDG
         END IF
         
 		IF (IELEM(N,I)%INTERIOR.EQ.0)THEN ! Element is interior
@@ -184,16 +177,16 @@ SUBROUTINE CALCULATE_FLUXESHI2D(N)
                 NY=IELEM(N,I)%FACEANGLEY(L)
                 
                 NORMALVECT=(NX*LAMX)+(NY*LAMY)
-                
-                NUM_NODES = 2
 
                 IQP=QP_LINE_N
+                
+                NEIGHBOR_INDEX = IELEM(N,I)%INEIGH(L)
+                NEIGHBOR_FACE_INDEX = IELEM(N,I)%INEIGHN(L)
+                
                 DO NGP=1,IQP
                     IF (DG.EQ.1) THEN
-                        NEIGHBOR_INDEX = IELEM(N,I)%INEIGH(L)
-                        CLEFT = DG_SOL(N, I, SURF_QP_TEMP(L,NGP,1), SURF_QP_TEMP(L,NGP,2), NOF_VARIABLES, IELEM(N,I)%IORDER, IELEM(N,I)%IDEGFREE, U_C(I)%VALDG(1,:,:))
-                        CRIGHT = DG_SOL(N, I, SURF_QP_TEMP(L,NGP,1), SURF_QP_TEMP(L,NGP,2), NOF_VARIABLES, IELEM(N,I)%IORDER, IELEM(N,I)%IDEGFREE, U_C(NEIGHBOR_INDEX)%VALDG(1,:,:))
-!                         WRITE(600+N,*) 'ASDF', NEIGHBOR_INDEX,ILOCAL_RECON3(NEIGHBOR_INDEX)%QPOINTS(IELEM(N,I)%INEIGHN(L),NGP,1), ILOCAL_RECON3(NEIGHBOR_INDEX)%QPOINTS(IELEM(N,I)%INEIGHN(L),NGP,2), NOF_VARIABLES, IELEM(N,I)%IORDER, IELEM(N,I)%IDEGFREE, U_C(NEIGHBOR_INDEX)%VALDG(1,:,:)
+                        CLEFT = ILOCAL_RECON3(I)%ULEFT_DG(:, L, NGP)
+                        CRIGHT = ILOCAL_RECON3(NEIGHBOR_INDEX)%ULEFT_DG(:, NEIGHBOR_FACE_INDEX, NGP)
                     ELSE !FV
                         CLEFT(1)=ILOCAL_RECON3(I)%ULEFT(1,L,NGP)
                         CRIGHT(1)=ILOCAL_RECON3(IELEM(N,I)%INEIGH(L))%ULEFT(1,IELEM(N,I)%INEIGHN(L),NGP)
@@ -202,10 +195,10 @@ SUBROUTINE CALCULATE_FLUXESHI2D(N)
                     CALL EXACT_RIEMANN_SOLVER(N,CLEFT,CRIGHT,NORMALVECT,HLLCFLUX)
 
                     IF (DG.EQ.1) THEN
-                        ! Riemann flux at interface quadrature points times basis                        
-                        DG_RHS = DG_RHS + DG_RHS_INTEGRAL(N, I, SURF_QP_TEMP(L,NGP,1), SURF_QP_TEMP(L,NGP,2), WEIGHTS_TEMP_LINE(NGP), NOF_VARIABLES, IELEM(N,I)%IORDER, IELEM(N,I)%IDEGFREE, IELEM(N,I)%SURF(L), HLLCFLUX, 2)
+                        ! Riemann flux at interface quadrature points times basis
+                        DG_RHS = DG_RHS + DG_RHS_INTEGRAL(N, I, ILOCAL_RECON3(I)%SURF_QPOINTS(L,NGP,1), ILOCAL_RECON3(I)%SURF_QPOINTS(L,NGP,2), WEIGHTS_TEMP_LINE(NGP), NOF_VARIABLES, IELEM(N,I)%IORDER, IELEM(N,I)%IDEGFREE, IELEM(N,I)%SURF(L), HLLCFLUX, 2)
                         
-!                         IF (I == 1) WRITE(600+N,*) 'INTERIOR:', I, L, NGP, IELEM(N,I)%INEIGH(L), 'HLLCFLUX:', HLLCFLUX, 'NOMRALVECT:', NORMALVECT, 'CLEFT:', CLEFT, 'CRIGHT:', CRIGHT, 'DG_SURF_INT:', DG_RHS_INTEGRAL(N, I, ILOCAL_RECON3(I)%QPOINTS(L,NGP,1), ILOCAL_RECON3(I)%QPOINTS(L,NGP,2), WEIGHTS_TEMP_LINE(NGP), NOF_VARIABLES, IELEM(N,I)%IORDER, IELEM(N,I)%IDEGFREE, IELEM(N,I)%SURF(L), HLLCFLUX, 2)
+                        IF (I == 1) WRITE(600+N,*) 'INTERIOR:', I, L, NGP, NEIGHBOR_INDEX, NEIGHBOR_FACE_INDEX, DG_RHS! 'QPOINTS', ILOCAL_RECON3(I)%SURF_QPOINTS(L,NGP,1), ILOCAL_RECON3(I)%SURF_QPOINTS(L,NGP,2), 'HLLCFLUX:', HLLCFLUX, 'surfl', IELEM(N,I)%SURF(L),'NOMRALVECT:', NORMALVECT, 'BASIS', BASIS_REC2D(N,ILOCAL_RECON3(I)%SURF_QPOINTS(L,NGP,1), ILOCAL_RECON3(I)%SURF_QPOINTS(L,NGP,2),IELEM(N,I)%IORDER,I,IELEM(N,I)%IDEGFREE), 'CLEFT:', CLEFT, 'CRIGHT:', CRIGHT, 'DG_SURF_INT:', DG_RHS_INTEGRAL(N, I, ILOCAL_RECON3(I)%SURF_QPOINTS(L,NGP,1), ILOCAL_RECON3(I)%SURF_QPOINTS(L,NGP,2), WEIGHTS_TEMP_LINE(NGP), NOF_VARIABLES, IELEM(N,I)%IORDER, IELEM(N,I)%IDEGFREE, IELEM(N,I)%SURF(L), HLLCFLUX, 2)!, 'ULEFT_DG:', ILOCAL_RECON3(I)%ULEFT_DG(:, L, NGP), 'neighbor uleft_dg', ILOCAL_RECON3(NEIGHBOR_INDEX)%ULEFT_DG(:, NEIGHBOR_FACE_INDEX, NGP)
                     ELSE !FV
                         GODFLUX2=GODFLUX2+(HLLCFLUX(1)*(WEIGHTS_TEMP_LINE(NGP)*IELEM(N,I)%SURF(L)))
                     END IF
@@ -225,7 +218,7 @@ SUBROUTINE CALCULATE_FLUXESHI2D(N)
                 GODFLUX2=ZERO
                 DO NGP=1,IQP
                     IF (DG == 1) THEN
-                        CLEFT = DG_SOL(N, I, SURF_QP_TEMP(L,NGP,1), SURF_QP_TEMP(L,NGP,2), NOF_VARIABLES, IELEM(N,I)%IORDER, IELEM(N,I)%IDEGFREE, U_C(I )%VALDG(1,:,:))
+                        CLEFT = ILOCAL_RECON3(I)%ULEFT_DG(:, L, NGP)
                     ELSE
                         CLEFT(1)=ILOCAL_RECON3(I)%ULEFT(1,L,NGP)
                     END IF
@@ -234,38 +227,47 @@ SUBROUTINE CALCULATE_FLUXESHI2D(N)
                         IF (IELEM(N,I)%IBOUNDS(L).GT.0)THEN	!CHECK FOR BOUNDARIES
                             if (ibound(n,ielem(n,i)%ibounds(L))%icode.eq.5)then	!PERIODIC IN MY CPU
                                 IF (DG == 1) THEN
-                                    CRIGHT = DG_SOL(N, I, SURF_QP_TEMP(L,NGP,1), SURF_QP_TEMP(L,NGP,2), NOF_VARIABLES, IELEM(N,I)%IORDER, IELEM(N,I)%IDEGFREE, U_C(IELEM(N,I)%INEIGH(L))%VALDG(1,:,:))
+                                    CRIGHT = ILOCAL_RECON3(NEIGHBOR_INDEX)%ULEFT_DG(1, NEIGHBOR_FACE_INDEX, NGP)
                                 ELSE !FV
-                                    CRIGHT(1)=ILOCAL_RECON3(IELEM(N,I)%INEIGH(L))%ULEFT(1,IELEM(N,I)%INEIGHN(L),NGP)
+                                    CRIGHT(1) = ILOCAL_RECON3(IELEM(N,I)%INEIGH(L))%ULEFT(1,IELEM(N,I)%INEIGHN(L),NGP)
                                 END IF
                             ELSE !NOT PERIODIC ONES IN MY CPU
                                 CRIGHT(1:nof_variables)=CLEFT(1:nof_variables)
                             END IF
-!                             WRITE(500+N,*) 'MY CPU BOUNDARY'
+!                             WRITE(600+N,*) 'MY CPU BOUNDARY'
                         ELSE
                             IF (DG == 1) THEN
-                                CRIGHT = DG_SOL(N, I, SURF_QP_TEMP(L,NGP,1), SURF_QP_TEMP(L,NGP,2), NOF_VARIABLES, IELEM(N,I)%IORDER, IELEM(N,I)%IDEGFREE, U_C(IELEM(N,I)%INEIGH(L))%VALDG(1,:,:))
-!                                 WRITE(500+N,*)'my cpu not boundary'
+                                CRIGHT = ILOCAL_RECON3(NEIGHBOR_INDEX)%ULEFT_DG(1, NEIGHBOR_FACE_INDEX, NGP)
+!                                 WRITE(600+N,*)'my cpu not boundary'
                             ELSE !FV
-                                CRIGHT(1)=ILOCAL_RECON3(IELEM(N,I)%INEIGH(L))%ULEFT(1,IELEM(N,I)%INEIGHN(L),NGP)
+                                CRIGHT(1) = ILOCAL_RECON3(IELEM(N,I)%INEIGH(L))%ULEFT(1,IELEM(N,I)%INEIGHN(L),NGP)
                             END IF
                         END IF
                     ELSE !IN OTHER CPUS THEY CAN ONLY BE PERIODIC OR MPI NEIGHBOURS
                         IF (IELEM(N,I)%IBOUNDS(L).GT.0)THEN	!CHECK FOR BOUNDARIES
                             if (ibound(n,ielem(n,i)%ibounds(L))%icode.eq.5)then	!PERIODIC IN OTHER CPU
-                                CRIGHT(1:nof_variables)=IEXBOUNDHIR(IELEM(N,I)%INEIGHN(L))%FACESOL(IELEM(N,I)%Q_FACE(L)%Q_MAPL(NGP),1:nof_variables)
+                            
+                                IF (DG == 1) THEN
+                                    CRIGHT = 0 !Takis
+                                else
+                                    CRIGHT(1:nof_variables)=IEXBOUNDHIR(IELEM(N,I)%INEIGHN(L))%FACESOL(IELEM(N,I)%Q_FACE(L)%Q_MAPL(NGP),1:nof_variables)
+                                end if
                             END IF
                         ELSE
-                            CRIGHT(1:nof_variables)=IEXBOUNDHIR(IELEM(N,I)%INEIGHN(L))%FACESOL(IELEM(N,I)%Q_FACE(L)%Q_MAPL(NGP),1:nof_variables)
+                            IF (DG == 1) THEN
+                            !Takis
+                            ELSE
+                                CRIGHT(1:nof_variables)=IEXBOUNDHIR(IELEM(N,I)%INEIGHN(L))%FACESOL(IELEM(N,I)%Q_FACE(L)%Q_MAPL(NGP),1:nof_variables)
+                            end if
                         END IF
-                        !WRITE(500+N,*)'other cpu:'!, IEXBOUNDHIR(IELEM(N,I)%INEIGHN(L))%FACESOL(IELEM(N,I)%Q_FACE(L)%Q_MAPL(NGP),1:nof_variables)
+!                         WRITE(600+N,*)'other cpu:'
                     END IF
                     
                     CALL EXACT_RIEMANN_SOLVER(N,CLEFT,CRIGHT,NORMALVECT,HLLCFLUX)
                     
                     IF (DG.EQ.1) THEN
                         !Riemann flux at interface quadrature points times basis
-                        DG_RHS = DG_RHS + DG_RHS_INTEGRAL(N, I, SURF_QP_TEMP(L,NGP,1), SURF_QP_TEMP(L,NGP,2), WEIGHTS_TEMP_LINE(NGP), NOF_VARIABLES, IELEM(N,I)%IORDER, IELEM(N,I)%IDEGFREE, IELEM(N,I)%SURF(L), HLLCFLUX, 2)
+                        DG_RHS = DG_RHS + DG_RHS_INTEGRAL(N, I, ILOCAL_RECON3(I)%SURF_QPOINTS(L,NGP,1), ILOCAL_RECON3(I)%SURF_QPOINTS(L,NGP,2), WEIGHTS_TEMP_LINE(NGP), NOF_VARIABLES, IELEM(N,I)%IORDER, IELEM(N,I)%IDEGFREE, IELEM(N,I)%SURF(L), HLLCFLUX, 2)
 
 !                         IF (I == 1) WRITE(600+N,*) 'BOUNDARY:', I, L, NGP, IELEM(N,I)%INEIGH(L), 'HLLCFLUX:', HLLCFLUX, 'NOMRALVECT:', NORMALVECT, 'CLEFT:', CLEFT, 'CRIGHT:', CRIGHT, 'dg_int', DG_RHS_INTEGRAL(N, I, ILOCAL_RECON3(I)%QPOINTS(L,NGP,1), ILOCAL_RECON3(I)%QPOINTS(L,NGP,2), WEIGHTS_TEMP_LINE(NGP), NOF_VARIABLES, IELEM(N,I)%IORDER, IELEM(N,I)%IDEGFREE, IELEM(N,I)%SURF(L), HLLCFLUX, 2)
                     ELSE !FV

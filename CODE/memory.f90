@@ -18,18 +18,20 @@ INTEGER::ALLS
 if (dimensiona.eq.3)then
 ALLS=IGQRULES*IGQRULES*IGQRULES
 ALLOCATE(VVA(3,3),VVA1(3,3),DETA(1))
-allocate(sb(idegfree))
 ALLOCATE(VVr1(alls),VVr2(alls),VVr3(alls),VVR4(ALLS),VVwg(alls),POX(1),POY(1),POZ(1),VVnpox(igqrules),VVnpoy(igqrules),VVnpoz(igqrules),VVwpox(igqrules),VVwpoy(igqrules),VVwpoz(igqrules))
 ALLOCATE(VVnxi(8),VVneta(8),VVnzeta(8),VVxi(8),VVeta(8),VVzeta(8),VVnallx(8),VVnally(8),VVnallz(8),VVB(3),VVC(3),VVD(3),VVE(3),VVF(3),VVJACOBSURF(3),VVJACOBVOLUME(4))
 else
 ALLS=IGQRULES*IGQRULES
 ALLOCATE(VVA(2,2),VVA1(2,2),DETA(1))
-allocate(sb(idegfree))
 ALLOCATE(VVr1(alls),VVr2(alls),VVr3(alls),VVR4(ALLS),VVwg(alls),VVnpox(igqrules),POX(1),POY(1),VVnpoy(igqrules),VVnpoz(igqrules),VVwpox(igqrules),VVwpoy(igqrules),VVwpoz(igqrules))
 ALLOCATE(VVnxi(4),VVneta(4),VVnzeta(4),VVxi(4),VVeta(4),VVzeta(4),VVnallx(4),VVnally(4),VVnallz(4),VVB(3),VVC(3),VVD(3),VVE(3),VVF(3),VVJACOBSURF(3),VVJACOBVOLUME(4))
 end if
 
-
+IF (DG == 1 .AND. DG_RECONSTRUCT == 1) THEN
+    ALLOCATE(SB(NUM_DG_DOFS + NUM_DG_RECONSTRUCT_DOFS - 1))
+ELSE
+    ALLOCATE(SB(IDEGFREE))
+END IF
 
 
 END SUBROUTINE
@@ -153,18 +155,12 @@ ELSE
     ALLOCATE(WEQUA3D(1:NUMBEROFPOINTS))
     ALLOCATE(QPOINTS(2,1:NUMBEROFPOINTS))
     
-	ALLOCATE(QP_ARRAY(XMPIELRANK(N),NUMBEROFPOINTS)); !Allocates for 2D
 END IF
 
 WEQUA2D(:)=0.0D0
 QPOINTS2D(:,:)=0.0D0
 WEQUA3D(:)=0.0D0
 QPOINTS(:,:)=0.0D0
-
-QP_ARRAY(:,:)%X = ZERO
-QP_ARRAY(:,:)%Y = ZERO
-QP_ARRAY(:,:)%QP_WEIGHT = ZERO
-
 
 ALLOCATE(weight_t2(NUMBEROFPOINTS2));weight_t2=zero
 
