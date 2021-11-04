@@ -989,8 +989,8 @@ IF (RESTART.EQ.0)THEN
                                 U_E(I)%VAL(1,:)=U_C(I)%VAL(1,:)
                             END IF
                         END IF
-                    END DO
-                END IF
+                    END IF
+                END DO
             END SELECT
         END DO
 !$OMP END DO

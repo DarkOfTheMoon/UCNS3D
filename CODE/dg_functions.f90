@@ -8,37 +8,6 @@ IMPLICIT NONE
 
 CONTAINS
 
-
-! FUNCTION DG_RHS_INTEGRAL(N, I_ELEM, QP_X, QP_Y, QP_WEIGHT, NUM_VARS, ORDER, NUM_DOFS, CELL_VOL_OR_SURF, FLUX_TERM, VOL_OR_SURF)
-! !> @brief
-! !> Calculates the volume or surface integral term in the DG RHS for scalar linear advection with speed = 1
-!     IMPLICIT NONE
-!     INTEGER,INTENT(IN)::N, I_ELEM, ORDER, NUM_VARS, NUM_DOFS, VOL_OR_SURF
-!     REAL,INTENT(IN)::QP_X, QP_Y, QP_WEIGHT, CELL_VOL_OR_SURF
-!     REAL,DIMENSION(:),INTENT(IN)::FLUX_TERM
-!     INTEGER::I_VAR
-!     REAL,DIMENSION(NUM_DOFS+1,NUM_VARS)::DG_RHS_INTEGRAL
-!     
-!     IF (SIZE(FLUX_TERM) /= NUM_VARS) THEN
-!         WRITE(400+N,*) 'DG_RHS_INTEGRAL: FLUX_TERM WRONG DIMENSIONS:', SHAPE(FLUX_TERM)
-!         STOP
-!     END IF
-!     
-!     IF (VOL_OR_SURF == 1) THEN ! VOLUME INTEGRAL
-!         DO I_VAR = 1, NUM_VARS
-!             DG_RHS_INTEGRAL(1,I_VAR) = 0
-!             DG_RHS_INTEGRAL(2:,I_VAR) = FLUX_TERM(I_VAR) * QP_WEIGHT * CELL_VOL_OR_SURF * (BASIS_REC2D_DERIVATIVE(N,QP_X,QP_Y,ORDER,I_ELEM,NUM_DOFS,1) + BASIS_REC2D_DERIVATIVE(N,QP_X,QP_Y,ORDER,I_ELEM,NUM_DOFS,2)) ! For linear advection with speed = 1
-!         END DO
-!     ELSE IF (VOL_OR_SURF == 2) THEN ! SURFACE INTEGRAL
-!         DO I_VAR = 1, NUM_VARS
-!             DG_RHS_INTEGRAL(1,I_VAR) = FLUX_TERM(I_VAR) * QP_WEIGHT * CELL_VOL_OR_SURF
-!             DG_RHS_INTEGRAL(2:,I_VAR) = FLUX_TERM(I_VAR) * QP_WEIGHT * CELL_VOL_OR_SURF * BASIS_REC2D(N,QP_X,QP_Y,ORDER,I_ELEM,NUM_DOFS)
-!         END DO
-!     END IF
-! 
-! END FUNCTION DG_RHS_INTEGRAL
-
-
 FUNCTION DG_SOL(N)
 IMPLICIT NONE
 !> @brief
@@ -49,12 +18,8 @@ INTEGER,INTENT(IN)::N
 INTEGER::I_DOF, I_VAR
 REAL,DIMENSION(Nof_VARIABLES)::DG_SOL
 
-!     IF(ALL(SHAPE(U_C_VALDG) /= (/ NUM_VARIABLES, NUM_DOFS+1 /))) THEN
-!         WRITE(400+N,*) 'DG_SOL: U_C_VALDG WRONG DIMENSIONS:', SHAPE(U_C_VALDG)
-!         STOP
-!     END IF
-NUMBER=IELEM(N,ICONSIDERED)%IORDER
-BASIS_TEMP = BASIS_REC2D(N, X1, Y1, NUMBER, ICONSIDERED, NUMBER_OF_DOG)
+    NUMBER = IELEM(N,ICONSIDERED)%IORDER
+    BASIS_TEMP = BASIS_REC2D(N, X1, Y1, NUMBER, ICONSIDERED, NUMBER_OF_DOG)
 
 DO I_VAR = 1, NOF_VARIABLES
     DG_SOL(I_VAR) = U_C(ICONSIDERED)%VALDG(1,I_VAR,1) + DOT_PRODUCT(BASIS_TEMP(1:NUMBER_OF_DOG), U_C(ICONSIDERED)%VALDG(1,I_VAR,2:NUMBER_OF_DOG+1))
@@ -62,6 +27,26 @@ END DO
 
 END FUNCTION DG_SOL
 
+FUNCTION DG_SOL_I_CENTER(N, I)
+IMPLICIT NONE
+!> @brief
+!> This function returns the DG solution at a given point (X_IN, Y_IN)\n
+!> REQUIRES: X_IN, Y_IN: coordinates of the point where the solution is requested, NUM_VARIABLES: number of solution variables, NUM_DOFS: number of basis terms
+    REAL,DIMENSION(NUMBER_OF_DOG)::BASIS_TEMP
+    INTEGER,INTENT(IN)::N, I
+    INTEGER::I_VAR
+    REAL,DIMENSION(NOF_VARIABLES)::DG_SOL_I_CENTER
+
+    NUMBER = IELEM(N, I)%IORDER
+    X1 = IELEM(N, I)%XXC
+    Y1 = IELEM(N, I)%YYC
+    BASIS_TEMP = BASIS_REC2D(N, X1, Y1, NUMBER, I, NUMBER_OF_DOG)
+
+    DO I_VAR = 1, NOF_VARIABLES
+        DG_SOL_I_CENTER(I_VAR) = U_C(I)%VALDG(1, I_VAR, 1) + DOT_PRODUCT(BASIS_TEMP, U_C(I)%VALDG(1, I_VAR, 2:))
+    END DO
+
+END FUNCTION DG_SOL_I_CENTER
 
 FUNCTION DG_SOLFACE(N)
 IMPLICIT NONE
@@ -90,8 +75,6 @@ END DO
 
 END FUNCTION DG_SOLFACE
 
-
-
 FUNCTION DG_SURF_FLUX(N)
 !> @brief
 !> Calculates the RHS flux term to be integrated in the DG formulation
@@ -119,14 +102,7 @@ IMPLICIT NONE
 INTEGER,INTENT(IN)::N
 REAL,DIMENSION(IDEGFREE+1,NOF_VARIABLES)::DG_VOL_INTEGRAL
 REAL,DIMENSION(NOF_VARIABLES)::FLUX_TERM
-INTEGER::I,J,K,NQP,I_QP,I_VAR
-REAL::PH,INTEG
-    
-!     IF (SIZE(FLUX_TERM) /= NUM_VARS) THEN
-!         WRITE(400+N,*) 'DG_RHS_INTEGRAL: FLUX_TERM WRONG DIMENSIONS:', SHAPE(FLUX_TERM)
-!         STOP
-!     END IF
-    
+INTEGER::I,NQP,I_QP,I_VAR
 
 IF (IELEM(N,ICONSIDERED)%ISHAPE == 5) NQP = QP_TRIANGLE*2
 IF (IELEM(N,ICONSIDERED)%ISHAPE == 6) NQP = QP_TRIANGLE
@@ -153,8 +129,6 @@ DO I_VAR = 1, NOF_VARIABLES
             END IF
              
               DG_VOL_INTEGRAL(I+1,I_VAR) = DG_VOL_INTEGRAL(I+1,I_VAR)+FLUX_TERM(I_VAR)* QP_ARRAY(ICONSIDERED,I_QP)%QP_WEIGHT *(DF2DX(X1,Y1,I)+DF2DY(X1,Y1,I))!* IELEM(N,ICONSIDERED)%TOTVOLUME
-
-!               DG_VOL_INTEGRAL(2:,I_VAR) = DG_VOL_INTEGRAL(2:,I_VAR)+FLUX_TERM(I_VAR)* QP_ARRAY(ICONSIDERED,I_QP)%QP_WEIGHT * IELEM(N,ICONSIDERED)%TOTVOLUME*(BASIS_REC2D_DERIVATIVE(N,x1,y1,number,ICONSIDERED,NUMBER_OF_DOG,1) + BASIS_REC2D_DERIVATIVE(N,x1,y1,number,ICONSIDERED,NUMBER_OF_DOG,2))
         END DO
      END DO
 END DO
@@ -215,17 +189,19 @@ FUNCTION CALC_DELTA_XYZ(NUM_NODES, NUM_DIMS, NODES_IN)
     
 END FUNCTION CALC_DELTA_XYZ
 
+SUBROUTINE PRESTORE_TAYLOR_INTEGRAL_AND_DELTA_XYZ
+    
+END SUBROUTINE PRESTORE_TAYLOR_INTEGRAL_AND_DELTA_XYZ
+
 SUBROUTINE PRESTORE_AND_ALLOCATE_DG
 !> @brief
-!> Prestores IELEM(N,I)%DELTA_XYZ, QP_ARRAY, SURF_QPOINTS, mass matrix
+!> Prestores IELEM(N,I)%DELTA_XYZ, QP_ARRAY, mass matrix
     IMPLICIT NONE
     INTEGER::I, K, I_QP, N_QP, I_FACE,nnd,iqp,idummy,COUNT_1
     
 	ALLOCATE(QP_ARRAY(XMPIELRANK(N),QP_Triangle*2)); !Allocates for 2D
     
-    DO I = 1, XMPIELRANK(N)    
-        iconsidered=i
-        !Store volume quadrature points
+    DO I = 1, XMPIELRANK(N)
         ELTYPE=IELEM(N,I)%ISHAPE
         DO K = 1,IELEM(N,I)%NONODES
             NODES_LIST(k,1:2)=INODER(IELEM(N,I)%NODES(K))%CORD(1:2)
@@ -236,7 +212,11 @@ SUBROUTINE PRESTORE_AND_ALLOCATE_DG
         
         !Store delta xyz (normalization factor from Luo 2012)
         IELEM(N,I)%DELTA_XYZ = CALC_DELTA_XYZ(IELEM(N,I)%NONODES, DIMENSIONA, NODES_LIST)
+        
+        ALLOCATE(IELEM(N,I)%TAYLOR_INTEGRAL(IDEGFREE - DIMENSIONA))
+        IELEM(N,I)%TAYLOR_INTEGRAL = ZERO
     
+        !Store volume quadrature points and Taylor integral
         SELECT CASE(ielem(n,i)%ishape)
         CASE(5)
             COUNT_1=0
@@ -244,7 +224,6 @@ SUBROUTINE PRESTORE_AND_ALLOCATE_DG
                  VEXT(1:3,1:2)=ELEM_LISTD(k,1:3,1:2)
             
                 CALL QUADRATUREtriangle(N,IGQRULES)
-!                CALL QUADRATUREQUAD(N,IGQRULES)
                 
                 VOLTEMP=TRIANGLEVOLUME(N)
                 
@@ -253,15 +232,14 @@ SUBROUTINE PRESTORE_AND_ALLOCATE_DG
                     QP_ARRAY(I,COUNT_1)%X = QPOINTS(1,I_QP) - IELEM(N,I)%XXC
                     QP_ARRAY(I,COUNT_1)%Y = QPOINTS(2,I_QP) - IELEM(N,I)%YYC
                     QP_ARRAY(I,COUNT_1)%QP_WEIGHT = WEQUA3D(I_QP) * VOLTEMP
+                    
+                    IELEM(N,I)%TAYLOR_INTEGRAL(1) = IELEM(N,I)%TAYLOR_INTEGRAL(1) + (QP_ARRAY(I,I_QP + QP_TRIANGLE * (K - 1))%X / IELEM(N,I)%DELTA_XYZ(1)) ** 2 / 2 * WEQUA3D(I_QP) ! * CELL_VOLUME No multiplication because cancelled out
+                    IELEM(N,I)%TAYLOR_INTEGRAL(2) = IELEM(N,I)%TAYLOR_INTEGRAL(2) + (QP_ARRAY(I,I_QP + QP_TRIANGLE * (K - 1))%Y / IELEM(N,I)%DELTA_XYZ(2)) ** 2 / 2 * WEQUA3D(I_QP) ! * CELL_VOLUME No multiplication because cancelled out
+                    IELEM(N,I)%TAYLOR_INTEGRAL(3) = IELEM(N,I)%TAYLOR_INTEGRAL(3) + QP_ARRAY(I,I_QP + QP_TRIANGLE * (K - 1))%X / IELEM(N,I)%DELTA_XYZ(1) *  QP_ARRAY(I,I_QP + QP_TRIANGLE * (K - 1))%Y / IELEM(N,I)%DELTA_XYZ(2) * WEQUA3D(I_QP) ! * CELL_VOLUME No multiplication because cancelled out
+                
                 END DO
                 
            END DO
-            
-!             DO I_QP = 1, QP_QUAD!N_QP
-!                 QP_ARRAY(I,I_QP)%X = QPOINTS(1,I_QP) - IELEM(N,I)%XXC
-!                 QP_ARRAY(I,I_QP)%Y = QPOINTS(2,I_QP) - IELEM(N,I)%YYC
-!                 QP_ARRAY(I,I_QP)%QP_WEIGHT = WEQUA3D(I_QP) * QUADVOLUME(N)
-!             END DO
             
         CASE(6)
             CALL QUADRATURETRIANGLE(N,IGQRULES)
@@ -271,62 +249,13 @@ SUBROUTINE PRESTORE_AND_ALLOCATE_DG
                 QP_ARRAY(I,I_QP)%X = QPOINTS(1,I_QP) - IELEM(N,I)%XXC
                 QP_ARRAY(I,I_QP)%Y = QPOINTS(2,I_QP) - IELEM(N,I)%YYC
                 QP_ARRAY(I,I_QP)%QP_WEIGHT = WEQUA3D(I_QP) * IELEM(N,I)%totvolume
+                
+                IELEM(N,I)%TAYLOR_INTEGRAL(1) = IELEM(N,I)%TAYLOR_INTEGRAL(1) + (QP_ARRAY(I,I_QP)%X / IELEM(N,I)%DELTA_XYZ(1)) ** 2 / 2 * WEQUA3D(I_QP) ! * CELL_VOLUME No multiplication because cancelled out
+                IELEM(N,I)%TAYLOR_INTEGRAL(2) = IELEM(N,I)%TAYLOR_INTEGRAL(2) + (QP_ARRAY(I,I_QP)%Y / IELEM(N,I)%DELTA_XYZ(2)) ** 2 / 2 * WEQUA3D(I_QP) ! * CELL_VOLUME No multiplication because cancelled out
+                IELEM(N,I)%TAYLOR_INTEGRAL(3) = IELEM(N,I)%TAYLOR_INTEGRAL(3) + QP_ARRAY(I,I_QP)%X / IELEM(N,I)%DELTA_XYZ(1) *  QP_ARRAY(I,I_QP)%Y / IELEM(N,I)%DELTA_XYZ(2) * WEQUA3D(I_QP) ! * CELL_VOLUME No multiplication because cancelled out
+                
             END DO
         END SELECT
-                
-
-        
-        ALLOCATE(ILOCAL_RECON3(I)%SURF_QPOINTS(IELEM(N,I)%IFCA, QP_LINE_N, DIMENSIONA))
-        !Store surface quadrature points
-        DO I_FACE = 1, IELEM(N,I)%IFCA
-            IDUMMY=0
-            !GAUSSIAN POINTS FIXED
-                if ((iperiodicity.eq.1).and.(ielem(n,i)%interior.eq.1))then	
-                IF (IELEM(N,I)%IBOUNDS(I_FACE).GT.0)THEN	!CHECK FOR BOUNDARIES
-                    if (ibound(n,ielem(n,i)%ibounds(I_FACE))%icode.eq.5)then	!PERIODIC
-                        IDUMMY=1
-                    END IF
-                END IF
-        
-                IQP=QP_LINE
-                NND=2
-                IF (IDUMMY.EQ.0)THEN
-                    DO K=1,NND
-                        VEXT(k,1:2)=inoder(IELEM(N,I)%NODES_FACES(I_FACE,K))%CORD(1:dims)
-                    END DO
-                ELSE
-                    facex=I_FACE;
-                    CALL coordinates_face_PERIOD2D1(n,iconsidered,facex)
-                    
-                    
-                END IF
-                CALL QUADRATURELINE(N,IGQRULES)	  
-            ELSE
-                IQP=QP_LINE
-                NND=2
-                DO K=1,NND
-                    VEXT(k,1:2)=inoder(IELEM(N,I)%NODES_FACES(I_FACE,K))%CORD(1:dims)
-                END DO
-                CALL QUADRATURELINE(N,IGQRULES)
-            END IF
-        
-        
-        
-        
-        
-        
-        
-        
-        
-!             VEXT(1,1:2) = inoder(IELEM(N,I)%NODES_FACES(I_FACE,1))%CORD(1:2)  !COPY THE COORDINATE OF THE FIRST NODE OF THID EDGE
-!             VEXT(2,1:2) = inoder(IELEM(N,I)%NODES_FACES(I_FACE,2))%CORD(1:2)  !COPY THE COORDINATE OF THE SECOND NODE OF THID EDGE
-!             CALL QUADRATURELINE(N,IGQRULES)
-
-            DO I_QP = 1, QP_LINE_N
-                ILOCAL_RECON3(I)%SURF_QPOINTS(I_FACE,I_QP,1) = QPOINTS2D(1,I_QP) - IELEM(N,I)%XXC
-                ILOCAL_RECON3(I)%SURF_QPOINTS(I_FACE,I_QP,2) = QPOINTS2D(2,I_QP) - IELEM(N,I)%YYC
-            END DO
-        END DO
         
         ALLOCATE(ILOCAL_RECON3(I)%ULEFT_DG(NOF_VARIABLES, IELEM(N,I)%IFCA, QP_LINE_N))
     END DO
@@ -334,6 +263,51 @@ SUBROUTINE PRESTORE_AND_ALLOCATE_DG
     CALL ASS_MASS_MATRIX(N)
     
 END SUBROUTINE PRESTORE_AND_ALLOCATE_DG
+        
+SUBROUTINE PRESTORE_AND_ALLOCATE_DG_SURF_QPOINTS  
+!> @brief
+!> Prestores SURF_QPOINTS
+    IMPLICIT NONE
+    INTEGER::I, K, I_QP, I_FACE, NND, IDUMMY
+    
+    DO I = 1, XMPIELRANK(N)
+        ICONSIDERED = I
+        ALLOCATE(ILOCAL_RECON3(I)%SURF_QPOINTS(IELEM(N,I)%IFCA, QP_LINE_N, DIMENSIONA))
+        DO I_FACE = 1, IELEM(N,I)%IFCA
+            IDUMMY=0
+            !GAUSSIAN POINTS FIXED
+            IF ((IPERIODICITY.EQ.1).AND.(IELEM(N,I)%INTERIOR.EQ.1))THEN	
+                IF (IELEM(N,I)%IBOUNDS(I_FACE).GT.0)THEN	!CHECK FOR BOUNDARIES
+                    IF (IBOUND(N,IELEM(N,I)%IBOUNDS(I_FACE))%ICODE.EQ.5)THEN	!PERIODIC
+                        IDUMMY=1
+                    END IF
+                END IF
+        
+                NND=2
+                IF (IDUMMY.EQ.0)THEN
+                    DO K=1,NND
+                        VEXT(K,1:2)=INODER(IELEM(N,I)%NODES_FACES(I_FACE,K))%CORD(1:DIMS)
+                    END DO
+                ELSE
+                    FACEX=I_FACE;
+                    CALL COORDINATES_FACE_PERIOD2D1(N,ICONSIDERED,FACEX)
+                END IF
+                CALL QUADRATURELINE(N,IGQRULES)	  
+            ELSE
+                NND=2
+                DO K=1,NND
+                    VEXT(k,1:2)=inoder(IELEM(N,I)%NODES_FACES(I_FACE,K))%CORD(1:dims)
+                END DO
+                CALL QUADRATURELINE(N,IGQRULES)
+            END IF
+
+            DO I_QP = 1, QP_LINE_N
+                ILOCAL_RECON3(I)%SURF_QPOINTS(I_FACE,I_QP,1) = QPOINTS2D(1,I_QP) - IELEM(N,I)%XXC
+                ILOCAL_RECON3(I)%SURF_QPOINTS(I_FACE,I_QP,2) = QPOINTS2D(2,I_QP) - IELEM(N,I)%YYC
+            END DO
+        END DO
+    END DO
+END SUBROUTINE PRESTORE_AND_ALLOCATE_DG_SURF_QPOINTS
 
 
 SUBROUTINE ASS_MASS_MATRIX(N)
@@ -358,39 +332,37 @@ SUBROUTINE ASS_MASS_MATRIX(N)
             N_QP = QP_TRIANGLE
         END SELECT
         
-    NUMBER_OF_DOG = IELEM(N,I_ELEM)%IDEGFREE
-        
-    DO I_DOF = 1, NUM_DG_DOFS       
-        DO J_DOF = 1, NUM_DG_DOFS
-            INTEG_MM = ZERO
+        NUMBER_OF_DOG = IELEM(N,I_ELEM)%IDEGFREE
             
-                DO I_QP = 1, N_QP
-                    IXX = I_ELEM; x1=QP_ARRAY(I_ELEM,I_QP)%X; y1=QP_ARRAY(I_ELEM,I_QP)%Y
-                    BASIS_VECTOR = BASIS_REC2D(N,X1,Y1,IORDER,IXX,NUMBER_OF_DOG)
-                    
-                        IF (I_DOF==1.and.J_DOF==1)THEN
-                            PHX = 1
-                            
-                        ELSE IF (I_DOF==1.and.J_DOF/=1)THEN
-                            PHX = BASIS_VECTOR(J_DOF-1)
-                            
-                        ELSE IF (I_DOF/=1.and.J_DOF==1)THEN
-                            PHX = BASIS_VECTOR(I_DOF-1) 
-                            
-                        ELSE IF (I_DOF/=1.and.J_DOF/=1)THEN
-                            PHX = BASIS_VECTOR(I_DOF-1)*BASIS_VECTOR(J_DOF-1)
-                            
-                        END IF
-                    INTEG_MM = INTEG_MM + PHX*QP_ARRAY(I_ELEM,I_QP)%QP_WEIGHT
-                END DO
-        
-        MASS_MATRIX_CENTERS(N, I_ELEM, I_DOF, J_DOF) = MASS_MATRIX_CENTERS(N, I_ELEM, I_DOF, J_DOF) + INTEG_MM
-        
+        DO I_DOF = 1, NUM_DG_DOFS       
+            DO J_DOF = 1, NUM_DG_DOFS
+                INTEG_MM = ZERO
+                
+                    DO I_QP = 1, N_QP
+                        IXX = I_ELEM; x1=QP_ARRAY(I_ELEM,I_QP)%X; y1=QP_ARRAY(I_ELEM,I_QP)%Y
+                        BASIS_VECTOR = BASIS_REC2D(N,X1,Y1,IORDER,IXX,NUMBER_OF_DOG)
+                        
+                            IF (I_DOF==1.and.J_DOF==1)THEN
+                                PHX = 1
+                                
+                            ELSE IF (I_DOF==1.and.J_DOF/=1)THEN
+                                PHX = BASIS_VECTOR(J_DOF-1)
+                                
+                            ELSE IF (I_DOF/=1.and.J_DOF==1)THEN
+                                PHX = BASIS_VECTOR(I_DOF-1) 
+                                
+                            ELSE IF (I_DOF/=1.and.J_DOF/=1)THEN
+                                PHX = BASIS_VECTOR(I_DOF-1)*BASIS_VECTOR(J_DOF-1)
+                                
+                            END IF
+                        INTEG_MM = INTEG_MM + PHX*QP_ARRAY(I_ELEM,I_QP)%QP_WEIGHT
+                    END DO
+            
+                MASS_MATRIX_CENTERS(N, I_ELEM, I_DOF, J_DOF) = MASS_MATRIX_CENTERS(N, I_ELEM, I_DOF, J_DOF) + INTEG_MM
+            
+            END DO
         END DO
     END DO
-
-   
-END DO
 
 
     ALLOCATE(INV_MASS_MATRIX(N:N,KMAXE,NUM_DG_DOFS,NUM_DG_DOFS)); INV_MASS_MATRIX(N,:,:,:) = ZERO
@@ -488,15 +460,74 @@ END DO
  
 END SUBROUTINE COMPMASSINV
 
-FUNCTION INVERSE_MATRIX(MATRIX_IN, N_COLS)
-    INTEGER,INTENT(IN)::N_COLS
-    REAL,DIMENSION(N_COLS,N_COLS),INTENT(IN)::MATRIX_IN
-    REAL,DIMENSION(1,N_COLS,N_COLS)::DUMMY_MATRIX_IN, DUMMY_INVERSE_MATRIX
-    REAL,DIMENSION(N_COLS,N_COLS)::INVERSE_MATRIX
+FUNCTION INVERSE_MATRIX(MATRIX_IN, N_DOFS)
+!Calculate the inverse of the input matrix with Gauss-Jordan Elimination
+IMPLICIT NONE
+    INTEGER,INTENT(IN)::N_DOFS
+    REAL,DIMENSION(N_DOFS,N_DOFS),INTENT(IN)::MATRIX_IN
+    integer :: i,j,k,l,m,irow
+    real:: big,dum
+    real,DIMENSION(N_DOFS,N_DOFS)::a,b
+    REAL,DIMENSION(N_DOFS,N_DOFS)::INVERSE_MATRIX
+
+    a(:,:)=MATRIX_IN
+    b(:,:)=zero
+
+    do i = 1,N_DOFS
+        do j = 1,N_DOFS
+            b(i,j) = 0.0
+        end do
+        b(i,i) = 1.0
+    end do 
+
+    do i = 1,N_DOFS   
+    big = a(i,i)
+    do j = i,N_DOFS
+        if (a(j,i).gt.big) then
+        big = a(j,i)
+        irow = j
+        end if
+    end do
+    ! interchange lines i with irow for both a() and b() matrices
+    if (big.gt.a(i,i)) then
+        do k = 1,N_DOFS
+        dum = a(i,k)                      ! matrix a()
+        a(i,k) = a(irow,k)
+        a(irow,k) = dum
+        dum = b(i,k)                 ! matrix b()
+        b(i,k) = b(irow,k)
+        b(irow,k) = dum
+        end do
+    end if
+    ! divide all entries in line i from a(i,j) by the value a(i,i); 
+    ! same operation for the identity matrix
+    dum = a(i,i)
+    do j = 1,N_DOFS
+        a(i,j) = a(i,j)/dum
+        b(i,j) = b(i,j)/dum
+    end do
+    ! make zero all entries in the column a(j,i); same operation for indent()
+    do j = i+1,N_DOFS
+        dum = a(j,i)
+        do k = 1,N_DOFS
+        a(j,k) = a(j,k) - dum*a(i,k)
+        b(j,k) = b(j,k) - dum*b(i,k)               
+                
+        end do
+    end do
+    end do
     
-    DUMMY_MATRIX_IN(1,:,:) = MATRIX_IN
-    CALL COMPMASSINV(DUMMY_MATRIX_IN, DUMMY_INVERSE_MATRIX, N_COLS)
-    INVERSE_MATRIX = DUMMY_INVERSE_MATRIX(1,:,:)
+    do i = 1,N_DOFS-1
+    do j = i+1,N_DOFS
+        dum = a(i,j)
+        do l = 1,N_DOFS
+        a(i,l) = a(i,l)-dum*a(j,l)
+        b(i,l) = b(i,l)-dum*b(j,l)
+        end do
+    end do
+    end do
+    
+    INVERSE_MATRIX = b(:,:)
     
 END FUNCTION INVERSE_MATRIX
 
@@ -509,49 +540,140 @@ FUNCTION NORMAL_LSQ(A, b)
     
 END FUNCTION NORMAL_LSQ
 
-! FUNCTION LUO_LSQ_RECONSTRUCT(N, N_DIM, ORDER, DEGFREE)
-! !> @brief
-! !> This function reconstructs an approximation of NUM_DG_RECONSTRUCT_DOFS
-! !> REQUIRES: IELEM, U_C as globals
-!     INTEGER,INTENT(IN)::N, N_DIM, ORDER, DEGFREE
-!     INTEGER::I_ELEM, I_FACE, NEIGHBOR_INDEX, I_DIM, KMAXE
-!     REAL,DIMENSION(DEGFREE)::BASIS_TEMP
-!     REAL,DIMENSION(IELEM(N, I_ELEM)%IFCA * 3, NUM_DG_RECONSTRUCT_DOFS)::LHS_MATRIX ! See eq. 3.19 of Luo 2012
-!     REAL,DIMENSION(IELEM(N, I_ELEM)%IFCA * 3)::RHS_DG_RECONSTRUCT ! See eq. 3.19 of Luo 2012
-!     REAL,DIMENSION(XMPIELRANK(N),NUM_DG_RECONSTRUCT_DOFS)::LUO_LSQ_RECONSTRUCT ! NUM_DG_RECONSTRUCT_DOFS
-!     
-!     KMAXE = XMPIELRANK(N)
-!     
-!     DO I_ELEM = 1, KMAXE
-!         LHS_MATRIX = ZERO
-!         IF (IELEM(N, I_ELEM)%INTERIOR == 0)THEN ! Element is interior
-!             DO I_FACE = 1, IELEM(N, I_ELEM)%IFCA
-!                 NEIGHBOR_INDEX = IELEM(N,I)%INEIGH(I_FACE)
-!                 OFFSET = (N_DIM + 1) * (I_FACE - 1)
-!             
-!                 BASIS_TEMP = BASIS_REC2D(N,IELEM(N, NEIGHBOR_INDEX)%XXC, IELEM(N,NEIGHBOR_INDEX)%YYC, IORDER,I_ELEM,IDEGFREE)
-!                 
-!                 DO I_DG_RECONSTRUCT_DOF = 1, NUM_DG_RECONSTRUCT_DOFS
-!                     LHS_MATRIX(OFFSET+1,I_DG_RECONSTRUCT_DOF) = BASIS_TEMP(N_DIM+I_DG_RECONSTRUCT_DOF-1)
-!                 END DO
-!                 
-!                 LHS_MATRIX(OFFSET+2,1) = BASIS_TEMP(1)
-!                 LHS_MATRIX(OFFSET+2,N_DIM+1) = BASIS_TEMP(2)
-!                 LHS_MATRIX(OFFSET+3,2) = BASIS_TEMP(2)
-!                 LHS_MATRIX(OFFSET+3,N_DIM+1) = BASIS_TEMP(1)
-!                 
-!                 RHS_DG_RECONSTRUCT(OFFSET+1) = DG_SOL(N, I_ELEM, IELEM(N, NEIGHBOR_INDEX)%XXC, IELEM(N,NEIGHBOR_INDEX)%YYC, NOF_VARIABLES, ORDER, DEGFREE, U_C(NEIGHBOR_INDEX)%VALDG(1,:,:)) - DG_SOL(N, I_ELEM, IELEM(N, NEIGHBOR_INDEX)%XXC, IELEM(N,NEIGHBOR_INDEX)%YYC, NOF_VARIABLES, ORDER, DEGFREE, U_C(I_ELEM)%VALDG(1,:,:))
-!                 DO I_DIM = 1, N_DIM
-!                     RHS_DG_RECONSTRUCT(OFFSET+I_DIM+1) = IELEM(N,I_ELEM)%DELTA_XYZ(I_DIM) / IELEM(N,NEIGHBOR_INDEX)%DELTA_XYZ(I_DIM) * U_C(I_ELEM)%VALDG(1,:,I_DIM+1) - U_C(NEIGHBOR_INDEX)%VALDG(1,:,I_DIM+1)
-!                 END DO
-!                 
-!             END DO
-!         END IF
-!         
-!         LUO_LSQ_RECONSTRUCT(I_ELEM,:) = NORMAL_LSQ(LHS_MATRIX, RHS_DG_RECONSTRUCT)
-!         
-!     END DO
-!     
-! END FUNCTION LUO_LSQ_RECONSTRUCT
+SUBROUTINE LUO_LSQ_RECONSTRUCT(N)
+!> @brief
+!> This function reconstructs an approximation of NUM_DG_RECONSTRUCT_DOFS
+!> REQUIRES: IELEM, U_C as globals
+    IMPLICIT NONE
+    INTEGER,INTENT(IN)::N
+    INTEGER::I_ELEM, I_FACE, I_QP, I_VAR
+    REAL,DIMENSION(NUM_DG_RECONSTRUCT_DOFS-1)::BASIS_TEMP
+    REAL,DIMENSION(NOF_VARIABLES, NUM_DG_RECONSTRUCT_DOFS)::RECONSTRUCTED_SOL
+    
+    !$OMP DO
+    DO I_ELEM = 1, XMPIELRANK(N)
+        ICONSIDERED = I_ELEM
+        NUMBER = IELEM(N,ICONSIDERED)%IORDER
+        
+        RECONSTRUCTED_SOL(:, 1:NUM_DG_DOFS) = U_C(ICONSIDERED)%VALDG(1, :, :)
+        RECONSTRUCTED_SOL(:, NUM_DG_DOFS+1:NUM_DG_RECONSTRUCT_DOFS) = LUO_LSQ_RECONSTRUCT_SOL(N)
+        
+        DO I_FACE = 1, IELEM(N,I_ELEM)%IFCA ! Set ULEFT_DG
+            FACEX = I_FACE
+            DO I_QP = 1, QP_LINE_N
+                POINTX = I_QP
+                
+                X1=ILOCAL_RECON3(ICONSIDERED)%SURF_QPOINTS(FACEX,POINTX,1)
+                Y1=ILOCAL_RECON3(ICONSIDERED)%SURF_QPOINTS(FACEX,POINTX,2)
+                BASIS_TEMP = BASIS_REC2D(N, X1, Y1, NUMBER + 1, ICONSIDERED, NUM_DG_RECONSTRUCT_DOFS-1)
+                
+                DO I_VAR = 1, NOF_VARIABLES
+                    ILOCAL_RECON3(I_ELEM)%ULEFT_DG(I_VAR, I_FACE, I_QP) = RECONSTRUCTED_SOL(I_VAR,1) + DOT_PRODUCT(BASIS_TEMP(1:NUM_DG_RECONSTRUCT_DOFS-1), RECONSTRUCTED_SOL(I_VAR, 2:NUM_DG_RECONSTRUCT_DOFS))
+                END DO
+                
+!                 write(700+n,*)"look here","cell",i_elem,"face",facex,"point",pointx
+!                 write(700+n,*)ILOCAL_RECON3(I_ELEM)%ULEFT_DG(:, I_FACE, I_QP)
+            END DO
+        END DO
+    END DO
+    !$OMP END DO
+    
+END SUBROUTINE LUO_LSQ_RECONSTRUCT
+
+FUNCTION LUO_LSQ_RECONSTRUCT_SOL(N)
+!> @brief
+!> Returns the higher dofs reconstructed solution using the Luo LSQ method
+    IMPLICIT NONE
+    INTEGER, INTENT(IN)::N
+    INTEGER::NEIGHBOR_INDEX, I_DIM, I_FACE, I_DG_RECONSTRUCT_DOF, I_VAR, NEIGHBOR_TYPE
+    REAL,DIMENSION(NUM_DG_RECONSTRUCT_DOFS - 1)::BASIS_TEMP
+    REAL,DIMENSION(NOF_VARIABLES)::DG_SOL_TEMP, DG_SOL_I_J
+    REAL,DIMENSION(DIMENSIONA)::NEIGHBOR_DELTA_XYZ
+    REAL,DIMENSION(NOF_VARIABLES, NUM_DG_DOFS)::NEIGHBOR_U
+    REAL,DIMENSION(NOF_VARIABLES, IELEM(N, ICONSIDERED)%IFCA * NUM_DG_DOFS, NUM_DG_RECONSTRUCT_DOFS - NUM_DG_DOFS)::LHS_MATRIX ! See eq. 3.19 of Luo 2012
+    REAL,DIMENSION(NOF_VARIABLES, IELEM(N, ICONSIDERED)%IFCA * NUM_DG_DOFS)::RHS_DG_RECONSTRUCT ! See eq. 3.19 of Luo 2012
+    REAL,DIMENSION(NOF_VARIABLES, NUM_DG_RECONSTRUCT_DOFS - NUM_DG_DOFS)::LUO_LSQ_RECONSTRUCT_SOL
+    
+    LHS_MATRIX = ZERO
+    
+    DO I_FACE = 1, IELEM(N, ICONSIDERED)%IFCA ! Construct LHS, RHS matrices
+        NEIGHBOR_INDEX = IELEM(N,ICONSIDERED)%INEIGH(I_FACE)
+        OFFSET = NUM_DG_DOFS * (I_FACE - 1) + 1 ! Incrementing LHS and RHS matrix indices for each face
+    
+        IF (IELEM(N, ICONSIDERED)%INTERIOR == 0)THEN ! Element is interior
+            NEIGHBOR_TYPE = 0
+        ELSE ! Element is not interior
+            IF (IELEM(N,ICONSIDERED)%INEIGHB(I_FACE) == N) THEN ! Same CPU
+                IF (IELEM(N,ICONSIDERED)%IBOUNDS(I_FACE).GT.0) THEN ! Boundary
+                    IF (IBOUND(N,IELEM(N,ICONSIDERED)%IBOUNDS(I_FACE))%ICODE.EQ.5) THEN ! PERIODIC IN MY CPU
+                        NEIGHBOR_TYPE = 0
+                    ELSE
+                        NEIGHBOR_TYPE = 1
+                    END IF
+                ELSE ! Not boundary
+                    NEIGHBOR_TYPE = 0
+                END IF
+            ELSE ! Other CPU
+                IF (IELEM(N,ICONSIDERED)%IBOUNDS(I_FACE).GT.0) THEN ! Boundary
+                    IF (IBOUND(N,IELEM(N,ICONSIDERED)%IBOUNDS(I_FACE))%ICODE.EQ.5) THEN ! PERIODIC IN OTHER CPU
+                        NEIGHBOR_TYPE = 2
+                    END IF
+                ELSE ! Not boundary
+                    NEIGHBOR_TYPE = 2
+                END IF
+            END IF
+        END IF
+        
+        SELECT CASE(NEIGHBOR_TYPE)
+        CASE(0) ! Interior or same CPU (periodic or not boundary)
+            X1 = IELEM(N, NEIGHBOR_INDEX)%XXC
+            Y1 = IELEM(N, NEIGHBOR_INDEX)%YYC
+            BASIS_TEMP = BASIS_REC2D(N, X1, Y1, NUMBER + 1, NEIGHBOR_INDEX, NUM_DG_RECONSTRUCT_DOFS - 1)
+            NEIGHBOR_U = U_C(NEIGHBOR_INDEX)%VALDG(1,:,:)
+            NEIGHBOR_DELTA_XYZ = IELEM(N, NEIGHBOR_INDEX)%DELTA_XYZ(I_DIM)
+            DG_SOL_TEMP = DG_SOL_I_CENTER(N, NEIGHBOR_INDEX) ! To call dg_sol without changing ICONSIDERED
+        CASE(1) ! Same CPU boundary and not periodic
+        CASE(2) ! Other CPU
+            ! BASIS_TEMP (basis at center of neighboring element)
+            BASIS_TEMP = IEXSOLHIR(ICONSIDERED)%BASIS_NEIGHBOR_CENTER(I_FACE, :)
+            ! DELTA_XYZ
+            NEIGHBOR_DELTA_XYZ = IEXSOLHIR(ICONSIDERED)%DELTA_XYZ(I_FACE, :)
+            ! NEIGHBOR_U
+            NEIGHBOR_U = IEXSOLHIR(ICONSIDERED)%SOL_DG(I_FACE,1:NOF_VARIABLES,1:NUM_DG_DOFS)
+            DO I_VAR = 1, NOF_VARIABLES
+                DG_SOL_TEMP(I_VAR) = NEIGHBOR_U(I_VAR,1) + DOT_PRODUCT(BASIS_TEMP, NEIGHBOR_U(I_VAR, 2:))
+            END DO
+        END SELECT
+        
+        DO I_DG_RECONSTRUCT_DOF = 1, NUM_DG_RECONSTRUCT_DOFS - NUM_DG_DOFS
+            LHS_MATRIX(:, OFFSET, I_DG_RECONSTRUCT_DOF) = BASIS_TEMP(NUMBER_OF_DOG + I_DG_RECONSTRUCT_DOF) ! Higher order terms
+        END DO
+        
+        ! 2D, first order terms
+        LHS_MATRIX(:,OFFSET+1,1) = BASIS_TEMP(1) ! x, x term
+        LHS_MATRIX(:,OFFSET+1,DIMENSIONA+1) = BASIS_TEMP(2) ! x, xy term
+        LHS_MATRIX(:,OFFSET+2,2) = BASIS_TEMP(2) ! y, y term
+        LHS_MATRIX(:,OFFSET+2,DIMENSIONA+1) = BASIS_TEMP(1) ! y, xy term
+        
+        DO I_VAR = 1, NOF_VARIABLES
+            DG_SOL_I_J(I_VAR) = U_C(ICONSIDERED)%VALDG(1, I_VAR, 1) + DOT_PRODUCT(BASIS_TEMP, U_C(ICONSIDERED)%VALDG(1, I_VAR, 2:)) ! DG solution using values at i and basis at center of j
+        END DO
+        
+        DG_SOL_TEMP = DG_SOL_TEMP - DG_SOL_I_J
+        DO I_VAR = 1, NOF_VARIABLES
+            RHS_DG_RECONSTRUCT(I_VAR,OFFSET) =  DG_SOL_TEMP(I_VAR) ! 1st term
+            DO I_DIM = 1, DIMENSIONA ! 1st order terms
+                RHS_DG_RECONSTRUCT(I_VAR, OFFSET+I_DIM) = IELEM(N, ICONSIDERED)%DELTA_XYZ(I_DIM) / NEIGHBOR_DELTA_XYZ * NEIGHBOR_U(I_VAR,I_DIM+1) - U_C(ICONSIDERED)%VALDG(1,I_VAR,I_DIM+1)
+            END DO
+        END DO
+    END DO
+    
+    DO I_VAR = 1, NOF_VARIABLES
+        LUO_LSQ_RECONSTRUCT_SOL(I_VAR, :) = NORMAL_LSQ(LHS_MATRIX(I_VAR,:,:), RHS_DG_RECONSTRUCT(I_VAR,:)) ! Solve for reconstructed solution
+    END DO
+    
+    WRITE(700+N,*) LHS_MATRIX, 'RHS_DG_RECONSTRUCT', RHS_DG_RECONSTRUCT, 'LUO_LSQ_RECONSTRUCT_SOL', LUO_LSQ_RECONSTRUCT_SOL
+    
+END FUNCTION LUO_LSQ_RECONSTRUCT_SOL
 
 END MODULE DG_FUNCTIONS

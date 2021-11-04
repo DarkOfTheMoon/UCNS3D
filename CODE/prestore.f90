@@ -22,57 +22,49 @@ INTEGER::KMAXE,i
 KMAXE=XMPIELRANK(N)
 
 if (dimensiona.eq.3)then
-!$OMP PARALLEL DEFAULT(SHARED) 
-!$OMP DO schedule(STATIC)
-DO I=1,KMAXE
+    !$OMP PARALLEL DEFAULT(SHARED) 
+    !$OMP DO schedule(STATIC)
+    DO I=1,KMAXE
 
-CALL LOCALISE_STENCIL(N,I)
-CALL LOCALISE_STEN2(N,I)
-! These subroutines ensure the surface quadrature points are matched up correctly between neighbors
+        ! These subroutines ensure the surface quadrature points are matched up correctly between neighbors
+        CALL LOCALISE_STENCIL(N,I)
+        CALL LOCALISE_STEN2(N,I)
 
+        call CHECKGRADS(N,I)
 
-call CHECKGRADS(N,I)
+        CALL FIND_ROT_ANGLES(N,I)
 
+        CALL PRESTORE_RECONSTRUCTION3(N,I)
 
-
-CALL FIND_ROT_ANGLES(N,I)
-
-CALL PRESTORE_RECONSTRUCTION3(N,I)
-
-
-END DO
-!$OMP END DO
-!$OMP END PARALLEL
-
-
+    END DO
+    !$OMP END DO
+    !$OMP END PARALLEL
 
 else
 
-!$OMP PARALLEL DEFAULT(SHARED) 
+    !$OMP PARALLEL DEFAULT(SHARED) 
 
+    CALL PRESTORE_AND_ALLOCATE_DG
+    
+    !$OMP DO
+    DO I=1,KMAXE
 
-!$OMP DO
-DO I=1,KMAXE
+        ! These subroutines ensure the surface quadrature points are matched up correctly between neighbors
+        CALL LOCALISE_STENCIL2d(N,I)
+        CALL LOCALISE_STEN2d(N,I)
 
-! These subroutines ensure the surface quadrature points are matched up correctly between neighbors
-CALL LOCALISE_STENCIL2d(N,I)
-CALL LOCALISE_STEN2d(N,I)
+        CALL CHECKGRADS2d(N,I)
 
+        CALL FIND_ROT_ANGLES2D(N,I)
 
-CALL CHECKGRADS2d(N,I)
+        CALL PRESTORE_RECONSTRUCTION2(N,I)
 
-CALL FIND_ROT_ANGLES2D(N,I)
+    END DO
+    !$OMP END DO
 
-CALL PRESTORE_RECONSTRUCTION2(N,I)
+    CALL PRESTORE_AND_ALLOCATE_DG_SURF_QPOINTS
 
-
-END DO
-!$OMP END DO
-
-CALL PRESTORE_AND_ALLOCATE_DG !takis this needs to be within a omp parallel region!
-
-!$OMP END PARALLEL
-
+    !$OMP END PARALLEL
 
 end if
 
@@ -2904,16 +2896,14 @@ WEQUA3D(1:QP_QUAD)=zero
 
 CALL QUADRATURETRIANGLE(N,IGQRULES)
 
-
- VOL=TRIANGLEVOLUME(N)
+VOL=TRIANGLEVOLUME(N)
 
 INTEG=zero
 DO Lc=1,qp_triangle
 	x1=QPOINTS(1,Lc);y1=QPOINTS(2,Lc)
-	INTEG(1:number_of_dog)=INTEG(1:number_of_dog)+(BASIS_REC2D(N,x1,y1,kxx,IXX,number_of_dog)*&
-WEQUA3D(Lc)*VOL)
+	INTEG(1:number_of_dog)=INTEG(1:number_of_dog)+(BASIS_REC2D(N,x1,y1,kxx,IXX,number_of_dog)*WEQUA3D(Lc)*VOL)
 END DO
-	  COMPBASTRI= INTEG
+COMPBASTRI= INTEG
 
 END FUNCTION
 
