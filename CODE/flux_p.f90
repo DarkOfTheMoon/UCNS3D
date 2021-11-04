@@ -165,7 +165,6 @@ SUBROUTINE CALCULATE_FLUXESHI2D(N)
         ICONSIDERED=I
         
         IF (DG.EQ.1) THEN
-        
             DG_RHS_VOL_INTEG = DG_VOL_INTEGRAL(N)
           !  IF (I == 1) WRITE(500+N,*) 'DG_RHS_VOL_INTEGRAL', I, DG_RHS_VOL_INTEG
         END IF
@@ -199,8 +198,7 @@ SUBROUTINE CALCULATE_FLUXESHI2D(N)
                     IF (DG.EQ.1) THEN
                         ! Riemann flux at interface quadrature points times basis
                         DG_RHS_SURF_INTEG = DG_RHS_SURF_INTEG + DG_SURF_FLUX(N)
-                       
-                        
+                  
                         IF (I == 1) WRITE(600+N,*) 'INTERIOR:', I, L, NGP, IELEM(N,I)%INEIGH(L), 'HLLCFLUX:', HLLCFLUX, 'NOMRALVECT:', NORMALVECT, 'CLEFT:', CLEFT, 'CRIGHT:', CRIGHT, 'DG_SURF_INT:', DG_SURF_FLUX(N)
                     ELSE !FV
                         GODFLUX2=GODFLUX2+(HLLCFLUX(1)*(WEIGHTS_TEMP_LINE(NGP)*IELEM(N,I)%SURF(L)))

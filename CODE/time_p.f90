@@ -2393,9 +2393,9 @@ SUBROUTINE CALL_FLUX_SUBROUTINES_2D
     
     CALL EXHBOUNDHIGHER(N)
     
-    if (dg.eq.1)then
-    call EXHBOUNDHIGHER_dg(N)
-    end if
+    IF (DG.EQ.1)THEN
+        CALL EXHBOUNDHIGHER_DG(N)
+    END IF
     
     !Modifies RHS
     SELECT CASE(ITESTCASE)

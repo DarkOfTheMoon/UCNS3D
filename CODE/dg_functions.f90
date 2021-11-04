@@ -202,6 +202,9 @@ SUBROUTINE PRESTORE_AND_ALLOCATE_DG
 	ALLOCATE(QP_ARRAY(XMPIELRANK(N),QP_Triangle*2)); !Allocates for 2D
     
     DO I = 1, XMPIELRANK(N)
+        !Store delta xyz (normalization factor from Luo 2012)
+        IELEM(N,I)%DELTA_XYZ = CALC_DELTA_XYZ(IELEM(N,I)%NONODES, DIMENSIONA, NODES_LIST)
+        
         ELTYPE=IELEM(N,I)%ISHAPE
         DO K = 1,IELEM(N,I)%NONODES
             NODES_LIST(k,1:2)=INODER(IELEM(N,I)%NODES(K))%CORD(1:2)
@@ -209,9 +212,6 @@ SUBROUTINE PRESTORE_AND_ALLOCATE_DG
         END DO
         
         CALL DECOMPOSE2
-        
-        !Store delta xyz (normalization factor from Luo 2012)
-        IELEM(N,I)%DELTA_XYZ = CALC_DELTA_XYZ(IELEM(N,I)%NONODES, DIMENSIONA, NODES_LIST)
         
         ALLOCATE(IELEM(N,I)%TAYLOR_INTEGRAL(IDEGFREE - DIMENSIONA))
         IELEM(N,I)%TAYLOR_INTEGRAL = ZERO
