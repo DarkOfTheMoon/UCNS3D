@@ -824,15 +824,15 @@ IF (RESTART.EQ.0)THEN
 !$OMP PARALLEL DEFAULT(SHARED) private(iNITIAL,i,QQP,INC)
 	IF (ISCHEME.LT.2)THEN
 		IF (ITESTCASE.EQ.0)THEN
-!$OMP DO SCHEDULE (STATIC) 
+            !$OMP DO SCHEDULE (STATIC)
             DO INITIAL=1,KMAXE
                 U_C(INITIAL)%VAL(1,1)=1.0D0
                 U_E(INITIAL)%VAL(1,1)=U_C(INITIAL)%VAL(1,1)
             END DO
-!$OMP END DO
+            !$OMP END DO
 		END IF
 		IF (ITESTCASE.EQ.1)THEN
-!$OMP DO SCHEDULE (STATIC) 
+            !$OMP DO SCHEDULE (STATIC) 
             DO INITIAL=1,KMAXE
                 pox(1)=IELEM(N,INITIAL)%XXC
                 poy(1)=IELEM(N,INITIAL)%yyC
@@ -840,10 +840,10 @@ IF (RESTART.EQ.0)THEN
                 U_E(INITIAL)%VAL(1,1)=U_C(INITIAL)%VAL(1,1)
                 U_C(INITIAL)%VAL(1,1)=LINEAR_INIT2D(N)
             END DO
-!$OMP END DO
+            !$OMP END DO
 		END IF
 		IF (ITESTCASE.EQ.2)THEN
-!$OMP DO SCHEDULE (STATIC) 
+            !$OMP DO SCHEDULE (STATIC) 
             DO INITIAL=1,KMAXE
                 pox(1)=IELEM(N,INITIAL)%XXC
                 poy(1)=IELEM(N,INITIAL)%yyC
@@ -851,10 +851,10 @@ IF (RESTART.EQ.0)THEN
                 U_C(INITIAL)%VAL(1,1)=LINEAR_INIT2D(N)
                 U_E(INITIAL)%VAL(1,1)=U_C(INITIAL)%VAL(1,1)
             END DO
-!$OMP END DO
+            !$OMP END DO
 		END IF
 		IF (ITESTCASE.GE.3)THEN
-!$OMP DO SCHEDULE (STATIC) 
+            !$OMP DO SCHEDULE (STATIC)
             DO INITIAL=1,KMAXE
                 VECCOS(:)=ZERO
                 pox(1)=IELEM(N,INITIAL)%XXC
@@ -870,21 +870,10 @@ IF (RESTART.EQ.0)THEN
             END DO
 !$OMP END DO
 		END IF
-	ELSE ! Original if statement: IF (ISCHEME.LT.2)THEN
+	ELSE ! ISCHEME >= 2
 !$OMP DO SCHEDULE (STATIC)
         DO I=1,KMAXE
             VEXT=ZERO
-        !     NODES_LIST=ZERO
-        !     ELTYPE=IELEM(N,I)%ISHAPE
-        !     ELEM_LISTD=ZERO
-        !         
-        !       jx=IELEM(N,I)%NONODES
-        ! 
-        ! 	  do K=1,jx
-        ! 	    JX2=IELEM(N,I)%NODES(k)
-        ! 	    NODES_LIST(k,:)=inoder(JX2)%CORD(:)
-        ! 	    VEXT(K,:)=NODES_LIST(k,:)
-        ! 	  END DO
             
             ELTYPE=IELEM(N,I)%ISHAPE
             ELEM_DEC=IELEM(N,I)%VDEC
@@ -897,18 +886,18 @@ IF (RESTART.EQ.0)THEN
             IF (DG.EQ.1)THEN
                 POX(1) = IELEM(N,I)%XXC !POX,POY required for LINEAR_INIT2D
                 POY(1) = IELEM(N,I)%YYC
-                 
+
                 U_C(I)%VALDG(1,1,1)=LINEAR_INIT2D(N)   !THIS IS JUST THE INITIAL SOLUTION
                 U_C(I)%VALDG(1,1,2:IELEM(N,I)%IDEGFREE+1) = ZERO ! Eq. 2.2, Cockburn/Shu 2001
                 
                 WRITE(200+N,*) "ELEMENT", I,"DG INITIAL"
                 WRITE(200+N,*) "SOLUTION", U_C(I)%VALDG(1,1,:)
             END IF
-            
+
             SELECT CASE(ielem(n,i)%ishape)
 
             CASE(5)
-                IF (IELEM(N,I)%MODE.EQ.0 .OR. DG == 1)THEN
+                IF (IELEM(N,I)%MODE.EQ.0)THEN
                     CALL QUADRATUREQUAD(N,IGQRULES)
                     
                     VOLTEMP=1.0d0
@@ -919,10 +908,10 @@ IF (RESTART.EQ.0)THEN
                         POX(1)=QP_ARRAY(I,INC)%X !POX,POY required for LINEAR_INIT2D
                         POY(1)=QP_ARRAY(I,INC)%Y 
                     
-                            IF (ITESTCASE.LE.2)THEN
+                        IF (ITESTCASE.LE.2)THEN
                             U_C(I)%VAL(1,1)=U_C(I)%VAL(1,1)+LINEAR_INIT2D(N)*WEQUA3D(INC)*(VOLTEMP)
                             U_E(I)%VAL(1,1)=U_C(I)%VAL(1,1)
-                            ELSE
+                        ELSE
                             CALL INITIALISE_EULER2D(N)
                             
                             if ((turbulence .eq. 1).or.(passivescalar.gt.0)) then
@@ -935,7 +924,7 @@ IF (RESTART.EQ.0)THEN
                             U_E(I)%VAL(1,:)=U_C(I)%VAL(1,:)
                             end if
                             end if
-                            END IF
+                        END IF
                     END DO
                 ELSE
                 ! this is where the initialisation will be performed for every decomposed element.
@@ -948,47 +937,31 @@ IF (RESTART.EQ.0)THEN
                         
                         VOLTEMP=TRIANGLEVOLUME(N)/IELEM(N,I)%totvolume
                         QQP=QP_Triangle
-                        
-                        !DO INC=1,QQP
-                        !    QP_ARRAY(I,INC,K)%X = QPOINTS(1,INC)
-                        !    QP_ARRAY(I,INC,K)%Y = QPOINTS(2,INC)
-                        !    QP_ARRAY(I,INC,K)%QP_WEIGHT = WEQUA3D(INC)
-                        !END DO
-                        
-                        IF (DG.EQ.1)THEN
-                        !    POX(1) = IELEM(N,I)%XXC !POX,POY required for LINEAR_INIT2D
-                        !    POY(1) = IELEM(N,I)%YYC
-                            
-                        !    U_C(I)%VALDG(1,1,1)=LINEAR_INIT2D(N)   !THIS IS JUST THE INITIAL SOLUTION
-                        !    
-                        !    WRITE(200+N,*) "ELEMENT", I,"DG INITIAL"
-                        !    WRITE(200+N,*) "SOLUTION", U_C(I)%VALDG(1,1,1)
-                        ELSE                        
-                            DO INC=1,QQP                        
-                                POX(1)=QPOINTS(1,INC) !POX,POY required for LINEAR_INIT2D
-                                POY(1)=QPOINTS(2,INC)
-                        
-                                IF (ITESTCASE.LE.2)THEN ! Linear advection
-                                    U_C(I)%VAL(1,1)=U_C(I)%VAL(1,1)+LINEAR_INIT2D(N)*WEQUA3D(INC)*(VOLTEMP)  !numerical
-                                    U_E(I)%VAL(1,1)=U_C(I)%VAL(1,1)  !exact
-                                    
+            
+                        DO INC=1,QQP                        
+                            POX(1)=QPOINTS(1,INC) !POX,POY required for LINEAR_INIT2D
+                            POY(1)=QPOINTS(2,INC)
+                    
+                            IF (ITESTCASE.LE.2)THEN ! Linear advection
+                                U_C(I)%VAL(1,1)=U_C(I)%VAL(1,1)+LINEAR_INIT2D(N)*WEQUA3D(INC)*(VOLTEMP)  !numerical
+                                U_E(I)%VAL(1,1)=U_C(I)%VAL(1,1)  !exact
+                                
+                            ELSE
+                                CALL INITIALISE_EULER2D(N)
+                                
+                                IF ((turbulence .eq. 1).or.(passivescalar.gt.0)) THEN
+                                    U_C(I)%VAL(1,1:nof_Variables)=U_C(I)%VAL(1,1:nof_Variables)+VECCOS(1:nof_Variables)*WEQUA3D(INC)*(VOLTEMP)
+                                    U_CT(I)%VAL(1,1:0+turbulenceequations+passivescalar)=U_CT(I)%VAL(1,1:0+turbulenceequations+passivescalar)+&
+                                    VECCOS(5:4+turbulenceequations+passivescalar)*WEQUA3D(INC)*(VOLTEMP)
                                 ELSE
-                                    CALL INITIALISE_EULER2D(N)
+                                    U_C(I)%VAL(1,:)=U_C(I)%VAL(1,:)+VECCOS(:)*WEQUA3D(INC)*(VOLTEMP)
                                     
-                                    IF ((turbulence .eq. 1).or.(passivescalar.gt.0)) THEN
-                                        U_C(I)%VAL(1,1:nof_Variables)=U_C(I)%VAL(1,1:nof_Variables)+VECCOS(1:nof_Variables)*WEQUA3D(INC)*(VOLTEMP)
-                                        U_CT(I)%VAL(1,1:0+turbulenceequations+passivescalar)=U_CT(I)%VAL(1,1:0+turbulenceequations+passivescalar)+&
-                                        VECCOS(5:4+turbulenceequations+passivescalar)*WEQUA3D(INC)*(VOLTEMP)
-                                    ELSE
-                                        U_C(I)%VAL(1,:)=U_C(I)%VAL(1,:)+VECCOS(:)*WEQUA3D(INC)*(VOLTEMP)
-                                        
-                                        IF (itestcase.eq.3)THEN
-                                            U_E(I)%VAL(1,:)=U_C(I)%VAL(1,:)
-                                        END IF
+                                    IF (itestcase.eq.3)THEN
+                                        U_E(I)%VAL(1,:)=U_C(I)%VAL(1,:)
                                     END IF
                                 END IF
-                            END DO !INC=1,QQP  
-                        END IF !DG.EQ.1
+                            END IF
+                        END DO !INC=1,QQP 
                     END DO !K=1,ELEM_DEC
                 END IF
 
@@ -996,34 +969,24 @@ IF (RESTART.EQ.0)THEN
                 CALL QUADRATURETRIANGLE(N,IGQRULES)
                 VOLTEMP=1.0d0
                 QQP=QP_Triangle
-                            
-                IF (DG.EQ.1)THEN
-                    !POX(1) = IELEM(N,I)%XXC !POX,POY required for LINEAR_INIT2D
-                    !POY(1) = IELEM(N,I)%YYC
+                
+                DO INC=1,QQP
+                    POX(1)=QP_ARRAY(I,INC)%X !POX,POY required for LINEAR_INIT2D
+                    POY(1)=QP_ARRAY(I,INC)%Y
                     
-                    !U_C(I)%VALDG(1,1,1)=LINEAR_INIT2D(N)   !THIS IS JUST THE INITIAL SOLUTION
-                            
-                    !WRITE(200+N,*) "ELEMENT", I,"DG INITIAL"
-                    !WRITE(200+N,*) "SOLUTION", U_C(I)%VALDG(1,1,1)
-                ELSE
-                    DO INC=1,QQP
-                        POX(1)=QP_ARRAY(I,INC)%X !POX,POY required for LINEAR_INIT2D
-                        POY(1)=QP_ARRAY(I,INC)%Y
-                        
-                        IF (ITESTCASE.LE.2)THEN
-                            U_C(I)%VAL(1,1)=U_C(I)%VAL(1,1)+LINEAR_INIT2D(N)*WEQUA3D(INC)*(VOLTEMP)
-                            U_E(I)%VAL(1,1)=U_C(I)%VAL(1,1)
+                    IF (ITESTCASE.LE.2)THEN
+                        U_C(I)%VAL(1,1)=U_C(I)%VAL(1,1)+LINEAR_INIT2D(N)*WEQUA3D(INC)*(VOLTEMP)
+                        U_E(I)%VAL(1,1)=U_C(I)%VAL(1,1)
+                    ELSE
+                        CALL INITIALISE_EULER2D(N)
+                        IF ((turbulence .eq. 1).or.(passivescalar.gt.0)) THEN
+                            U_C(I)%VAL(1,1:nof_Variables)=U_C(I)%VAL(1,1:nof_Variables)+VECCOS(1:nof_Variables)*WEQUA3D(INC)*(VOLTEMP)
+                            U_CT(I)%VAL(1,1:0+turbulenceequations+passivescalar)=U_CT(I)%VAL(1,1:0+turbulenceequations+passivescalar)+&
+                            VECCOS(5:4+turbulenceequations+passivescalar)*WEQUA3D(INC)*(VOLTEMP)
                         ELSE
-                            CALL INITIALISE_EULER2D(N)
-                            IF ((turbulence .eq. 1).or.(passivescalar.gt.0)) THEN
-                                U_C(I)%VAL(1,1:nof_Variables)=U_C(I)%VAL(1,1:nof_Variables)+VECCOS(1:nof_Variables)*WEQUA3D(INC)*(VOLTEMP)
-                                U_CT(I)%VAL(1,1:0+turbulenceequations+passivescalar)=U_CT(I)%VAL(1,1:0+turbulenceequations+passivescalar)+&
-                                VECCOS(5:4+turbulenceequations+passivescalar)*WEQUA3D(INC)*(VOLTEMP)
-                            ELSE
-                                U_C(I)%VAL(1,:)=U_C(I)%VAL(1,:)+VECCOS(:)*WEQUA3D(INC)*(VOLTEMP)
-                                IF (itestcase.eq.3) THEN
-                                    U_E(I)%VAL(1,:)=U_C(I)%VAL(1,:)
-                                END IF
+                            U_C(I)%VAL(1,:)=U_C(I)%VAL(1,:)+VECCOS(:)*WEQUA3D(INC)*(VOLTEMP)
+                            IF (itestcase.eq.3) THEN
+                                U_E(I)%VAL(1,:)=U_C(I)%VAL(1,:)
                             END IF
                         END IF
                     END DO
