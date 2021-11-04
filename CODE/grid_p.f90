@@ -6049,7 +6049,7 @@ SUBROUTINE DETERMINE_SIZE(N,IORDER,ISELEM,ISELEMT,IOVERST,IOVERTO,ILX,NUMNEIGHBO
             if (dg.eq.1)then
                 NUMNEIGHBOURS=5
                 IMAXDEGFREE=NUMNEIGHBOURS-1
-                itemd=(3*extf)*IEXTEND
+                itemd=10
                 ISELEM=min(itemd,imaxe-1)
                 ISELEMT(N:N)=ISELEM
                 IOVERST=ISELEM

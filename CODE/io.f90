@@ -14662,8 +14662,13 @@ SUBROUTINE CALCULATE_ERROR(N)
 			!$OMP DO REDUCTION (+:L1NORM)
 			DO I=1,KMAXE
 				IF (ITESTCASE.Le.3)THEN
+				
 				EXACT=U_E(I)%VAL(1,ind_er)
+				if (DG.eq.1)then
+				APROXIMATE=U_C(I)%VALDG(1,ind_er,1)
+				else
 				APROXIMATE=U_C(I)%VAL(1,ind_er)
+				end if
 ! 					IF ((ABS(APROXIMATE-EXACT)).GT.L0NORM(N,1))THEN
 ! 					L0NORM(N,1)=ABS(APROXIMATE-EXACT)
 ! 					END IF
@@ -14690,7 +14695,12 @@ SUBROUTINE CALCULATE_ERROR(N)
 			DO I=1,KMAXE
 				IF (ITESTCASE.Le.3)THEN
 				EXACT=U_E(I)%VAL(1,ind_er)
+				
+				if (DG.eq.1)then
+				APROXIMATE=U_C(I)%VALDG(1,ind_er,1)
+				else
 				APROXIMATE=U_C(I)%VAL(1,ind_er)
+				end if
 					IF ((ABS(APROXIMATE-EXACT)).GT.L0NORM)THEN
 					L0NORM=ABS(APROXIMATE-EXACT)
 					END IF

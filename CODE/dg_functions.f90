@@ -127,8 +127,8 @@ REAL::PH,INTEG
 !         STOP
 !     END IF
     
-    
-IF (IELEM(N,ICONSIDERED)%ISHAPE == 5) NQP = QP_QUAD!QP_TRIANGLE*2
+
+IF (IELEM(N,ICONSIDERED)%ISHAPE == 5) NQP = QP_TRIANGLE*2
 IF (IELEM(N,ICONSIDERED)%ISHAPE == 6) NQP = QP_TRIANGLE
     NUMBER=IELEM(N,ICONSIDERED)%IORDER
     NUMBER_OF_DOG = IELEM(N,ICONSIDERED)%IDEGFREE
@@ -138,6 +138,7 @@ DO I_VAR = 1, NOF_VARIABLES
     DG_VOL_INTEGRAL(2:,I_VAR)= 0.0D0
 
       DO I=1,NUMBER_OF_DOG
+      
         DO I_QP = 1, NQP 
             X1=QP_ARRAY(ICONSIDERED,I_QP)%X
             Y1=QP_ARRAY(ICONSIDERED,I_QP)%Y
@@ -218,45 +219,49 @@ SUBROUTINE PRESTORE_AND_ALLOCATE_DG
 !> @brief
 !> Prestores IELEM(N,I)%DELTA_XYZ, QP_ARRAY, SURF_QPOINTS, mass matrix
     IMPLICIT NONE
-    INTEGER::I, K, I_QP, N_QP, I_FACE
+    INTEGER::I, K, I_QP, N_QP, I_FACE,nnd,iqp,idummy,COUNT_1
     
 	ALLOCATE(QP_ARRAY(XMPIELRANK(N),QP_Triangle*2)); !Allocates for 2D
     
     DO I = 1, XMPIELRANK(N)    
+        iconsidered=i
         !Store volume quadrature points
+        ELTYPE=IELEM(N,I)%ISHAPE
         DO K = 1,IELEM(N,I)%NONODES
             NODES_LIST(k,1:2)=INODER(IELEM(N,I)%NODES(K))%CORD(1:2)
             VEXT(k,1:2)=NODES_LIST(k,1:2)
         END DO
         
-!         CALL DECOMPOSE2
+        CALL DECOMPOSE2
         
         !Store delta xyz (normalization factor from Luo 2012)
         IELEM(N,I)%DELTA_XYZ = CALC_DELTA_XYZ(IELEM(N,I)%NONODES, DIMENSIONA, NODES_LIST)
     
         SELECT CASE(ielem(n,i)%ishape)
         CASE(5)
-!              DO K=1,ELEM_DEC
-!                  VEXT(1:3,1:2)=ELEM_LISTD(k,1:3,1:2)
-!             
-!                 CALL QUADRATUREtriangle(N,IGQRULES)
-               CALL QUADRATUREQUAD(N,IGQRULES)
-                
-!                 VOLTEMP=TRIANGLEVOLUME(N)
-!                 
-!                 DO I_QP = 1, QP_Triangle
-!                     QP_ARRAY(I,I_QP + QP_TRIANGLE * (K - 1))%X = QPOINTS(1,I_QP) - IELEM(N,I)%XXC
-!                     QP_ARRAY(I,I_QP + QP_TRIANGLE * (K - 1))%Y = QPOINTS(2,I_QP) - IELEM(N,I)%YYC
-!                     QP_ARRAY(I,I_QP + QP_TRIANGLE * (K - 1))%QP_WEIGHT = WEQUA3D(I_QP) * VOLTEMP
-!                 END DO
-!                 
-!            END DO
+            COUNT_1=0
+             DO K=1,ELEM_DEC
+                 VEXT(1:3,1:2)=ELEM_LISTD(k,1:3,1:2)
             
-            DO I_QP = 1, QP_QUAD!N_QP
-                QP_ARRAY(I,I_QP)%X = QPOINTS(1,I_QP) - IELEM(N,I)%XXC
-                QP_ARRAY(I,I_QP)%Y = QPOINTS(2,I_QP) - IELEM(N,I)%YYC
-                QP_ARRAY(I,I_QP)%QP_WEIGHT = WEQUA3D(I_QP) * QUADVOLUME(N)
-            END DO
+                CALL QUADRATUREtriangle(N,IGQRULES)
+!                CALL QUADRATUREQUAD(N,IGQRULES)
+                
+                VOLTEMP=TRIANGLEVOLUME(N)
+                
+                DO I_QP = 1, QP_Triangle
+                    COUNT_1=COUNT_1+1
+                    QP_ARRAY(I,COUNT_1)%X = QPOINTS(1,I_QP) - IELEM(N,I)%XXC
+                    QP_ARRAY(I,COUNT_1)%Y = QPOINTS(2,I_QP) - IELEM(N,I)%YYC
+                    QP_ARRAY(I,COUNT_1)%QP_WEIGHT = WEQUA3D(I_QP) * VOLTEMP
+                END DO
+                
+           END DO
+            
+!             DO I_QP = 1, QP_QUAD!N_QP
+!                 QP_ARRAY(I,I_QP)%X = QPOINTS(1,I_QP) - IELEM(N,I)%XXC
+!                 QP_ARRAY(I,I_QP)%Y = QPOINTS(2,I_QP) - IELEM(N,I)%YYC
+!                 QP_ARRAY(I,I_QP)%QP_WEIGHT = WEQUA3D(I_QP) * QUADVOLUME(N)
+!             END DO
             
         CASE(6)
             CALL QUADRATURETRIANGLE(N,IGQRULES)
@@ -274,9 +279,48 @@ SUBROUTINE PRESTORE_AND_ALLOCATE_DG
         ALLOCATE(ILOCAL_RECON3(I)%SURF_QPOINTS(IELEM(N,I)%IFCA, QP_LINE_N, DIMENSIONA))
         !Store surface quadrature points
         DO I_FACE = 1, IELEM(N,I)%IFCA
-            VEXT(1,1:2) = inoder(IELEM(N,I)%NODES_FACES(I_FACE,1))%CORD(1:2)  !COPY THE COORDINATE OF THE FIRST NODE OF THID EDGE
-            VEXT(2,1:2) = inoder(IELEM(N,I)%NODES_FACES(I_FACE,2))%CORD(1:2)  !COPY THE COORDINATE OF THE SECOND NODE OF THID EDGE
-            CALL QUADRATURELINE(N,IGQRULES)
+            IDUMMY=0
+            !GAUSSIAN POINTS FIXED
+                if ((iperiodicity.eq.1).and.(ielem(n,i)%interior.eq.1))then	
+                IF (IELEM(N,I)%IBOUNDS(I_FACE).GT.0)THEN	!CHECK FOR BOUNDARIES
+                    if (ibound(n,ielem(n,i)%ibounds(I_FACE))%icode.eq.5)then	!PERIODIC
+                        IDUMMY=1
+                    END IF
+                END IF
+        
+                IQP=QP_LINE
+                NND=2
+                IF (IDUMMY.EQ.0)THEN
+                    DO K=1,NND
+                        VEXT(k,1:2)=inoder(IELEM(N,I)%NODES_FACES(I_FACE,K))%CORD(1:dims)
+                    END DO
+                ELSE
+                    facex=I_FACE;
+                    CALL coordinates_face_PERIOD2D1(n,iconsidered,facex)
+                    
+                    
+                END IF
+                CALL QUADRATURELINE(N,IGQRULES)	  
+            ELSE
+                IQP=QP_LINE
+                NND=2
+                DO K=1,NND
+                    VEXT(k,1:2)=inoder(IELEM(N,I)%NODES_FACES(I_FACE,K))%CORD(1:dims)
+                END DO
+                CALL QUADRATURELINE(N,IGQRULES)
+            END IF
+        
+        
+        
+        
+        
+        
+        
+        
+        
+!             VEXT(1,1:2) = inoder(IELEM(N,I)%NODES_FACES(I_FACE,1))%CORD(1:2)  !COPY THE COORDINATE OF THE FIRST NODE OF THID EDGE
+!             VEXT(2,1:2) = inoder(IELEM(N,I)%NODES_FACES(I_FACE,2))%CORD(1:2)  !COPY THE COORDINATE OF THE SECOND NODE OF THID EDGE
+!             CALL QUADRATURELINE(N,IGQRULES)
 
             DO I_QP = 1, QP_LINE_N
                 ILOCAL_RECON3(I)%SURF_QPOINTS(I_FACE,I_QP,1) = QPOINTS2D(1,I_QP) - IELEM(N,I)%XXC
@@ -309,7 +353,7 @@ SUBROUTINE ASS_MASS_MATRIX(N)
     DO I_ELEM = 1, KMAXE
         SELECT CASE(IELEM(N,I_ELEM)%ISHAPE)
         CASE(5) ! Quadrilateral
-            N_QP = QP_QUAD!QP_TRIANGLE*2
+            N_QP = QP_TRIANGLE*2
         CASE(6) ! Triangle
             N_QP = QP_TRIANGLE
         END SELECT

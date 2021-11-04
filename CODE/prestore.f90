@@ -51,8 +51,6 @@ else
 
 !$OMP PARALLEL DEFAULT(SHARED) 
 
-CALL PRESTORE_AND_ALLOCATE_DG
-!takis this needs to be within a omp parallel region!
 
 
 !$OMP DO
@@ -74,6 +72,13 @@ CALL FIND_ROT_ANGLES2D(N,I)
 END DO
 !$OMP END DO
 !$OMP END PARALLEL
+
+
+
+CALL PRESTORE_AND_ALLOCATE_DG
+!takis this needs to be within a omp parallel region!
+
+
 
 
 end if
