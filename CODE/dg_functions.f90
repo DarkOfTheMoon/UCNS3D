@@ -135,18 +135,20 @@ END FUNCTION CALC_DELTA_XYZ
 
 SUBROUTINE PRESTORE_AND_ALLOCATE_DG
 !> @brief
-!> Prestores IELEM(N,I)%DELTA_XYZ, QP_ARRAY
+!> Prestores IELEM(N,I)%DELTA_XYZ, QP_ARRAY, SURF_QPOINTS, mass matrix
     IMPLICIT NONE
-    INTEGER::I,K,I_QP,N_QP, I_FACE
+    INTEGER::I, K, I_QP, N_QP, I_FACE
     
 	ALLOCATE(QP_ARRAY(XMPIELRANK(N),NUMBEROFPOINTS)); !Allocates for 2D
     
-    DO I=1,XMPIELRANK(N)
-        DO K=1,IELEM(N,I)%NONODES
+    DO I = 1, XMPIELRANK(N)    
+        !Store volume quadrature points
+        DO K = 1,IELEM(N,I)%NONODES
             NODES_LIST(k,1:2)=INODER(IELEM(N,I)%NODES(K))%CORD(1:2)
             VEXT(k,1:2)=NODES_LIST(k,1:2)
         END DO
         
+        !Store delta xyz (normalization factor from Luo 2012)
         IELEM(N,I)%DELTA_XYZ = CALC_DELTA_XYZ(IELEM(N,I)%NONODES, DIMENSIONA, NODES_LIST)
     
         SELECT CASE(ielem(n,i)%ishape)
