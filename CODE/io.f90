@@ -14695,7 +14695,7 @@ SUBROUTINE CALCULATE_ERROR(N)
                         IF ((ABS(APROXIMATE-EXACT)).GT.L0NORM)THEN
                             L0NORM=ABS(APROXIMATE-EXACT)
                         END IF
-    ! 					L1NORM(N,1)=L1NORM(N,1)+((ABS(APROXIMATE-EXACT)))
+    ! 					L1NORM(N,1)=L1NORM(N,1)+((ABS(APROXIMATpX4&feature=sharepX4&feature=shareE-EXACT)))
                     END IF
                 END DO
                 !$OMP END DO
