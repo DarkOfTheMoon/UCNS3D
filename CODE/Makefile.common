@@ -34,7 +34,7 @@ boundary.mod bc_p.o : bc_p.f90 library.mod transform.mod
 derivatives.mod der_r.o : der_r.f90 mpiinfo.mod
 	$(F90) $(FFLAGS)  -c    der_r.f90
 
-communications.mod communications.o : communications.f90 mpiinfo.mod declaration.mod transform.mod 
+communications.mod communications.o : communications.f90 mpiinfo.mod declaration.mod transform.mod basis.mod
 	$(F90) $(FFLAGS)  -c    communications.f90
 
 flow_operations.mod flow_operations.o : flow_operations.f90 declaration.mod mpiinfo.mod transform.mod

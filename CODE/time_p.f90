@@ -202,7 +202,12 @@ KMAXE=XMPIELRANK(N)
         
         
 		VELN=MAX(ABS(LAMx),ABS(LAMy))
-		DT=MIN(DT,CCFL*((IELEM(N,I)%MINEDGE)/(ABS(VELN))))
+		
+		IF (DG.EQ.1) THEN
+            DT=MIN(DT,CCFL*((IELEM(N,I)%MINEDGE)/(ABS(VELN)))*(1.0D0/(2*IORDER+1)))
+		ELSE
+            DT=MIN(DT,CCFL*((IELEM(N,I)%MINEDGE)/(ABS(VELN))))
+		END IF
 		
 	END DO
 	!$OMP END DO
@@ -2444,7 +2449,7 @@ DO I=1,KMAXE
 END DO
 !$OMP END DO
 ! WRITE(500+N,*) SHAPE(U_C(1)%VALDG(2,:,:)), SHAPE(MATMUL(INV_MASS_MATRIX(N,1,:,:), RHS(1)%VALDG(:,:))), DT * 0.391752226571890 * MATMUL(INV_MASS_MATRIX(N,1,:,:), RHS(1)%VALDG(:,:))
-WRITE(500+N,*) 'RK_STAGE', RK_STAGE, U_C(1)%VALDG(1,:,:)
+!write(500+N,*) 'RK_STAGE', RK_STAGE, U_C(1)%VALDG(1,:,:)
 RK_STAGE = RK_STAGE + 1
 
 IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
@@ -2472,7 +2477,7 @@ DO I=1,KMAXE
     END IF
 END DO
 !$OMP END DO
-WRITE(500+N,*) 'RK_STAGE', RK_STAGE, U_C(1)%VALDG(1,:,:)
+!write(500+N,*) 'RK_STAGE', RK_STAGE, U_C(1)%VALDG(1,:,:)
 RK_STAGE = RK_STAGE + 1
 
 IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
@@ -2501,7 +2506,7 @@ DO I=1,KMAXE
     END IF
 END DO
 !$OMP END DO
-WRITE(500+N,*) 'RK_STAGE', RK_STAGE, U_C(1)%VALDG(1,:,:)
+!write(500+N,*) 'RK_STAGE', RK_STAGE, U_C(1)%VALDG(1,:,:)
 RK_STAGE = RK_STAGE + 1
 
 IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
@@ -2532,7 +2537,7 @@ DO I=1,KMAXE
     END IF
 END DO
 !$OMP END DO
-WRITE(500+N,*) 'RK_STAGE', RK_STAGE, U_C(1)%VALDG(1,:,:)
+!write(500+N,*) 'RK_STAGE', RK_STAGE, U_C(1)%VALDG(1,:,:)
 RK_STAGE = RK_STAGE + 1
 
 IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
@@ -2565,7 +2570,7 @@ DO I=1,KMAXE
     END IF
 END DO
 !$OMP END DO
-WRITE(500+N,*) RK_STAGE, U_C(1)%VALDG(1,:,:)
+!write(500+N,*) RK_STAGE, U_C(1)%VALDG(1,:,:)
 RK_STAGE = RK_STAGE + 1
 
 IF ((turbulence.gt.0).or.(passivescalar.gt.0))THEN
@@ -4484,7 +4489,7 @@ DO
     !$OMP BARRIER
     
     
-    WRITE(500+N,*) 'IT:',IT
+    !write(500+N,*) 'IT:',IT
     !$OMP MASTER
     IT=IT+1
     IF (IT.EQ.NTMAX)THEN

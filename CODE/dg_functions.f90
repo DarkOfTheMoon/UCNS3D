@@ -154,8 +154,8 @@ DO I_ELEM = 1, XMPIELRANK(N)
             NUMBER_OF_DOG=IELEM(N,I_ELEM)%IDEGFREE
             ILOCAL_RECON3(ICONSIDERED)%ULEFT_DG(:, FACEX, POINTX) = DG_SOLFACE(N)
         
-            write(700+n,*)"look here","cell",i_elem,"face",facex,"point",pointx
-            write(700+n,*)ILOCAL_RECON3(I_ELEM)%ULEFT_DG(1:NOF_VARIABLES, I_FACE, I_QP)
+!             write(700+n,*)"look here","cell",i_elem,"face",facex,"point",pointx
+!             write(700+n,*)ILOCAL_RECON3(I_ELEM)%ULEFT_DG(1:NOF_VARIABLES, I_FACE, I_QP)
                 
                 !STORE IT HERE (ILOCAL_RECON3(I)%ULEFT_DG(1,1:FACES,1:NGP) ! you need to allocate it in memory
         END DO
@@ -630,7 +630,7 @@ FUNCTION LUO_LSQ_RECONSTRUCT_SOL(N)
             Y1 = IELEM(N, NEIGHBOR_INDEX)%YYC
             BASIS_TEMP = BASIS_REC2D(N, X1, Y1, NUMBER + 1, NEIGHBOR_INDEX, NUM_DG_RECONSTRUCT_DOFS - 1)
             NEIGHBOR_U = U_C(NEIGHBOR_INDEX)%VALDG(1,:,:)
-            NEIGHBOR_DELTA_XYZ = IELEM(N, NEIGHBOR_INDEX)%DELTA_XYZ(I_DIM)
+            NEIGHBOR_DELTA_XYZ = IELEM(N, NEIGHBOR_INDEX)%DELTA_XYZ
             DG_SOL_TEMP = DG_SOL_I_CENTER(N, NEIGHBOR_INDEX) ! To call dg_sol without changing ICONSIDERED
         CASE(1) ! Same CPU boundary and not periodic
         CASE(2) ! Other CPU
@@ -663,7 +663,7 @@ FUNCTION LUO_LSQ_RECONSTRUCT_SOL(N)
         DO I_VAR = 1, NOF_VARIABLES
             RHS_DG_RECONSTRUCT(I_VAR,OFFSET) =  DG_SOL_TEMP(I_VAR) ! 1st term
             DO I_DIM = 1, DIMENSIONA ! 1st order terms
-                RHS_DG_RECONSTRUCT(I_VAR, OFFSET+I_DIM) = IELEM(N, ICONSIDERED)%DELTA_XYZ(I_DIM) / NEIGHBOR_DELTA_XYZ * NEIGHBOR_U(I_VAR,I_DIM+1) - U_C(ICONSIDERED)%VALDG(1,I_VAR,I_DIM+1)
+                RHS_DG_RECONSTRUCT(I_VAR, OFFSET+I_DIM) = IELEM(N, ICONSIDERED)%DELTA_XYZ(I_DIM) / NEIGHBOR_DELTA_XYZ(I_DIM) * NEIGHBOR_U(I_VAR,I_DIM+1) - U_C(ICONSIDERED)%VALDG(1,I_VAR,I_DIM+1)
             END DO
         END DO
     END DO
