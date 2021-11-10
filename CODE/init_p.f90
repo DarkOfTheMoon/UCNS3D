@@ -887,11 +887,12 @@ IF (RESTART.EQ.0)THEN
                 POX(1) = IELEM(N,I)%XXC !POX,POY required for LINEAR_INIT2D
                 POY(1) = IELEM(N,I)%YYC
 
-                U_C(I)%VALDG(1,1,1)=LINEAR_INIT2D(N)   !THIS IS JUST THE INITIAL SOLUTION
+!                 U_C(I)%VALDG(1,1,1)=LINEAR_INIT2D(N)   !THIS IS JUST THE INITIAL SOLUTION
                 U_C(I)%VALDG(1,1,2:IELEM(N,I)%IDEGFREE+1) = ZERO ! Eq. 2.2, Cockburn/Shu 2001
+!                 U_E(I)%VAL(1,1) = U_C(I)%VALDG(1,1,1)
                 
-                WRITE(200+N,*) "ELEMENT", I,"DG INITIAL"
-                WRITE(200+N,*) "SOLUTION", U_C(I)%VALDG(1,1,:)
+!                 WRITE(200+N,*) "ELEMENT", I,"DG INITIAL"
+!                 WRITE(200+N,*) "SOLUTION", U_C(I)%VALDG(1,1,:)
             END IF
 
             SELECT CASE(ielem(n,i)%ishape)
@@ -944,7 +945,8 @@ IF (RESTART.EQ.0)THEN
                     
                             IF (ITESTCASE.LE.2)THEN ! Linear advection
                                 U_C(I)%VAL(1,1)=U_C(I)%VAL(1,1)+LINEAR_INIT2D(N)*WEQUA3D(INC)*(VOLTEMP)  !numerical
-                                U_E(I)%VAL(1,1)=U_C(I)%VAL(1,1)  !exact
+                                 U_C(I)%VALDG(1,1,1) = U_C(I)%VAL(1,1)
+                                 U_E(I)%VAL(1,1)=U_C(I)%VAL(1,1)  !exact
                                 
                             ELSE
                                 CALL INITIALISE_EULER2D(N)
@@ -976,6 +978,7 @@ IF (RESTART.EQ.0)THEN
                     
                     IF (ITESTCASE.LE.2)THEN
                         U_C(I)%VAL(1,1)=U_C(I)%VAL(1,1)+LINEAR_INIT2D(N)*WEQUA3D(INC)*(VOLTEMP)
+                        U_C(I)%VALDG(1,1,1) = U_C(I)%VAL(1,1)
                         U_E(I)%VAL(1,1)=U_C(I)%VAL(1,1)
                     ELSE
                         CALL INITIALISE_EULER2D(N)

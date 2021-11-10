@@ -761,7 +761,7 @@ SUBROUTINE READ_UCNS3D
         end if
 
         IF (DG == 1) THEN
-            IGQRULES = MIN(2*IORDER+1,6)
+            IGQRULES = MIN(IORDER+1,6)
 	    ELSE if (guassianquadra.eq.0) then
             IGQRULES=min(iorder,6)
         else 
