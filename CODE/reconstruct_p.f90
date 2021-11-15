@@ -155,17 +155,17 @@ ELSE ! 2 dimensions
                 IF (IDUMMY.EQ.0)THEN
                     DO K=1,NND
                         VEXT(k,1:2)=inoder(IELEM(N,I)%NODES_FACES(L,K))%CORD(1:dims)
-                        IF (DG /= 1) THEN ! Only transforming to reference space if not DG
+!                         IF (DG /= 1) THEN ! Only transforming to reference space if not DG
                             VEXT(k,1:2)=MATMUL(ILOCAL_RECON3(I)%INVCCJAC(:,:),VEXT(K,1:2)-ILOCAL_RECON3(I)%VEXT_REF(1:2))
-                        END IF
+!                         END IF
                     END DO
                 ELSE
                     facex=l;
                     CALL coordinates_face_PERIOD2D1(n,iconsidered,facex)
                     DO K=1,NND
-                        IF (DG /= 1) THEN ! Only transforming to reference space if not DG
+!                         IF (DG /= 1) THEN ! Only transforming to reference space if not DG
                             VEXT(k,1:2)=MATMUL(ILOCAL_RECON3(I)%INVCCJAC(:,:),VEXT(K,1:2)-ILOCAL_RECON3(I)%VEXT_REF(1:2))
-                        END IF
+!                         END IF
                     END DO
                 END IF
                 CALL QUADRATURELINE(N,IGQRULES)	  
@@ -174,9 +174,9 @@ ELSE ! 2 dimensions
                 NND=2
                 DO K=1,NND
                     VEXT(k,1:2)=inoder(IELEM(N,I)%NODES_FACES(L,K))%CORD(1:dims)
-                    IF (DG /= 1) THEN ! Only transforming to reference space if not DG
+!                     IF (DG /= 1) THEN ! Only transforming to reference space if not DG
                         VEXT(k,1:2)=MATMUL(ILOCAL_RECON3(I)%INVCCJAC(:,:),VEXT(K,1:2)-ILOCAL_RECON3(I)%VEXT_REF(1:2))
-                    END IF
+!                     END IF
                 END DO
                 CALL QUADRATURELINE(N,IGQRULES)
             END IF

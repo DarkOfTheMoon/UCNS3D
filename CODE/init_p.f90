@@ -906,8 +906,8 @@ IF (RESTART.EQ.0)THEN
                     
                     DO INC=1,QQP
                         
-                        POX(1)=QP_ARRAY(I,INC)%X !POX,POY required for LINEAR_INIT2D
-                        POY(1)=QP_ARRAY(I,INC)%Y 
+                        POX(1)=QPOINTS(1,INC) !POX,POY required for LINEAR_INIT2D
+                        POY(1)=QPOINTS(2,INC) 
                     
                         IF (ITESTCASE.LE.2)THEN
                             U_C(I)%VAL(1,1)=U_C(I)%VAL(1,1)+LINEAR_INIT2D(N)*WEQUA3D(INC)*(VOLTEMP)
@@ -973,8 +973,8 @@ IF (RESTART.EQ.0)THEN
                 QQP=QP_Triangle
                 
                 DO INC=1,QQP
-                    POX(1)=QP_ARRAY(I,INC)%X !POX,POY required for LINEAR_INIT2D
-                    POY(1)=QP_ARRAY(I,INC)%Y
+                    POX(1)=QPOINTS(1,INC) !POX,POY required for LINEAR_INIT2D
+                    POY(1)=QPOINTS(2,INC)
                     
                     IF (ITESTCASE.LE.2)THEN
                         U_C(I)%VAL(1,1)=U_C(I)%VAL(1,1)+LINEAR_INIT2D(N)*WEQUA3D(INC)*(VOLTEMP)
